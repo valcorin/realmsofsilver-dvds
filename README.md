@@ -1,50 +1,176 @@
-# realmsofsilver-dvds
+# Realms of Silver DVD Collection
 
-A short placeholder README for the `realmsofsilver-dvds` repository.
+A Vue 3 web application for managing and browsing your DVD collection with an interactive table interface and detailed form views.
 
-## Project
+## Features
 
-realmsofsilver-dvds — short description goes here. Replace this line with a brief summary of the project, its purpose, and what this repository contains.
+- 📊 **Interactive Table View**: Browse your DVD collection in a sortable, clickable table
+- 🔍 **Detailed Form View**: View and edit complete DVD information
+- 🎨 **Modern UI**: Beautiful gradient design with responsive layout
+- 📝 **Edit Capability**: Update DVD details with an intuitive form interface
+- 🔄 **Sortable Columns**: Click column headers to sort by title, year, director, or genre
+- 📱 **Responsive Design**: Works on desktop and mobile devices
 
-## Status
+## Project Structure
 
-- Status: Initial / scaffold
+```
+realmsofsilver-dvds/
+├── src/
+│   ├── components/
+│   │   ├── DvdTable.vue    # Interactive DVD table component
+│   │   └── DvdForm.vue     # DVD detail/edit form component
+│   ├── data/
+│   │   └── dvds.js         # DVD data (replace with your actual data)
+│   ├── App.vue             # Main application component
+│   ├── main.js             # Application entry point
+│   └── style.css           # Global styles
+├── public/                 # Static assets
+├── index.html             # HTML template
+├── vite.config.js         # Vite configuration
+└── package.json           # Project dependencies
+```
 
 ## Prerequisites
 
-- Git
-- (Optional) Any runtime or language prerequisites — add them here.
+- Node.js (version 14 or higher)
+- npm (comes with Node.js)
 
-## Installation / Setup
+## Installation
 
-1. Clone the repo:
-
+1. Clone the repository:
+   ```bash
    git clone https://github.com/valcorin/realmsofsilver-dvds.git
    cd realmsofsilver-dvds
+   ```
 
-2. Add any project-specific setup steps here (dependencies, build, etc.).
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
 ## Usage
 
-Provide basic usage examples or a short demo of how to run the project or script.
+### Development Mode
+
+Start the development server with hot reload:
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`
+
+### Production Build
+
+Build the application for production:
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist/` directory.
+
+### Preview Production Build
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## Adding Your DVD Data
+
+To populate the application with your actual DVD collection:
+
+1. Open `src/data/dvds.js`
+2. Replace the sample data with your DVD information
+3. Each DVD should follow this structure:
+
+```javascript
+{
+  id: 1,                    // Unique identifier
+  title: "Movie Title",     // DVD title
+  year: 2024,              // Release year
+  director: "Director",     // Director name
+  genre: "Genre",          // Genre(s)
+  rating: "PG-13",         // MPAA rating
+  runtime: "120 min",      // Runtime
+  format: "DVD",           // Format (DVD/Blu-ray/4K UHD/Digital)
+  condition: "Excellent",  // Condition (Excellent/Very Good/Good/Fair/Poor)
+  notes: "Optional notes"  // Additional notes
+}
+```
+
+## How to Use the Application
+
+### Browsing DVDs
+- View all DVDs in the table format
+- Click column headers (Title, Year, Director, Genre) to sort
+- Click on any row to select it
+
+### Viewing DVD Details
+- Click the green "View" button on any DVD row
+- A detailed form will appear showing all DVD information
+- Click "Close" or the X button to dismiss the form
+
+### Editing DVDs
+- Click the blue "Edit" button on any DVD row, OR
+- Open a DVD in view mode and click the "Edit" button
+- Modify any fields in the form
+- Click "Save" to save changes or "Cancel" to discard
+- Changes are stored in the application state (client-side only)
+
+## Technology Stack
+
+- **Vue 3**: Progressive JavaScript framework
+- **Vite**: Next-generation frontend build tool
+- **JavaScript**: Modern ES6+ syntax
+- **CSS**: Custom styles with gradients and transitions
+
+## Browser Compatibility
+
+Works in all modern browsers that support ES6+:
+- Chrome/Edge (latest)
+- Firefox (latest)
+- Safari (latest)
 
 ## Development
 
-- How to run tests, linters, or start a development server — add steps here.
-- Coding style or contribution notes.
+### Project Commands
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+
+### Customization
+
+**Colors**: Edit the gradient colors in `src/App.vue` and component styles
+**Layout**: Modify component styles in respective `.vue` files
+**Data Fields**: Update the DVD structure in `src/data/dvds.js` and corresponding component templates
+
+## Future Enhancements
+
+Potential features to add:
+- Backend integration for persistent storage
+- Search and filter functionality
+- Image uploads for DVD covers
+- Export to CSV/JSON
+- Print functionality
+- User authentication
 
 ## Contributing
 
-Contributions welcome. Please open an issue or submit a pull request with a clear description of changes.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-Specify the license (e.g., MIT). If you don't know yet, replace this line later.
+This project is open source and available under the MIT License.
 
 ## Contact
 
 Maintainer: valcorin
+Repository: https://github.com/valcorin/realmsofsilver-dvds
 
 ---
 
-This is a minimal starter README. Edit and expand as the project grows.
+Built with ❤️ using Vue 3 and Vite
