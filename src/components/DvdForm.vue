@@ -885,6 +885,33 @@ const onDirectorEditKeydown = (e) => {
   background-color: #fff;
 }
 
+.title-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.title-row input {
+  flex: 1 1 auto;
+  min-width: 0; /* allow flexing in constrained containers */
+}
+
+.btn-fetch {
+  margin-left: 6px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #48bb78;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-fetch[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
