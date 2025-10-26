@@ -1,6 +1,9 @@
 <template>
   <div class="dvd-table-container">
-    <h2>DVD Collection</h2>
+    <div class="table-header">
+  <h2>DVD Collection</h2>
+  <button class="btn-new" @click.stop="createDvd">New</button>
+    </div>
     <div class="table-wrapper">
       <table class="dvd-table">
         <thead>
@@ -15,8 +18,12 @@
               <span v-if="sortColumn === 'year'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
             <th @click="sortBy('director')">
-              Director
+              Directors
               <span v-if="sortColumn === 'director'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th @click="sortBy('actors')">
+              Actors
+              <span v-if="sortColumn === 'actors'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
             <th @click="sortBy('genre')">
               Genre
@@ -44,7 +51,8 @@
             </td>
             <td>{{ dvd.title }}</td>
             <td>{{ dvd.year }}</td>
-            <td>{{ dvd.director }}</td>
+            <td>{{ dvd.directors || dvd.director }}</td>
+            <td>{{ dvd.actors || dvd.stars }}</td>
             <td>{{ dvd.genre }}</td>
             <td>
               <button @click.stop="editDvd(dvd)" class="btn-edit">Edit</button>
@@ -72,7 +80,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['select-dvd', 'edit-dvd']);
+const emit = defineEmits(['select-dvd', 'edit-dvd', 'create-dvd']);
 
 const sortColumn = ref('title');
 const sortDirection = ref('asc');
@@ -126,6 +134,10 @@ const editDvd = (dvd) => {
   emit('edit-dvd', dvd);
 };
 
+const createDvd = () => {
+  emit('create-dvd');
+};
+
 const viewDetails = (dvd) => {
   emit('select-dvd', dvd);
 };
@@ -134,10 +146,29 @@ const viewDetails = (dvd) => {
 <style scoped>
 .dvd-table-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* widened on desktop */
   margin: 0 auto;
   padding: 20px;
 }
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.btn-new {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-new:hover { background: #16a34a; }
 
 h2 {
   color: #2c3e50;

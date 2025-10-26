@@ -93,21 +93,45 @@ const handleEditDvd = (dvd) => {
   editMode.value = true;
 };
 
+const handleCreateDvd = () => {
+  // open the form with an empty DVD object for creation
+  selectedDvd.value = {
+    title: '',
+    year: '',
+    rating: '',
+    directors: [],
+    director: '',
+    actors: [],
+    stars: '',
+    genre: '',
+    runtime: '',
+    format: 'DVD',
+    condition: 'Excellent',
+    notes: ''
+  };
+  editMode.value = true;
+};
+
 const handleUpdateDvd = async (updatedDvd) => {
   try {
-    const result = await dvdApi.updateDvd(updatedDvd);
-    
-    // Update local data
-    const index = dvds.value.findIndex(d => d.id === updatedDvd.id);
-    if (index !== -1) {
-      dvds.value[index] = result;
+    let result;
+
+    // If there's no id/dkey, treat this as a create
+    if (!updatedDvd.id && !updatedDvd.dkey) {
+      result = await dvdApi.createDvd(updatedDvd);
+    } else {
+      result = await dvdApi.updateDvd(updatedDvd);
     }
-    
-    selectedDvd.value = result;
+
+    // Refresh the current page of results from the server so the list shows the saved changes
+    await loadDvds(currentPage.value);
+
+    // Close the modal after a successful save
+    selectedDvd.value = null;
     editMode.value = false;
   } catch (err) {
-    error.value = `Failed to update DVD: ${err.message}`;
-    console.error('Error updating DVD:', err);
+    error.value = `Failed to save DVD: ${err.message}`;
+    console.error('Error saving DVD:', err);
   }
 };
 
@@ -160,6 +184,7 @@ const retryLoad = () => {
           :pagination="pagination"
           @select-dvd="handleSelectDvd"
           @edit-dvd="handleEditDvd"
+          @create-dvd="handleCreateDvd"
         />
         
         <!-- Pagination controls -->
