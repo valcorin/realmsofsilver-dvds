@@ -13,6 +13,8 @@ const loading = ref(true);
 const error = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+// Controller used to cancel in-flight list/search requests
+let dvdsController = null;
 
 // Load DVDs from the API when component mounts
 onMounted(async () => {
@@ -24,21 +26,34 @@ const loadDvds = async (page = currentPage.value, q = undefined) => {
   // We consider it a search when the caller passes a value (even an empty string).
   const isSearch = typeof q !== 'undefined';
   try {
+    // abort previous request if still running
+    if (dvdsController) {
+      try { dvdsController.abort(); } catch (e) {}
+      dvdsController = null;
+    }
+    dvdsController = new AbortController();
+    const signal = dvdsController.signal;
+
     if (!isSearch) {
       loading.value = true;
     }
     error.value = null;
-    const response = await dvdApi.fetchDvds(page, itemsPerPage.value, q);
+    const response = await dvdApi.fetchDvds(page, itemsPerPage.value, q, signal);
     dvds.value = response.data || response; // Handle both new and old response formats
     pagination.value = response.pagination || {};
     currentPage.value = page;
   } catch (err) {
+    if (err && err.name === 'AbortError') {
+      // aborted by a newer request — don't surface an error
+      return;
+    }
     error.value = `Failed to load DVDs: ${err.message}`;
     console.error('Error loading DVDs:', err);
   } finally {
     if (!isSearch) {
       loading.value = false;
     }
+    try { dvdsController = null; } catch (e) {}
   }
 };
 

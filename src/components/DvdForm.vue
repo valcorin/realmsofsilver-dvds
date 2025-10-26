@@ -7,8 +7,9 @@
       </div>
       
       <div class="form-content">
-        <!-- DVD Cover Image and upload -->
-        <div class="dvd-image-section">
+  <form @submit.prevent="save" class="dvd-form">
+  <!-- DVD Cover Image and upload (moved inside the form so fields can span under it) -->
+  <div class="dvd-image-section">
           <!-- show preview of newly selected file first, otherwise existing image -->
           <img v-if="previewUrl" :src="previewUrl" :alt="formData.title" class="dvd-cover" />
           <img v-else-if="dvdImageUrl" :src="dvdImageUrl" :alt="formData.title" class="dvd-cover" />
@@ -22,8 +23,7 @@
             </div>
           </div>
         </div>
-        
-        <form @submit.prevent="save" class="dvd-form">
+        <div class="right-column">
         <div class="form-group">
           <label for="title">Title:</label>
           <div class="title-row">
@@ -35,6 +35,7 @@
               :disabled="!isEditing"
               required
             />
+
             <button
               type="button"
               class="btn-fetch"
@@ -49,7 +50,6 @@
           </div>
           <div class="fetch-error" v-if="wikiError">{{ wikiError }}</div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label for="year">Year:</label>
@@ -70,64 +70,6 @@
               type="text" 
               :disabled="!isEditing"
             />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="directors">Directors:</label>
-          <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
-            <template v-for="(dir, idx) in directorsArray" :key="idx">
-              <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
-                {{ dir }}
-                <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeDirector(idx)">✕</button>
-              </span>
-              <input
-                v-else
-                ref="directorEditInput"
-                class="token-edit-input"
-                v-model="directorEditValue"
-                @keydown="onDirectorEditKeydown"
-                @blur="commitDirectorEdit"
-              />
-            </template>
-            <input
-              ref="directorInput"
-              v-show="isEditing && directorEditIndex === -1"
-              v-model="directorInputValue"
-              @keydown="onDirectorKeydown"
-              @blur="onDirectorBlur"
-              placeholder="Add director and press Enter or comma"
-            />
-            <div v-if="!isEditing && directorsArray.length === 0" class="hint">No director listed</div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="actors">Actors:</label>
-          <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusActorInput">
-            <template v-for="(actor, idx) in actorsArray" :key="idx">
-              <span v-if="actorEditIndex !== idx" class="actor-token" @click.stop="startEditActor(idx)">
-                {{ actor }}
-                <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeActor(idx)">✕</button>
-              </span>
-              <input
-                v-else
-                ref="actorEditInput"
-                class="token-edit-input"
-                v-model="actorEditValue"
-                @keydown="onActorEditKeydown"
-                @blur="commitActorEdit"
-              />
-            </template>
-            <input
-              ref="actorInput"
-              v-show="isEditing && actorEditIndex === -1"
-              v-model="actorInputValue"
-              @keydown="onActorKeydown"
-              @blur="onActorBlur"
-              placeholder="Add actor and press Enter or comma"
-            />
-            <div v-if="!isEditing && actorsArray.length === 0" class="hint">No actors listed</div>
           </div>
         </div>
 
@@ -181,9 +123,11 @@
               :disabled="!isEditing"
             >
               <option value="DVD">DVD</option>
-              <option value="Blu-ray">Blu-ray</option>
-              <option value="4K UHD">4K UHD</option>
-              <option value="Digital">Digital</option>
+              <option value="BLU">Blu-ray</option>
+              <option value="4K">4K UHD</option>
+              <option value="DIG">Digital</option>
+              <option value="BCK">Backup</option>
+              <option value="VHS">VHS</option>
             </select>
           </div>
 
@@ -203,7 +147,67 @@
           </div>
         </div>
 
-        <div class="form-group">
+        </div> <!-- .right-column -->
+
+        <div class="form-group full-width">
+          <label for="directors">Directors:</label>
+          <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
+            <template v-for="(dir, idx) in directorsArray" :key="idx">
+              <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
+                {{ dir }}
+                <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeDirector(idx)">✕</button>
+              </span>
+              <input
+                v-else
+                ref="directorEditInput"
+                class="token-edit-input"
+                v-model="directorEditValue"
+                @keydown="onDirectorEditKeydown"
+                @blur="commitDirectorEdit"
+              />
+            </template>
+            <input
+              ref="directorInput"
+              v-show="isEditing && directorEditIndex === -1"
+              v-model="directorInputValue"
+              @keydown="onDirectorKeydown"
+              @blur="onDirectorBlur"
+              placeholder="Add director and press Enter or comma"
+            />
+            <div v-if="!isEditing && directorsArray.length === 0" class="hint">No director listed</div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="actors">Actors:</label>
+          <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusActorInput">
+            <template v-for="(actor, idx) in actorsArray" :key="idx">
+              <span v-if="actorEditIndex !== idx" class="actor-token" @click.stop="startEditActor(idx)">
+                {{ actor }}
+                <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeActor(idx)">✕</button>
+              </span>
+              <input
+                v-else
+                ref="actorEditInput"
+                class="token-edit-input"
+                v-model="actorEditValue"
+                @keydown="onActorEditKeydown"
+                @blur="commitActorEdit"
+              />
+            </template>
+            <input
+              ref="actorInput"
+              v-show="isEditing && actorEditIndex === -1"
+              v-model="actorInputValue"
+              @keydown="onActorKeydown"
+              @blur="onActorBlur"
+              placeholder="Add actor and press Enter or comma"
+            />
+            <div v-if="!isEditing && actorsArray.length === 0" class="hint">No actors listed</div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
           <label for="notes">Notes:</label>
           <textarea 
             v-model="formData.notes" 
@@ -322,16 +326,26 @@ const handleEscape = (event) => {
 const wikiLoading = ref(false);
 const wikiError = ref(null);
 const wikidataUsed = ref(false);
+// Controller to cancel in-flight wiki/wikidata requests
+let wikiController = null;
 
 const fetchFromWikipedia = async () => {
   const title = (formData.value.title || '').trim();
   if (!title) return;
+  // abort any previous fetch in progress
+  if (wikiController) {
+    try { wikiController.abort(); } catch (e) {}
+    wikiController = null;
+  }
+  wikiController = new AbortController();
+  const signal = wikiController.signal;
+
   wikiLoading.value = true;
   wikiError.value = null;
   try {
     // 1) search for the page
-    const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(title) + '&format=json&utf8=1&srlimit=1&origin=*';
-    const sr = await fetch(searchUrl).then(r => r.json());
+  const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(title) + '&format=json&utf8=1&srlimit=1&origin=*';
+  const sr = await fetch(searchUrl, { signal }).then(r => r.json());
     const hit = sr?.query?.search?.[0];
     if (!hit) {
       wikiError.value = 'No Wikipedia page found for this title.';
@@ -344,7 +358,7 @@ const fetchFromWikipedia = async () => {
       // Try Wikidata first (structured data) by resolving the Wikidata Q-id from the Wikipedia page
       try {
         const propsUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageprops&format=json&origin=*';
-        const propsResp = await fetch(propsUrl).then(r => r.json());
+        const propsResp = await fetch(propsUrl, { signal }).then(r => r.json());
         const pagesProps = propsResp?.query?.pages || {};
         const pageObj = Object.values(pagesProps)[0] || {};
         const wikibaseItem = pageObj.pageprops && pageObj.pageprops.wikibase_item;
@@ -360,7 +374,7 @@ const fetchFromWikipedia = async () => {
           }`;
 
           const sparqlUrl = 'https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(sparql);
-          const wdResp = await fetch(sparqlUrl, { headers: { 'Accept': 'application/sparql-results+json' } }).then(r => r.json());
+          const wdResp = await fetch(sparqlUrl, { headers: { 'Accept': 'application/sparql-results+json' }, signal }).then(r => r.json());
           const rows = wdResp?.results?.bindings || [];
 
           const directorSet = new Set();
@@ -427,13 +441,15 @@ const fetchFromWikipedia = async () => {
           }
         }
       } catch (e) {
+        // If the fetch was aborted, swallow silently
+        if (e && e.name === 'AbortError') return;
         // Non-fatal: if Wikidata query fails, fall back to wikitext parsing below
         console.debug('Wikidata lookup failed', e);
       }
 
     // 2) get wikitext revision
-    const revUrl = 'https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&rvslots=*&titles=' + encodeURIComponent(pageTitle) + '&format=json&utf8=1&origin=*';
-    const revRes = await fetch(revUrl).then(r => r.json());
+  const revUrl = 'https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&rvslots=*&titles=' + encodeURIComponent(pageTitle) + '&format=json&utf8=1&origin=*';
+  const revRes = await fetch(revUrl, { signal }).then(r => r.json());
     const pages = revRes?.query?.pages || {};
     const page = Object.values(pages)[0] || {};
     let content = '';
@@ -539,7 +555,7 @@ const fetchFromWikipedia = async () => {
     // Fetch plain-text extract (intro) to use as notes/description
     try {
       const extractUrl2 = 'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=' + encodeURIComponent(pageTitle) + '&format=json&utf8=1&origin=*';
-      const extResp = await fetch(extractUrl2).then(r => r.json());
+      const extResp = await fetch(extractUrl2, { signal }).then(r => r.json());
       const pages2 = extResp?.query?.pages || {};
       const p2 = Object.values(pages2)[0] || {};
       const extractText = p2.extract || '';
@@ -556,10 +572,16 @@ const fetchFromWikipedia = async () => {
     }
 
   } catch (err) {
+    if (err && err.name === 'AbortError') {
+      // aborted by user / new request — don't surface as an error
+      return;
+    }
     wikiError.value = 'Failed to fetch from Wikipedia.';
     console.error('Wikipedia fetch error', err);
   } finally {
     wikiLoading.value = false;
+    // clear controller when done
+    try { if (wikiController) { wikiController = null; } } catch (e) {}
   }
 };
 
@@ -605,6 +627,8 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleEscape);
   // Restore body scroll
   document.body.style.overflow = '';
+  // abort any in-flight wiki lookup
+  try { if (wikiController) wikiController.abort(); } catch (e) {}
 });
 
 // Initialize actors when the prop is available. Use immediate:true so opening the modal
@@ -1097,20 +1121,41 @@ const onDirectorEditKeydown = (e) => {
 }
 
 .dvd-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: 200px 1fr; /* left column for cover, right for fields */
+  gap: 12px;
+}
+
+.right-column {
+  /* ensure the right-side container sits in the right grid column and aligns with the cover */
+  grid-column: 2;
+  align-self: start;
 }
 
 .form-row {
+  grid-column: 2; /* place paired fields in the right column */
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 12px;
+  margin-top: 6px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
+  grid-column: 2; /* default: place in right column */
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1; /* span both columns (under the cover) */
+}
+
+.form-row .form-group {
+  grid-column: auto; /* allow children inside .form-row to flow into the two columns */
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
 .form-group label {
@@ -1135,6 +1180,7 @@ const onDirectorEditKeydown = (e) => {
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-bottom: 6px;
 }
 
 .title-row input {

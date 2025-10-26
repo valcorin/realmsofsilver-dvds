@@ -6,7 +6,8 @@ class DvdApiService {
     this.baseUrl = API_BASE_URL;
   }
 
-  async fetchDvds(page = 1, limit = 10, q = null) {
+  // `signal` is optional AbortSignal to allow callers to cancel in-flight requests
+  async fetchDvds(page = 1, limit = 10, q = null, signal = undefined) {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -16,7 +17,7 @@ class DvdApiService {
         params.set('q', q.trim());
       }
       
-  const response = await fetch(`${this.baseUrl}/dvds.php?${params}`);
+  const response = await fetch(`${this.baseUrl}/dvds.php?${params}`, { signal });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
