@@ -45,6 +45,7 @@
               <span v-if="!wikiLoading">Fetch</span>
               <span v-else>Loading…</span>
             </button>
+              <span v-if="wikidataUsed" class="wikidata-badge" title="Some fields were populated from Wikidata">Data from Wikidata</span>
           </div>
           <div class="fetch-error" v-if="wikiError">{{ wikiError }}</div>
         </div>
@@ -133,12 +134,31 @@
         <div class="form-row">
           <div class="form-group">
             <label for="genre">Genre:</label>
-            <input 
-              v-model="formData.genre" 
-              id="genre" 
-              type="text" 
-              :disabled="!isEditing"
-            />
+            <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusGenreInput">
+              <template v-for="(g, idx) in genresArray" :key="idx">
+                <span v-if="genreEditIndex !== idx" class="actor-token" @click.stop="startEditGenre(idx)">
+                  {{ g }}
+                  <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeGenre(idx)">✕</button>
+                </span>
+                <input
+                  v-else
+                  ref="genreEditInput"
+                  class="token-edit-input"
+                  v-model="genreEditValue"
+                  @keydown="onGenreEditKeydown"
+                  @blur="commitGenreEdit"
+                />
+              </template>
+              <input
+                ref="genreInput"
+                v-show="isEditing && genreEditIndex === -1"
+                v-model="genreInputValue"
+                @keydown="onGenreKeydown"
+                @blur="onGenreBlur"
+                placeholder="Add genre and press Enter or comma"
+              />
+              <div v-if="!isEditing && genresArray.length === 0" class="hint">No genre listed</div>
+            </div>
           </div>
 
           <div class="form-group">
@@ -258,6 +278,15 @@ const directorEditIndex = ref(-1);
 const directorEditValue = ref('');
 const directorEditInput = ref(null);
 
+// Genres token input state
+const genresArray = ref([]);
+const genreInputValue = ref('');
+const genreInput = ref(null);
+// editing state for a genre token
+const genreEditIndex = ref(-1);
+const genreEditValue = ref('');
+const genreEditInput = ref(null);
+
 // refs for focusing
 const titleInput = ref(null);
 
@@ -269,6 +298,19 @@ const dvdImageUrl = computed(() => {
   return null;
 });
 
+// Clean genre terms: drop the word "film" or "films" if present and trim
+function cleanGenreTerm(s) {
+  if (!s) return '';
+  let t = String(s).trim();
+  // remove trailing/standalone 'film' or 'films'
+  t = t.replace(/\bfilms?\b/ig, '');
+  // collapse whitespace and separators
+  t = t.replace(/[\s\-_]+/g, ' ').trim();
+  // remove stray commas
+  t = t.replace(/^,|,$/g, '').trim();
+  return t;
+}
+
 // Handle escape key to close modal
 const handleEscape = (event) => {
   if (event.key === 'Escape') {
@@ -279,6 +321,7 @@ const handleEscape = (event) => {
 // Wikipedia fetch state
 const wikiLoading = ref(false);
 const wikiError = ref(null);
+const wikidataUsed = ref(false);
 
 const fetchFromWikipedia = async () => {
   const title = (formData.value.title || '').trim();
@@ -295,6 +338,98 @@ const fetchFromWikipedia = async () => {
       return;
     }
     const pageTitle = hit.title;
+  // update the form title to the canonical Wikipedia page title (fix case/spacing)
+  formData.value.title = pageTitle;
+
+      // Try Wikidata first (structured data) by resolving the Wikidata Q-id from the Wikipedia page
+      try {
+        const propsUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageprops&format=json&origin=*';
+        const propsResp = await fetch(propsUrl).then(r => r.json());
+        const pagesProps = propsResp?.query?.pages || {};
+        const pageObj = Object.values(pagesProps)[0] || {};
+        const wikibaseItem = pageObj.pageprops && pageObj.pageprops.wikibase_item;
+        if (wikibaseItem) {
+          // Query Wikidata SPARQL endpoint for structured fields
+          const sparql = `SELECT ?directorLabel ?castLabel ?genreLabel ?duration ?publicationDate WHERE {
+            OPTIONAL { wd:${wikibaseItem} wdt:P57 ?director. }
+            OPTIONAL { wd:${wikibaseItem} wdt:P161 ?cast. }
+            OPTIONAL { wd:${wikibaseItem} wdt:P136 ?genre. }
+            OPTIONAL { wd:${wikibaseItem} wdt:P2047 ?duration. }
+            OPTIONAL { wd:${wikibaseItem} wdt:P577 ?publicationDate. }
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+          }`;
+
+          const sparqlUrl = 'https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(sparql);
+          const wdResp = await fetch(sparqlUrl, { headers: { 'Accept': 'application/sparql-results+json' } }).then(r => r.json());
+          const rows = wdResp?.results?.bindings || [];
+
+          const directorSet = new Set();
+          const castSet = new Set();
+          const genreSet = new Set();
+          let durationVal = null;
+          let pubDateVal = null;
+
+          rows.forEach(row => {
+            if (row.directorLabel) directorSet.add(row.directorLabel.value);
+            if (row.castLabel) castSet.add(row.castLabel.value);
+            if (row.genreLabel) genreSet.add(row.genreLabel.value);
+            if (!durationVal && row.duration) durationVal = row.duration.value;
+            if (!pubDateVal && row.publicationDate) pubDateVal = row.publicationDate.value;
+          });
+
+          if (directorSet.size > 0) {
+            const parts = Array.from(directorSet);
+            directorsArray.value = parts;
+            formData.value.directors = parts.join(', ');
+            formData.value.director = parts.join(', ');
+          }
+
+          if (castSet.size > 0) {
+            const parts = Array.from(castSet);
+            actorsArray.value = parts;
+            formData.value.actors = parts.join(', ');
+            formData.value.stars = parts.join(', ');
+          }
+
+          if (genreSet.size > 0) {
+            const raw = Array.from(genreSet).map(s => cleanGenreTerm(s)).filter(Boolean);
+            // dedupe preserving insertion order
+            const seen = new Set();
+            const parts = [];
+            for (const x of raw) {
+              const key = x.toLowerCase();
+              if (!seen.has(key)) {
+                seen.add(key);
+                parts.push(x);
+              }
+            }
+            genresArray.value = parts;
+            formData.value.genre = parts.join(', ');
+          }
+
+          if (durationVal) {
+            // durationVal may be an ISO 8601 duration (e.g. PT120M) or a number; try to normalize to minutes
+            const minutes = parseIsoDurationToMinutes(durationVal);
+            if (minutes !== null) formData.value.runtime = String(minutes);
+            else formData.value.runtime = String(durationVal);
+          }
+
+          if (pubDateVal) {
+            // pubDateVal is often a date-time string; extract year
+            try {
+              const y = new Date(pubDateVal).getFullYear();
+              if (!Number.isNaN(y)) formData.value.year = Number(y);
+            } catch (e) {}
+          }
+          // If any Wikidata-derived field was present, mark wikidataUsed
+          if (directorSet.size > 0 || castSet.size > 0 || genreSet.size > 0 || durationVal || pubDateVal) {
+            wikidataUsed.value = true;
+          }
+        }
+      } catch (e) {
+        // Non-fatal: if Wikidata query fails, fall back to wikitext parsing below
+        console.debug('Wikidata lookup failed', e);
+      }
 
     // 2) get wikitext revision
     const revUrl = 'https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&rvslots=*&titles=' + encodeURIComponent(pageTitle) + '&format=json&utf8=1&origin=*';
@@ -376,8 +511,22 @@ const fetchFromWikipedia = async () => {
     // --- extract more fields: genre, runtime, and intro description ---
     const genreRaw = extractInfobox('genre');
     if (genreRaw) {
-      // keep as a comma-separated string
-      const parts = genreRaw.split(',').map(s => s.trim()).filter(Boolean);
+      // split and clean terms, remove words like 'film'
+      const rawParts = genreRaw.split(',').map(s => cleanGenreTerm(s)).filter(Boolean);
+      // also split on slashes or pipes
+      let parts = [];
+      rawParts.forEach(p => {
+        parts.push(...p.split(/[|\/]+/).map(x => x.trim()).filter(Boolean));
+      });
+      // dedupe case-insensitive
+      const seen = new Set();
+      parts = parts.map(p => p.trim()).filter(Boolean).filter(p => {
+        const k = p.toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      genresArray.value = parts;
       formData.value.genre = parts.join(', ');
     }
 
@@ -428,6 +577,24 @@ function cleanWikiText(s) {
   return s.trim();
 }
 
+// Parse ISO 8601 duration (e.g. PT2H3M, PT120M) to minutes. Returns integer minutes or null.
+function parseIsoDurationToMinutes(v) {
+  if (!v) return null;
+  // If it's a plain number, return it
+  if (!isNaN(Number(v))) return Math.floor(Number(v));
+  // Match patterns like PT2H, PT2H30M, PT120M
+  const m = String(v).match(/P(T)?(?:(\d+)H)?(?:(\d+)M)?/i);
+  if (m) {
+    const hours = parseInt(m[2] || '0', 10) || 0;
+    const mins = parseInt(m[3] || '0', 10) || 0;
+    return hours * 60 + mins;
+  }
+  // Try to extract any number
+  const m2 = String(v).match(/(\d+)/);
+  if (m2) return parseInt(m2[1], 10);
+  return null;
+}
+
 onMounted(() => {
   document.addEventListener('keydown', handleEscape);
   // Prevent body scroll when modal is open
@@ -472,6 +639,16 @@ watch(() => props.dvd, (newDvd) => {
     } else {
       directorsArray.value = [];
     }
+    // initialize genres array from incoming data (comma separated or array)
+    if (newDvd.genre && typeof newDvd.genre === 'string') {
+      genresArray.value = newDvd.genre.split(',').map(s => cleanGenreTerm(s)).filter(Boolean);
+    } else if (Array.isArray(newDvd.genre)) {
+      genresArray.value = newDvd.genre.map(s => cleanGenreTerm(s)).filter(Boolean);
+    } else if (newDvd.genre && String(newDvd.genre).trim() !== '') {
+      genresArray.value = String(newDvd.genre).split(',').map(s => cleanGenreTerm(s)).filter(Boolean);
+    } else {
+      genresArray.value = [];
+    }
     // If this is a newly-created DVD and we're in edit mode, autofocus title
     if (isEditing.value && (!newDvd.id && !newDvd.dkey)) {
       nextTick(() => {
@@ -499,6 +676,8 @@ const save = () => {
         formData.value.directors = directorsArray.value.join(', ');
         // also set legacy `director` field for server compatibility
         formData.value.director = directorsArray.value.join(', ');
+        // sync genres tokens back into formData as comma-separated string
+        formData.value.genre = genresArray.value.join(', ');
 
       if (selectedFile.value) {
         const base64 = await fileToBase64(selectedFile.value);
@@ -641,6 +820,73 @@ const addDirector = (raw) => {
     if (!directorsArray.value.includes(p)) directorsArray.value.push(p);
   }
   directorInputValue.value = '';
+};
+
+// --- Genres token input helpers ---
+const focusGenreInput = () => {
+  if (genreInput.value && isEditing.value) genreInput.value.focus();
+};
+
+const addGenre = (raw) => {
+  if (!raw) return;
+  const parts = String(raw).split(',').map(s => cleanGenreTerm(s)).map(s => s.trim()).filter(Boolean);
+  for (const p of parts) {
+    // dedupe case-insensitive
+    if (!genresArray.value.map(x => x.toLowerCase()).includes(p.toLowerCase())) genresArray.value.push(p);
+  }
+  genreInputValue.value = '';
+};
+
+const removeGenre = (idx) => {
+  genresArray.value.splice(idx, 1);
+};
+
+const onGenreKeydown = (e) => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    addGenre(genreInputValue.value);
+  } else if (e.key === 'Backspace' && (!genreInputValue.value || genreInputValue.value.length === 0)) {
+    genresArray.value.pop();
+  }
+};
+
+const onGenreBlur = () => {
+  if (genreInputValue.value && genreInputValue.value.trim()) {
+    addGenre(genreInputValue.value);
+  }
+};
+
+// token edit handlers for genres
+const startEditGenre = (idx) => {
+  if (!isEditing.value) return;
+  genreEditIndex.value = idx;
+  genreEditValue.value = genresArray.value[idx] || '';
+  nextTick(() => {
+    if (genreEditInput.value) genreEditInput.value.focus();
+  });
+};
+
+const commitGenreEdit = () => {
+  const idx = genreEditIndex.value;
+  if (idx < 0) return;
+  const v = (genreEditValue.value || '').trim();
+  if (v === '') {
+    genresArray.value.splice(idx, 1);
+  } else {
+    genresArray.value.splice(idx, 1, cleanGenreTerm(v));
+  }
+  genreEditIndex.value = -1;
+  genreEditValue.value = '';
+};
+
+const onGenreEditKeydown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    commitGenreEdit();
+  } else if (e.key === 'Escape') {
+    genreEditIndex.value = -1;
+    genreEditValue.value = '';
+  }
 };
 
 const removeDirector = (idx) => {
@@ -910,6 +1156,17 @@ const onDirectorEditKeydown = (e) => {
 .btn-fetch[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.wikidata-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 6px 8px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid #e2e8f0;
 }
 
 .form-group input:focus,
