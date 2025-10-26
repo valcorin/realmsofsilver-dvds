@@ -5,6 +5,7 @@
       <table class="dvd-table">
         <thead>
           <tr>
+            <th>Cover</th>
             <th @click="sortBy('title')">
               Title
               <span v-if="sortColumn === 'title'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
@@ -28,10 +29,19 @@
           <tr 
             v-for="dvd in sortedDvds" 
             :key="dvd.id"
-            :class="{ 'selected': selectedDvd?.id === dvd.id }"
             @click="selectDvd(dvd)"
             class="clickable-row"
           >
+            <td class="cover-cell">
+              <img 
+                v-if="getDvdImageUrl(dvd)" 
+                :src="getDvdImageUrl(dvd)" 
+                :alt="dvd.title"
+                class="cover-thumbnail"
+                @error="handleImageError"
+              />
+              <div v-else class="no-cover">📀</div>
+            </td>
             <td>{{ dvd.title }}</td>
             <td>{{ dvd.year }}</td>
             <td>{{ dvd.director }}</td>
@@ -44,28 +54,41 @@
         </tbody>
       </table>
     </div>
-    <div class="table-info">
-      <p>Total DVDs: {{ dvds.length }}</p>
-      <p class="hint">Click on a row to select it, or use the buttons to view/edit details</p>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import dvdApi from '../services/dvdApi.js';
 
 const props = defineProps({
   dvds: {
     type: Array,
     required: true
+  },
+  pagination: {
+    type: Object,
+    default: () => ({})
   }
 });
 
 const emit = defineEmits(['select-dvd', 'edit-dvd']);
 
-const selectedDvd = ref(null);
 const sortColumn = ref('title');
 const sortDirection = ref('asc');
+
+// Helper function to get DVD image URL
+const getDvdImageUrl = (dvd) => {
+  if (dvd && dvd.image) {
+    return dvdApi.getImageUrl(dvd.image);
+  }
+  return null;
+};
+
+const handleImageError = (event) => {
+  // Hide broken images
+  event.target.style.display = 'none';
+};
 
 const sortedDvds = computed(() => {
   const sorted = [...props.dvds].sort((a, b) => {
@@ -96,17 +119,14 @@ const sortBy = (column) => {
 };
 
 const selectDvd = (dvd) => {
-  selectedDvd.value = dvd;
   emit('select-dvd', dvd);
 };
 
 const editDvd = (dvd) => {
-  selectedDvd.value = dvd;
   emit('edit-dvd', dvd);
 };
 
 const viewDetails = (dvd) => {
-  selectedDvd.value = dvd;
   emit('select-dvd', dvd);
 };
 </script>
@@ -159,19 +179,24 @@ h2 {
 .dvd-table td {
   padding: 12px;
   border-bottom: 1px solid #e0e0e0;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 .clickable-row {
   cursor: pointer;
   transition: background-color 0.2s;
+  color: #2c3e50;
 }
 
 .clickable-row:hover {
   background-color: #f5f5f5;
+  color: #1a202c;
 }
 
 .clickable-row.selected {
   background-color: #e3f2fd;
+  color: #1565c0;
 }
 
 .btn-edit, .btn-view {
@@ -217,5 +242,55 @@ h2 {
 .hint {
   font-style: italic;
   font-size: 0.9em;
+}
+
+/* Cover image styles */
+.cover-cell {
+  width: 50px;
+  text-align: center;
+  padding: 8px !important;
+}
+
+.cover-thumbnail {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.cover-thumbnail:hover {
+  transform: scale(1.1);
+}
+
+.no-cover {
+  width: 40px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 4px;
+  color: #999;
+  font-size: 20px;
+  border: 1px dashed #ccc;
+}
+
+@media (max-width: 768px) {
+  .cover-cell {
+    width: 40px;
+  }
+  
+  .cover-thumbnail {
+    width: 32px;
+    height: 48px;
+  }
+  
+  .no-cover {
+    width: 32px;
+    height: 48px;
+    font-size: 16px;
+  }
 }
 </style>

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+config.ini
+api/dvds.php
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

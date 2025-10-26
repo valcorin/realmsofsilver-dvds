@@ -6,9 +6,14 @@ class DvdApiService {
     this.baseUrl = API_BASE_URL;
   }
 
-  async fetchDvds() {
+  async fetchDvds(page = 1, limit = 10) {
     try {
-      const response = await fetch(`${this.baseUrl}/dvds.php`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      });
+      
+      const response = await fetch(`${this.baseUrl}/dvds.php?${params}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -108,7 +113,11 @@ class DvdApiService {
   // Helper method to create image URL from base64 data
   getImageUrl(imageData) {
     if (imageData && imageData.type && imageData.data) {
-      return `data:image/${imageData.type};base64,${imageData.data}`;
+      // Check if data is already base64 encoded or if it's raw binary
+      const base64Data = imageData.data.startsWith('data:') ? 
+        imageData.data : 
+        `data:image/${imageData.type};base64,${imageData.data}`;
+      return base64Data;
     }
     return null;
   }
