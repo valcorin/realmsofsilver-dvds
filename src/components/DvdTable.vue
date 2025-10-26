@@ -30,6 +30,10 @@
               Year
               <span v-if="sortColumn === 'year'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
+            <th @click="sortBy('type')">
+              Type
+              <span v-if="sortColumn === 'type'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            </th>
             <th @click="sortBy('director')">
               Directors
               <span v-if="sortColumn === 'director'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
@@ -64,6 +68,7 @@
             </td>
             <td>{{ dvd.title }}</td>
             <td>{{ dvd.year }}</td>
+            <td>{{ dvd.type || dvd.format }}</td>
             <td>{{ dvd.directors || dvd.director }}</td>
             <td>{{ dvd.actors || dvd.stars }}</td>
             <td>{{ dvd.genre }}</td>

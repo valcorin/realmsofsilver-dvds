@@ -355,6 +355,34 @@ const fetchFromWikipedia = async () => {
   // update the form title to the canonical Wikipedia page title (fix case/spacing)
   formData.value.title = pageTitle;
 
+      // Additionally, check whether this page transcludes Template:Infobox_film.
+      // Some pages use nested templates where the starring list is harder to extract from revisions; if
+      // the page transcludes the infobox, request the parsed wikitext via action=parse and prefer that
+      // when extracting infobox fields.
+      try {
+        const embedUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=embeddedin&eititle=Template:Infobox_film&einamespace=0&format=json&eilimit=500&origin=*';
+        const embedResp = await fetch(embedUrl, { signal }).then(r => r.json());
+        const embedded = embedResp?.query?.embeddedin || [];
+        const embedsTitles = embedded.map(e => e.title);
+        const transcludesInfobox = embedsTitles.includes(pageTitle);
+        if (transcludesInfobox) {
+          try {
+            const parseUrl = 'https://en.wikipedia.org/w/api.php?action=parse&page=' + encodeURIComponent(pageTitle) + '&prop=wikitext&format=json&origin=*';
+            const parseResp = await fetch(parseUrl, { signal }).then(r => r.json());
+            const parsedWikitext = parseResp?.parse?.wikitext?.['*'] || '';
+            if (parsedWikitext) {
+              // prefer parsed wikitext as the content to extract from
+              content = parsedWikitext;
+            }
+          } catch (e) {
+            if (e && e.name === 'AbortError') return;
+            console.debug('Failed to fetch parsed wikitext for page', pageTitle, e);
+          }
+        }
+      } catch (e) {
+        // ignore failures for the embeddedin check
+      }
+
       // Try Wikidata first (structured data) by resolving the Wikidata Q-id from the Wikipedia page
       try {
         const propsUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageprops&format=json&origin=*';
@@ -402,7 +430,6 @@ const fetchFromWikipedia = async () => {
             const parts = Array.from(castSet);
             actorsArray.value = parts;
             formData.value.actors = parts.join(', ');
-            formData.value.stars = parts.join(', ');
           }
 
           if (genreSet.size > 0) {
@@ -500,7 +527,6 @@ const fetchFromWikipedia = async () => {
       }
       actorsArray.value = parts;
       formData.value.actors = parts.join(', ');
-      formData.value.stars = parts.join(', ');
     }
 
     // try to extract year from released or from page content/snippet
@@ -700,6 +726,8 @@ const save = () => {
         formData.value.directors = directorsArray.value.join(', ');
         // also set legacy `director` field for server compatibility
         formData.value.director = directorsArray.value.join(', ');
+        // set legacy `stars` field so backend continues to receive the actors list
+        formData.value.stars = actorsArray.value.join(', ');
         // sync genres tokens back into formData as comma-separated string
         formData.value.genre = genresArray.value.join(', ');
 
@@ -1100,12 +1128,9 @@ const onDirectorEditKeydown = (e) => {
   transform: scale(1.1);
 }
 
-.form-content {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 25px;
-  align-items: start;
-  padding: 25px;
+  .form-content {
+  display: block;
+  padding: 20px 25px;
 }
 
 .dvd-image-section {
@@ -1123,7 +1148,7 @@ const onDirectorEditKeydown = (e) => {
 .dvd-form {
   display: grid;
   grid-template-columns: 200px 1fr; /* left column for cover, right for fields */
-  gap: 12px;
+  gap: 20px;
 }
 
 .right-column {
