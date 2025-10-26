@@ -5,7 +5,13 @@
       <button @click="close" class="btn-close">✕</button>
     </div>
     
-    <form @submit.prevent="save" class="dvd-form">
+    <div class="form-content">
+      <!-- DVD Cover Image -->
+      <div v-if="dvdImageUrl" class="dvd-image-section">
+        <img :src="dvdImageUrl" :alt="formData.title" class="dvd-cover" />
+      </div>
+      
+      <form @submit.prevent="save" class="dvd-form">
       <div class="form-group">
         <label for="title">Title:</label>
         <input 
@@ -129,12 +135,14 @@
         </template>
         <button @click="close" type="button" class="btn-secondary">Close</button>
       </div>
-    </form>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
+import dvdApi from '../services/dvdApi.js';
 
 const props = defineProps({
   dvd: {
@@ -151,6 +159,14 @@ const emit = defineEmits(['update-dvd', 'close']);
 
 const isEditing = ref(props.editMode);
 const formData = ref({ ...props.dvd });
+
+// Computed property for DVD image URL
+const dvdImageUrl = computed(() => {
+  if (props.dvd && props.dvd.image) {
+    return dvdApi.getImageUrl(props.dvd.image);
+  }
+  return null;
+});
 
 watch(() => props.dvd, (newDvd) => {
   if (newDvd) {
@@ -188,8 +204,27 @@ const close = () => {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 20px;
-  max-width: 600px;
+  max-width: 800px;
   margin: 20px auto;
+}
+
+.form-content {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.dvd-image-section {
+  min-width: 200px;
+}
+
+.dvd-cover {
+  width: 200px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
 }
 
 .form-header {
@@ -318,6 +353,16 @@ const close = () => {
 @media (max-width: 600px) {
   .form-row {
     grid-template-columns: 1fr;
+  }
+  
+  .form-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .dvd-cover {
+    width: 150px;
+    margin: 0 auto;
+    display: block;
   }
 }
 </style>

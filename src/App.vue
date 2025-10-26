@@ -1,12 +1,33 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import DvdTable from './components/DvdTable.vue';
 import DvdForm from './components/DvdForm.vue';
-import { dvds as initialDvds } from './data/dvds.js';
+import dvdApi from './services/dvdApi.js';
 
-const dvds = ref([...initialDvds]);
+const dvds = ref([]);
 const selectedDvd = ref(null);
 const editMode = ref(false);
+const loading = ref(true);
+const error = ref(null);
+
+// Load DVDs from the API when component mounts
+onMounted(async () => {
+  await loadDvds();
+});
+
+const loadDvds = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+    const data = await dvdApi.fetchDvds();
+    dvds.value = data;
+  } catch (err) {
+    error.value = `Failed to load DVDs: ${err.message}`;
+    console.error('Error loading DVDs:', err);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handleSelectDvd = (dvd) => {
   selectedDvd.value = dvd;
@@ -18,18 +39,31 @@ const handleEditDvd = (dvd) => {
   editMode.value = true;
 };
 
-const handleUpdateDvd = (updatedDvd) => {
-  const index = dvds.value.findIndex(d => d.id === updatedDvd.id);
-  if (index !== -1) {
-    dvds.value[index] = updatedDvd;
+const handleUpdateDvd = async (updatedDvd) => {
+  try {
+    const result = await dvdApi.updateDvd(updatedDvd);
+    
+    // Update local data
+    const index = dvds.value.findIndex(d => d.id === updatedDvd.id);
+    if (index !== -1) {
+      dvds.value[index] = result;
+    }
+    
+    selectedDvd.value = result;
+    editMode.value = false;
+  } catch (err) {
+    error.value = `Failed to update DVD: ${err.message}`;
+    console.error('Error updating DVD:', err);
   }
-  selectedDvd.value = updatedDvd;
-  editMode.value = false;
 };
 
 const handleClose = () => {
   selectedDvd.value = null;
   editMode.value = false;
+};
+
+const retryLoad = () => {
+  loadDvds();
 };
 </script>
 
@@ -41,19 +75,37 @@ const handleClose = () => {
     </header>
 
     <main class="app-main">
-      <DvdTable 
-        :dvds="dvds"
-        @select-dvd="handleSelectDvd"
-        @edit-dvd="handleEditDvd"
-      />
-      
-      <DvdForm 
-        v-if="selectedDvd"
-        :dvd="selectedDvd"
-        :edit-mode="editMode"
-        @update-dvd="handleUpdateDvd"
-        @close="handleClose"
-      />
+      <!-- Loading state -->
+      <div v-if="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading your DVD collection...</p>
+      </div>
+
+      <!-- Error state -->
+      <div v-else-if="error" class="error-container">
+        <div class="error-message">
+          <h3>⚠️ Error Loading DVDs</h3>
+          <p>{{ error }}</p>
+          <button @click="retryLoad" class="retry-button">Try Again</button>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <template v-else>
+        <DvdTable 
+          :dvds="dvds"
+          @select-dvd="handleSelectDvd"
+          @edit-dvd="handleEditDvd"
+        />
+        
+        <DvdForm 
+          v-if="selectedDvd"
+          :dvd="selectedDvd"
+          :edit-mode="editMode"
+          @update-dvd="handleUpdateDvd"
+          @close="handleClose"
+        />
+      </template>
     </main>
 
     <footer class="app-footer">
@@ -116,5 +168,67 @@ const handleClose = () => {
   .subtitle {
     font-size: 1em;
   }
+}
+
+/* Loading and error states */
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  color: #e74c3c;
+}
+
+.error-message {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.error-message h3 {
+  margin: 0 0 15px 0;
+  color: #e74c3c;
+}
+
+.error-message p {
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.retry-button {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background: #5a67d8;
 }
 </style>
