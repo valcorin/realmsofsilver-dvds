@@ -5,6 +5,7 @@ import DvdForm from './components/DvdForm.vue';
 import dvdApi from './services/dvdApi.js';
 
 const dvds = ref([]);
+const searchTerm = ref('');
 const pagination = ref({});
 const selectedDvd = ref(null);
 const editMode = ref(false);
@@ -18,11 +19,15 @@ onMounted(async () => {
   await loadDvds();
 });
 
-const loadDvds = async (page = currentPage.value) => {
+const loadDvds = async (page = currentPage.value, q = null) => {
+  // If this is a typed search (q provided), avoid toggling the global loading state
+  const isSearch = q !== null && q !== undefined && q !== '';
   try {
-    loading.value = true;
+    if (!isSearch) {
+      loading.value = true;
+    }
     error.value = null;
-    const response = await dvdApi.fetchDvds(page, itemsPerPage.value);
+    const response = await dvdApi.fetchDvds(page, itemsPerPage.value, q);
     dvds.value = response.data || response; // Handle both new and old response formats
     pagination.value = response.pagination || {};
     currentPage.value = page;
@@ -30,25 +35,34 @@ const loadDvds = async (page = currentPage.value) => {
     error.value = `Failed to load DVDs: ${err.message}`;
     console.error('Error loading DVDs:', err);
   } finally {
-    loading.value = false;
+    if (!isSearch) {
+      loading.value = false;
+    }
   }
+};
+
+const handleSearch = async (query) => {
+  // Server-side search: remember query, reload page 1 with q parameter
+  searchTerm.value = query || '';
+  currentPage.value = 1;
+  await loadDvds(1, searchTerm.value || null);
 };
 
 const nextPage = async () => {
   if (pagination.value.has_next) {
-    await loadDvds(currentPage.value + 1);
+    await loadDvds(currentPage.value + 1, searchTerm.value || null);
   }
 };
 
 const prevPage = async () => {
   if (pagination.value.has_prev) {
-    await loadDvds(currentPage.value - 1);
+    await loadDvds(currentPage.value - 1, searchTerm.value || null);
   }
 };
 
 const goToPage = async (page) => {
   if (page >= 1 && page <= pagination.value.total_pages) {
-    await loadDvds(page);
+    await loadDvds(page, searchTerm.value || null);
   }
 };
 
@@ -185,6 +199,7 @@ const retryLoad = () => {
           @select-dvd="handleSelectDvd"
           @edit-dvd="handleEditDvd"
           @create-dvd="handleCreateDvd"
+          @search="handleSearch"
         />
         
         <!-- Pagination controls -->

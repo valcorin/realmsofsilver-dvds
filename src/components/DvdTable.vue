@@ -1,8 +1,21 @@
 <template>
   <div class="dvd-table-container">
     <div class="table-header">
-  <h2>DVD Collection</h2>
-  <button class="btn-new" @click.stop="createDvd">New</button>
+      <h2>DVD Collection</h2>
+
+      <div class="search-wrap">
+        <input
+          ref="searchInput"
+          v-model="searchQuery"
+          @input="onSearchInput"
+          type="search"
+          placeholder="Search titles, actors, directors..."
+          aria-label="Search DVDs"
+          class="search-input"
+        />
+      </div>
+
+      <button class="btn-new" @click.stop="createDvd">New</button>
     </div>
     <div class="table-wrapper">
       <table class="dvd-table">
@@ -54,7 +67,7 @@
             <td>{{ dvd.directors || dvd.director }}</td>
             <td>{{ dvd.actors || dvd.stars }}</td>
             <td>{{ dvd.genre }}</td>
-            <td>
+            <td class="actions-cell">
               <button @click.stop="editDvd(dvd)" class="btn-edit">Edit</button>
               <button @click.stop="viewDetails(dvd)" class="btn-view">View</button>
             </td>
@@ -66,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import dvdApi from '../services/dvdApi.js';
 
 const props = defineProps({
@@ -80,7 +93,23 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['select-dvd', 'edit-dvd', 'create-dvd']);
+const emit = defineEmits(['select-dvd', 'edit-dvd', 'create-dvd', 'search']);
+
+const searchQuery = ref('');
+let searchDebounce = null;
+const searchInput = ref(null);
+
+const onSearchInput = () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(async () => {
+    emit('search', searchQuery.value.trim());
+    // keep focus on the input in case re-render/parent updates cause blur
+    await nextTick();
+    if (searchInput.value && typeof searchInput.value.focus === 'function') {
+      searchInput.value.focus();
+    }
+  }, 300);
+};
 
 const sortColumn = ref('title');
 const sortDirection = ref('asc');
@@ -146,9 +175,10 @@ const viewDetails = (dvd) => {
 <style scoped>
 .dvd-table-container {
   width: 100%;
-  max-width: 1400px; /* widened on desktop */
+  /* widen the table area on large screens while keeping a sensible cap */
+  max-width: min(1800px, 96vw);
   margin: 0 auto;
-  padding: 20px;
+  padding: 12px 8px; /* reduce side padding so table uses more horizontal space */
 }
 
 .table-header {
@@ -156,6 +186,54 @@ const viewDetails = (dvd) => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+}
+
+/* Actions (Edit/View) layout: side-by-side on desktop, stacked on narrow screens */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.actions-cell .btn-edit,
+.actions-cell .btn-view {
+  display: inline-block;
+  width: auto;
+}
+
+@media (max-width: 640px) {
+  .actions-cell {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions-cell .btn-edit,
+  .actions-cell .btn-view {
+    width: 100%;
+  }
+}
+
+/* Search input centered between title and New button */
+.table-header .search-wrap {
+  flex: 1 1 360px;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+}
+
+.table-header .search-input {
+  width: 100%;
+  max-width: 520px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .table-header .search-wrap { display: none; }
 }
 
 .btn-new {

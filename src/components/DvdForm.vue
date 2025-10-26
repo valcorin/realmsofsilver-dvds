@@ -206,7 +206,7 @@
             <button type="submit" class="btn-primary">Save</button>
             <button @click="cancel" type="button" class="btn-secondary">Cancel</button>
           </template>
-          <button @click="close" type="button" class="btn-secondary">Close</button>
+          <button v-if="!isNew" @click="close" type="button" class="btn-secondary">Close</button>
         </div>
         </form>
       </div>
@@ -233,6 +233,9 @@ const emit = defineEmits(['update-dvd', 'close']);
 
 const isEditing = ref(props.editMode);
 const formData = ref({ ...props.dvd });
+const isNew = computed(() => {
+  return !props.dvd || (!props.dvd.id && !props.dvd.dkey);
+});
 // File handling for image upload
 const selectedFile = ref(null);
 const previewUrl = ref(null);
@@ -330,13 +333,26 @@ const fetchFromWikipedia = async () => {
     // actors / starring
     const starsRaw = extractInfobox('starring|cast|stars');
     if (starsRaw) {
-      const parts = starsRaw.split(',').map(s => s.trim()).filter(Boolean);
+      let parts = [];
+      // Handle Plainlist template and pipe-separated lists
+      if (/\{\{\s*Plainlist\b/i.test(starsRaw)) {
+        // extract inside of Plainlist and split on pipes/newlines/bullets
+        const m = starsRaw.match(/\{\{\s*Plainlist\s*\|(.*?)\}\}/is);
+        if (m) {
+          const inner = m[1];
+          parts = inner.split(/[|\n\r]+/).map(s => s.replace(/^\s*\*\s*/, '').trim()).filter(Boolean);
+        }
+      } else if (starsRaw.indexOf('|') !== -1 && starsRaw.indexOf(',') === -1) {
+        parts = starsRaw.split('|').map(s => s.trim()).filter(Boolean);
+      } else {
+        parts = starsRaw.split(',').map(s => s.trim()).filter(Boolean);
+      }
       actorsArray.value = parts;
       formData.value.actors = parts.join(', ');
       formData.value.stars = parts.join(', ');
     }
 
-    // try to extract year from released or released = {{Film date|year}}
+    // try to extract year from released or from page content/snippet
     let year = null;
     const releasedRaw = extractInfobox('released|release date');
     if (releasedRaw) {
@@ -348,6 +364,10 @@ const fetchFromWikipedia = async () => {
       const snippet = hit?.snippet || '';
       const m2 = snippet.match(/(19|20)\\d{2}/);
       if (m2) year = m2[0];
+    }
+    if (!year && content) {
+      const m3 = content.match(/(19|20)\\d{2}/);
+      if (m3) year = m3[0];
     }
     if (year) {
       formData.value.year = Number(year);

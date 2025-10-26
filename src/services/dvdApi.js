@@ -6,14 +6,17 @@ class DvdApiService {
     this.baseUrl = API_BASE_URL;
   }
 
-  async fetchDvds(page = 1, limit = 10) {
+  async fetchDvds(page = 1, limit = 10, q = null) {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString()
       });
+      if (q && typeof q === 'string' && q.trim() !== '') {
+        params.set('q', q.trim());
+      }
       
-      const response = await fetch(`${this.baseUrl}/dvds.php?${params}`);
+  const response = await fetch(`${this.baseUrl}/dvds.php?${params}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
