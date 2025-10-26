@@ -47,6 +47,7 @@
               <span v-else>Loading…</span>
             </button>
               <span v-if="wikidataUsed" class="wikidata-badge" title="Some fields were populated from Wikidata">Data from Wikidata</span>
+              <div class="fetch-image-status" v-if="fetchImageStatus">{{ fetchImageStatus }}</div>
           </div>
           <div class="fetch-error" v-if="wikiError">{{ wikiError }}</div>
         </div>
@@ -227,6 +228,8 @@
             Edit
           </button>
           <template v-else>
+            <!-- Delete button left-aligned in the action row -->
+            <button v-if="!isNew" type="button" class="btn-delete" @click.prevent="confirmAndDelete">Delete</button>
             <button type="submit" class="btn-primary">Save</button>
             <button @click="cancel" type="button" class="btn-secondary">Cancel</button>
           </template>
@@ -326,6 +329,7 @@ const handleEscape = (event) => {
 const wikiLoading = ref(false);
 const wikiError = ref(null);
 const wikidataUsed = ref(false);
+const fetchImageStatus = ref('');
 // Controller to cancel in-flight wiki/wikidata requests
 let wikiController = null;
 
@@ -342,6 +346,7 @@ const fetchFromWikipedia = async () => {
 
   wikiLoading.value = true;
   wikiError.value = null;
+  fetchImageStatus.value = '';
   try {
     // 1) search for the page
   const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(title) + '&format=json&utf8=1&srlimit=1&origin=*';
@@ -384,15 +389,18 @@ const fetchFromWikipedia = async () => {
       }
 
       // Try Wikidata first (structured data) by resolving the Wikidata Q-id from the Wikipedia page
+      let wikibaseItem = null;
       try {
         const propsUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageprops&format=json&origin=*';
         const propsResp = await fetch(propsUrl, { signal }).then(r => r.json());
         const pagesProps = propsResp?.query?.pages || {};
         const pageObj = Object.values(pagesProps)[0] || {};
-        const wikibaseItem = pageObj.pageprops && pageObj.pageprops.wikibase_item;
+        wikibaseItem = pageObj.pageprops && pageObj.pageprops.wikibase_item;
         if (wikibaseItem) {
           // Query Wikidata SPARQL endpoint for structured fields
+          // Require that the Wikidata item is an instance of a film (P31 = Q11424)
           const sparql = `SELECT ?directorLabel ?castLabel ?genreLabel ?duration ?publicationDate WHERE {
+            wd:${wikibaseItem} wdt:P31 wd:Q11424 .
             OPTIONAL { wd:${wikibaseItem} wdt:P57 ?director. }
             OPTIONAL { wd:${wikibaseItem} wdt:P161 ?cast. }
             OPTIONAL { wd:${wikibaseItem} wdt:P136 ?genre. }
@@ -405,36 +413,56 @@ const fetchFromWikipedia = async () => {
           const wdResp = await fetch(sparqlUrl, { headers: { 'Accept': 'application/sparql-results+json' }, signal }).then(r => r.json());
           const rows = wdResp?.results?.bindings || [];
 
-          const directorSet = new Set();
-          const castSet = new Set();
-          const genreSet = new Set();
+          // Collect lists in the order they appear in the SPARQL results, dedup case-insensitively
+          const directorList = [];
+          const castList = [];
+          const genreList = [];
           let durationVal = null;
           let pubDateVal = null;
 
+          const pick = (row, keys) => {
+            for (const k of keys) {
+              if (row[k] && row[k].value) return row[k].value;
+            }
+            return null;
+          };
+
           rows.forEach(row => {
-            if (row.directorLabel) directorSet.add(row.directorLabel.value);
-            if (row.castLabel) castSet.add(row.castLabel.value);
-            if (row.genreLabel) genreSet.add(row.genreLabel.value);
-            if (!durationVal && row.duration) durationVal = row.duration.value;
-            if (!pubDateVal && row.publicationDate) pubDateVal = row.publicationDate.value;
+            const d = pick(row, ['directorLabel', 'director']);
+            const c = pick(row, ['castLabel', 'cast']);
+            const g = pick(row, ['genreLabel', 'genre']);
+            const dur = pick(row, ['duration']);
+            const pub = pick(row, ['publicationDate']);
+
+            if (d) {
+              const kd = String(d).trim();
+              if (kd && !directorList.some(x => x.toLowerCase() === kd.toLowerCase())) directorList.push(kd);
+            }
+            if (c) {
+              const kc = String(c).trim();
+              if (kc && !castList.some(x => x.toLowerCase() === kc.toLowerCase())) castList.push(kc);
+            }
+            if (g) {
+              const kg = String(g).trim();
+              if (kg && !genreList.some(x => x.toLowerCase() === kg.toLowerCase())) genreList.push(kg);
+            }
+            if (!durationVal && dur) durationVal = dur;
+            if (!pubDateVal && pub) pubDateVal = pub;
           });
 
-          if (directorSet.size > 0) {
-            const parts = Array.from(directorSet);
-            directorsArray.value = parts;
-            formData.value.directors = parts.join(', ');
-            formData.value.director = parts.join(', ');
+          if (directorList.length > 0) {
+            directorsArray.value = directorList;
+            formData.value.directors = directorList.join(', ');
+            formData.value.director = directorList.join(', ');
           }
 
-          if (castSet.size > 0) {
-            const parts = Array.from(castSet);
-            actorsArray.value = parts;
-            formData.value.actors = parts.join(', ');
+          if (castList.length > 0) {
+            actorsArray.value = castList;
+            formData.value.actors = castList.join(', ');
           }
 
-          if (genreSet.size > 0) {
-            const raw = Array.from(genreSet).map(s => cleanGenreTerm(s)).filter(Boolean);
-            // dedupe preserving insertion order
+          if (genreList.length > 0) {
+            const raw = genreList.map(s => cleanGenreTerm(s)).filter(Boolean);
             const seen = new Set();
             const parts = [];
             for (const x of raw) {
@@ -449,21 +477,19 @@ const fetchFromWikipedia = async () => {
           }
 
           if (durationVal) {
-            // durationVal may be an ISO 8601 duration (e.g. PT120M) or a number; try to normalize to minutes
             const minutes = parseIsoDurationToMinutes(durationVal);
             if (minutes !== null) formData.value.runtime = String(minutes);
             else formData.value.runtime = String(durationVal);
           }
 
           if (pubDateVal) {
-            // pubDateVal is often a date-time string; extract year
             try {
               const y = new Date(pubDateVal).getFullYear();
               if (!Number.isNaN(y)) formData.value.year = Number(y);
             } catch (e) {}
           }
-          // If any Wikidata-derived field was present, mark wikidataUsed
-          if (directorSet.size > 0 || castSet.size > 0 || genreSet.size > 0 || durationVal || pubDateVal) {
+
+          if (directorList.length > 0 || castList.length > 0 || genreList.length > 0 || durationVal || pubDateVal) {
             wikidataUsed.value = true;
           }
         }
@@ -472,6 +498,364 @@ const fetchFromWikipedia = async () => {
         if (e && e.name === 'AbortError') return;
         // Non-fatal: if Wikidata query fails, fall back to wikitext parsing below
         console.debug('Wikidata lookup failed', e);
+      }
+
+      // Attempt to fetch a poster image for the page. Strategy:
+      // 1) Try Wikipedia PageImages API (original/thumbnail)
+      // 2) Fall back to Wikidata P18 via entity JSON -> resolve to Commons Special:FilePath
+      // If an image is found, download it, convert to base64, set previewUrl and formData.image,
+      // and append a short attribution to notes. Use the existing `wikiController` signal for cancellation.
+      const arrayBufferToBase64 = (buffer) => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, Array.prototype.slice.call(bytes, i, i + chunkSize));
+        }
+        return btoa(binary);
+      };
+
+      try {
+        let imageUrl = null;
+        let imageFilename = null;
+        fetchImageStatus.value = 'Searching for cover image…';
+
+        // helper to attempt downloading and assigning an image URL (tries original, thumbnail, then proxy)
+        const downloadAndAssign = async (imageUrlParam, imageFilenameParam) => {
+          let imageUrlLocal = imageUrlParam;
+          let imageFilenameLocal = imageFilenameParam;
+          if (!imageUrlLocal) return false;
+          console.log('fetchFromWikipedia: resolved imageUrl=', imageUrlLocal, 'imageFilename=', imageFilenameLocal);
+          fetchImageStatus.value = 'Downloading cover image…';
+          // Download image as binary with a resilient strategy: try original; on failure, try thumbnail variant
+          let imgResp = null;
+          try {
+            imgResp = await fetch(imageUrlLocal, { signal });
+            console.debug('fetchFromWikipedia: initial image fetch response', { ok: imgResp.ok, status: imgResp.status, headers: { 'content-type': imgResp.headers.get('Content-Type') } });
+          } catch (e) {
+            console.debug('fetchFromWikipedia: initial image fetch failed', e);
+            imgResp = null;
+          }
+
+          // If initial response not ok, try constructing a commons thumbnail URL when possible
+          if (!(imgResp && imgResp.ok)) {
+            // Construct thumbnail URL by inserting '/thumb' and appending '/250px-<filename>' when possible
+            try {
+              if (!imageFilenameLocal && imageUrlLocal) {
+                // try to derive filename from URL
+                const parts = imageUrlLocal.split('/');
+                imageFilenameLocal = parts[parts.length - 1] || imageFilenameLocal;
+              }
+              if (imageUrlLocal && imageFilenameLocal && imageUrlLocal.includes('/wikipedia/')) {
+                // split after '/wikipedia/<lang>/'
+                const idx = imageUrlLocal.indexOf('/wikipedia/');
+                const after = imageUrlLocal.slice(idx + '/wikipedia/'.length); // e.g. 'en/1/1f/Name.jpg'
+                const langAndRest = after.split('/');
+                const lang = langAndRest.shift();
+                const rest = langAndRest.join('/');
+                const thumbUrl = 'https://upload.wikimedia.org/wikipedia/' + lang + '/thumb/' + rest + '/250px-' + encodeURIComponent(imageFilenameLocal);
+                console.debug('fetchFromWikipedia: trying thumbnail URL', thumbUrl);
+                try {
+                  imgResp = await fetch(thumbUrl, { signal });
+                  console.debug('fetchFromWikipedia: thumbnail fetch response', { ok: imgResp && imgResp.ok, status: imgResp && imgResp.status });
+                  if (imgResp && imgResp.ok) {
+                    imageUrlLocal = thumbUrl; // use the thumbnail URL moving forward
+                  }
+                } catch (e) {
+                  console.debug('fetchFromWikipedia: thumbnail fetch failed', e);
+                }
+              }
+            } catch (e) {
+              console.debug('fetchFromWikipedia: failed to construct thumbnail URL', e);
+            }
+            // If both original and thumbnail attempts fail, try the server-side proxy to avoid CORS/redirect problems
+            try {
+              const proxyUrl = '/api/fetch-image.php?url=' + encodeURIComponent(imageUrlLocal);
+              console.debug('fetchFromWikipedia: attempting server-side proxy fetch', proxyUrl);
+              const proxyResp = await fetch(proxyUrl, { signal }).then(r => r.json());
+              console.debug('fetchFromWikipedia: proxy response', proxyResp);
+              if (proxyResp && proxyResp.ok && proxyResp.data) {
+                const contentType = proxyResp.contentType || '';
+                const base64Data = proxyResp.data;
+                previewUrl.value = 'data:' + (contentType || 'image/jpeg') + ';base64,' + base64Data;
+                const subtype = (contentType && contentType.indexOf('/') !== -1) ? contentType.split('/')[1] : (imageFilenameLocal ? imageFilenameLocal.split('.').pop() : 'jpeg');
+                formData.value.image = {
+                  name: imageFilenameLocal || ('image.' + subtype),
+                  type: subtype,
+                  data: base64Data
+                };
+                fetchImageStatus.value = 'Cover image assigned via proxy';
+                console.log('fetchFromWikipedia: assigned formData.image via proxy, data length=', (formData.value.image && formData.value.image.data) ? formData.value.image.data.length : 0);
+                // append attribution
+                try {
+                  const attribution = imageFilenameLocal ? ('Image: ' + imageFilenameLocal + ' (Wikimedia Commons)') : 'Image from Wikimedia Commons';
+                  if (!formData.value.notes || formData.value.notes.trim() === '') {
+                    formData.value.notes = attribution;
+                  } else if (formData.value.notes.indexOf(attribution) === -1) {
+                    formData.value.notes += '\n\n' + attribution;
+                  }
+                } catch (e) {}
+                return true;
+              } else {
+                console.debug('fetchFromWikipedia: proxy did not return image', proxyResp);
+              }
+            } catch (e) {
+              console.debug('fetchFromWikipedia: proxy fetch failed', e);
+            }
+          }
+
+          if (imgResp && imgResp.ok) {
+            const contentType = imgResp.headers.get('Content-Type') || '';
+            const buf = await imgResp.arrayBuffer();
+            const base64Data = arrayBufferToBase64(buf);
+            console.log('fetchFromWikipedia: downloaded image; contentType=', contentType, 'bytes=', buf.byteLength);
+            fetchImageStatus.value = 'Cover image downloaded';
+            const subtype = contentType && contentType.indexOf('/') !== -1 ? contentType.split('/')[1] : (imageFilenameLocal ? imageFilenameLocal.split('.').pop() : 'jpeg');
+            // set preview and form image (formData.image.data expects raw base64 without data: prefix)
+            previewUrl.value = 'data:' + (contentType || ('image/' + subtype)) + ';base64,' + base64Data;
+            formData.value.image = {
+              name: imageFilenameLocal || ('image.' + subtype),
+              type: subtype,
+              data: base64Data
+            };
+            console.log('fetchFromWikipedia: assigned formData.image, data length=', (formData.value.image && formData.value.image.data) ? formData.value.image.data.length : 0);
+            fetchImageStatus.value = 'Cover image assigned to form';
+            // Append short attribution to notes if not already present
+            try {
+              const attribution = imageFilenameLocal ? ('Image: ' + imageFilenameLocal + ' (Wikimedia Commons)') : 'Image from Wikimedia Commons';
+              if (!formData.value.notes || formData.value.notes.trim() === '') {
+                formData.value.notes = attribution;
+              } else if (formData.value.notes.indexOf(attribution) === -1) {
+                formData.value.notes += '\n\n' + attribution;
+              }
+            } catch (e) {
+              // ignore attribution failures
+            }
+            return true;
+          }
+          console.debug('fetchFromWikipedia: image fetch ultimately failed, imgResp=', imgResp);
+          return false;
+        };
+
+        // 1) Wikipedia pageimages API (prefer original, else thumbnail)
+        try {
+          const piUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=pageimages&piprop=original|thumbnail&pithumbsize=600&format=json&origin=*';
+          const piResp = await fetch(piUrl, { signal }).then(r => r.json());
+          console.debug('fetchFromWikipedia: pageimages response', piResp);
+          const piPages = piResp?.query?.pages || {};
+          const piPage = Object.values(piPages)[0] || {};
+          imageUrl = piPage?.original?.source || piPage?.thumbnail?.source || null;
+          if (!imageUrl) {
+            fetchImageStatus.value = 'No image on Wikipedia page; checking Wikidata...';
+            console.debug('fetchFromWikipedia: no pageimage found for', pageTitle, 'page object:', piPage);
+          }
+        } catch (e) {
+          if (e && e.name === 'AbortError') throw e;
+          // ignore pageimages failures
+        }
+
+        // 2) Wikidata P18 fallback (if no imageUrl and we have a wikibaseItem)
+        if (!imageUrl && wikibaseItem) {
+          try {
+            const entUrl = 'https://www.wikidata.org/wiki/Special:EntityData/' + encodeURIComponent(wikibaseItem) + '.json';
+            const entResp = await fetch(entUrl, { signal }).then(r => r.json());
+            console.debug('fetchFromWikipedia: wikidata entity response', entResp);
+            const entities = entResp?.entities || {};
+            const ent = entities[wikibaseItem] || Object.values(entities)[0] || {};
+            const claims = ent.claims || {};
+            const p18 = claims.P18 || [];
+            if (p18.length > 0) {
+              const val = p18[0].mainsnak?.datavalue?.value;
+              if (val) {
+                // val is usually like 'File:Something.jpg'
+                imageFilename = String(val).replace(/^File:/i, '');
+                imageUrl = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(imageFilename);
+                console.debug('fetchFromWikipedia: wikidata P18 found', imageFilename, imageUrl);
+              }
+            }
+          } catch (e) {
+            if (e && e.name === 'AbortError') throw e;
+            // ignore wikidata P18 failures
+          }
+        }
+
+        if (!imageUrl && !wikibaseItem) {
+          console.debug('fetchFromWikipedia: no wikibaseItem found for page', pageTitle, '— cannot query Wikidata P18');
+          fetchImageStatus.value = 'No Wikidata entry for this page; no cover image available';
+        }
+
+        if (imageUrl) {
+          console.log('fetchFromWikipedia: resolved imageUrl=', imageUrl, 'imageFilename=', imageFilename);
+          fetchImageStatus.value = 'Downloading cover image…';
+          // Download image as binary with a resilient strategy: try original; on failure, try thumbnail variant
+          let imgResp = null;
+          try {
+            imgResp = await fetch(imageUrl, { signal });
+            console.debug('fetchFromWikipedia: initial image fetch response', { ok: imgResp.ok, status: imgResp.status, headers: { 'content-type': imgResp.headers.get('Content-Type') } });
+          } catch (e) {
+            console.debug('fetchFromWikipedia: initial image fetch failed', e);
+            imgResp = null;
+          }
+
+          // If initial response not ok, try constructing a commons thumbnail URL when possible
+          if (!(imgResp && imgResp.ok)) {
+            // Construct thumbnail URL by inserting '/thumb' and appending '/250px-<filename>' when possible
+            try {
+              if (!imageFilename && imageUrl) {
+                // try to derive filename from URL
+                const parts = imageUrl.split('/');
+                imageFilename = parts[parts.length - 1] || imageFilename;
+              }
+              if (imageUrl && imageFilename && imageUrl.includes('/wikipedia/')) {
+                // split after '/wikipedia/<lang>/'
+                const idx = imageUrl.indexOf('/wikipedia/');
+                const after = imageUrl.slice(idx + '/wikipedia/'.length); // e.g. 'en/1/1f/Name.jpg'
+                const langAndRest = after.split('/');
+                const lang = langAndRest.shift();
+                const rest = langAndRest.join('/');
+                const thumbUrl = 'https://upload.wikimedia.org/wikipedia/' + lang + '/thumb/' + rest + '/250px-' + encodeURIComponent(imageFilename);
+                console.debug('fetchFromWikipedia: trying thumbnail URL', thumbUrl);
+                  try {
+                    imgResp = await fetch(thumbUrl, { signal });
+                    console.debug('fetchFromWikipedia: thumbnail fetch response', { ok: imgResp && imgResp.ok, status: imgResp && imgResp.status });
+                    if (imgResp && imgResp.ok) {
+                      imageUrl = thumbUrl; // use the thumbnail URL moving forward
+                    }
+                  } catch (e) {
+                    console.debug('fetchFromWikipedia: thumbnail fetch failed', e);
+                  }
+              }
+            } catch (e) {
+              console.debug('fetchFromWikipedia: failed to construct thumbnail URL', e);
+            }
+            // If both original and thumbnail attempts fail, try the server-side proxy to avoid CORS/redirect problems
+            try {
+              const proxyUrl = '/api/fetch-image.php?url=' + encodeURIComponent(imageUrl);
+              console.debug('fetchFromWikipedia: attempting server-side proxy fetch', proxyUrl);
+              const proxyResp = await fetch(proxyUrl, { signal }).then(r => r.json());
+              console.debug('fetchFromWikipedia: proxy response', proxyResp);
+              if (proxyResp && proxyResp.ok && proxyResp.data) {
+                const contentType = proxyResp.contentType || '';
+                const base64Data = proxyResp.data;
+                previewUrl.value = 'data:' + (contentType || 'image/jpeg') + ';base64,' + base64Data;
+                const subtype = (contentType && contentType.indexOf('/') !== -1) ? contentType.split('/')[1] : (imageFilename ? imageFilename.split('.').pop() : 'jpeg');
+                formData.value.image = {
+                  name: imageFilename || ('image.' + subtype),
+                  type: subtype,
+                  data: base64Data
+                };
+                fetchImageStatus.value = 'Cover image assigned via proxy';
+                console.log('fetchFromWikipedia: assigned formData.image via proxy, data length=', (formData.value.image && formData.value.image.data) ? formData.value.image.data.length : 0);
+                // append attribution
+                try {
+                  const attribution = imageFilename ? ('Image: ' + imageFilename + ' (Wikimedia Commons)') : 'Image from Wikimedia Commons';
+                  if (!formData.value.notes || formData.value.notes.trim() === '') {
+                    formData.value.notes = attribution;
+                  } else if (formData.value.notes.indexOf(attribution) === -1) {
+                    formData.value.notes += '\n\n' + attribution;
+                  }
+                } catch (e) {}
+              } else {
+                console.debug('fetchFromWikipedia: proxy did not return image', proxyResp);
+              }
+            } catch (e) {
+              console.debug('fetchFromWikipedia: proxy fetch failed', e);
+            }
+          }
+
+          if (imgResp && imgResp.ok) {
+            const contentType = imgResp.headers.get('Content-Type') || '';
+            const buf = await imgResp.arrayBuffer();
+            const base64Data = arrayBufferToBase64(buf);
+            console.log('fetchFromWikipedia: downloaded image; contentType=', contentType, 'bytes=', buf.byteLength);
+            fetchImageStatus.value = 'Cover image downloaded';
+            const subtype = contentType && contentType.indexOf('/') !== -1 ? contentType.split('/')[1] : (imageFilename ? imageFilename.split('.').pop() : 'jpeg');
+            // set preview and form image (formData.image.data expects raw base64 without data: prefix)
+            previewUrl.value = 'data:' + (contentType || ('image/' + subtype)) + ';base64,' + base64Data;
+            formData.value.image = {
+              name: imageFilename || ('image.' + subtype),
+              type: subtype,
+              data: base64Data
+            };
+            console.log('fetchFromWikipedia: assigned formData.image, data length=', (formData.value.image && formData.value.image.data) ? formData.value.image.data.length : 0);
+            fetchImageStatus.value = 'Cover image assigned to form';
+
+            // Append short attribution to notes if not already present
+            try {
+              const attribution = imageFilename ? ('Image: ' + imageFilename + ' (Wikimedia Commons)') : 'Image from Wikimedia Commons';
+              if (!formData.value.notes || formData.value.notes.trim() === '') {
+                formData.value.notes = attribution;
+              } else if (formData.value.notes.indexOf(attribution) === -1) {
+                formData.value.notes += '\n\n' + attribution;
+              }
+            } catch (e) {
+              // ignore attribution failures
+            }
+          } else {
+            console.debug('fetchFromWikipedia: image fetch ultimately failed, imgResp=', imgResp);
+          }
+        }
+        // Fallback: if no imageUrl found yet, use the Wikipedia API to list images on the page
+        // (avoids CORS issues fetching raw HTML). We'll prefer image titles containing 'poster'
+        if (!imageUrl) {
+          try {
+            fetchImageStatus.value = 'Searching Wikipedia images list…';
+            const imagesApi = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=images&imlimit=50&format=json&origin=*';
+            const imagesResp = await fetch(imagesApi, { signal }).then(r => r.json());
+            console.debug('fetchFromWikipedia: images list response', imagesResp);
+            const pagesObj = imagesResp?.query?.pages || {};
+            const pg = Object.values(pagesObj)[0] || {};
+            const imgs = pg.images || [];
+            // Filter for likely poster files (jpg/png/webp) and prefer ones with 'poster' in the name
+            const candidates = imgs.map(i => i.title).filter(Boolean).filter(t => /\.(jpg|jpeg|png|webp)$/i.test(t));
+            let chosenFile = null;
+            for (const c of candidates) {
+              if (/poster/i.test(c)) { chosenFile = c; break; }
+            }
+            if (!chosenFile && candidates.length > 0) chosenFile = candidates[0];
+            if (chosenFile) {
+              // Now request imageinfo to get the direct URL (this API supports origin=*)
+              fetchImageStatus.value = 'Resolving file URL…';
+              const infoApi = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(chosenFile) + '&prop=imageinfo&iiprop=url&format=json&origin=*';
+              const infoResp = await fetch(infoApi, { signal }).then(r => r.json());
+              console.debug('fetchFromWikipedia: imageinfo response', infoResp);
+              const infoPages = infoResp?.query?.pages || {};
+              const infoPg = Object.values(infoPages)[0] || {};
+              const imageinfo = infoPg.imageinfo || [];
+              if (imageinfo.length > 0 && imageinfo[0].url) {
+                imageUrl = imageinfo[0].url;
+                imageFilename = chosenFile.replace(/^File:/i, '');
+                console.debug('fetchFromWikipedia: resolved image URL from imageinfo', imageUrl);
+                // Attempt to download/assign the resolved image immediately
+                try {
+                  const assigned = await downloadAndAssign(imageUrl, imageFilename);
+                  if (assigned) {
+                    // image assigned, skip remaining attempts
+                    // no-op here; subsequent code will see formData.image and not overwrite
+                  }
+                } catch (e) {
+                  console.debug('fetchFromWikipedia: downloadAndAssign failed after imageinfo', e);
+                }
+              } else {
+                console.debug('fetchFromWikipedia: imageinfo did not return a url for', chosenFile, infoResp);
+              }
+            } else {
+              console.debug('fetchFromWikipedia: no image candidates found in images list for', pageTitle, imgs);
+            }
+          } catch (e) {
+            if (e && e.name === 'AbortError') throw e;
+            console.debug('fetchFromWikipedia: error querying images API', e);
+          }
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        console.debug('Poster fetch failed', e);
+        fetchImageStatus.value = 'Cover image fetch failed';
+      }
+
+      // If no image was assigned by the poster fetch attempts, update status so the UI doesn't stay stuck
+      if (!formData.value.image && !previewUrl.value) {
+        fetchImageStatus.value = 'No cover image found';
       }
 
     // 2) get wikitext revision
@@ -525,8 +909,18 @@ const fetchFromWikipedia = async () => {
       } else {
         parts = starsRaw.split(',').map(s => s.trim()).filter(Boolean);
       }
-      actorsArray.value = parts;
-      formData.value.actors = parts.join(', ');
+      // If Wikidata already populated actors, merge unique values and prefer Wikidata order
+      if (wikidataUsed.value && actorsArray.value.length > 0) {
+        const existing = actorsArray.value.slice();
+        for (const p of parts) {
+          if (!existing.includes(p)) existing.push(p);
+        }
+        actorsArray.value = existing;
+        formData.value.actors = existing.join(', ');
+      } else {
+        actorsArray.value = parts;
+        formData.value.actors = parts.join(', ');
+      }
     }
 
     // try to extract year from released or from page content/snippet
@@ -746,6 +1140,22 @@ const save = () => {
         formData.value.image = null;
       }
 
+      // Debug: log final image state just before emitting so we can see if the image
+      // made it into the payload. This helps diagnose cases where fetch succeeded
+      // locally but the payload ends up without image.data.
+      try {
+        const img = formData.value.image;
+        if (img && img.data) {
+          console.debug('DvdForm.save: emitting image present, data length =', img.data.length);
+        } else if (img) {
+          console.debug('DvdForm.save: emitting image present but no data (image) =', img);
+        } else {
+          console.debug('DvdForm.save: emitting with no image');
+        }
+      } catch (e) {
+        console.debug('DvdForm.save: image debug failed', e);
+      }
+
       emit('update-dvd', { ...formData.value });
       isEditing.value = false;
     } catch (err) {
@@ -793,6 +1203,27 @@ const cancel = () => {
     } else {
       actorsArray.value = [];
     }
+  }
+};
+
+// Delete handler: confirm then call backend and notify parent
+const confirmAndDelete = async () => {
+  const id = formData.value.dkey || formData.value.id;
+  if (!id) {
+    // nothing to delete
+    return;
+  }
+  const ok = window.confirm('Delete this DVD? This action cannot be undone.');
+  if (!ok) return;
+  try {
+    // Call API to delete by dkey
+    await dvdApi.deleteDvd(id);
+    // notify parent so it can refresh list and close modal
+    emit('deleted', id);
+  } catch (e) {
+    console.error('Failed to delete DVD', e);
+    // surface error to user
+    try { alert('Failed to delete DVD: ' + (e && e.message ? e.message : e)); } catch (ee) {}
   }
 };
 
@@ -1224,6 +1655,13 @@ const onDirectorEditKeydown = (e) => {
   cursor: pointer;
 }
 
+.fetch-image-status {
+  margin-left: 8px;
+  font-size: 0.85rem;
+  color: #374151;
+  margin-top: 6px;
+}
+
 .btn-fetch[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
@@ -1267,6 +1705,7 @@ const onDirectorEditKeydown = (e) => {
   gap: 12px;
   margin-top: 15px;
   justify-content: flex-end;
+  grid-column: 1 / -1; /* span both columns so buttons sit to the right under the form */
   padding-top: 20px;
   border-top: 1px solid #e9ecef;
 }
@@ -1305,6 +1744,20 @@ const onDirectorEditKeydown = (e) => {
   background-color: #e9ecef;
   border-color: #dee2e6;
   transform: translateY(-1px);
+}
+
+.btn-delete {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-right: auto; /* push following buttons to the right */
+}
+.btn-delete:hover {
+  background-color: #c53030;
 }
 
 @media (max-width: 768px) {

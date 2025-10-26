@@ -95,6 +95,15 @@ const props = defineProps({
   pagination: {
     type: Object,
     default: () => ({})
+  },
+  // current sort state is driven by the parent so the table only reflects it
+  sortColumn: {
+    type: String,
+    default: 'title'
+  },
+  sortDirection: {
+    type: String,
+    default: 'asc'
   }
 });
 
@@ -116,8 +125,7 @@ const onSearchInput = () => {
   }, 300);
 };
 
-const sortColumn = ref('title');
-const sortDirection = ref('asc');
+// Note: visual sort state comes from the parent via props.sortColumn / props.sortDirection.
 
 // Helper function to get DVD image URL
 const getDvdImageUrl = (dvd) => {
@@ -132,32 +140,16 @@ const handleImageError = (event) => {
   event.target.style.display = 'none';
 };
 
-const sortedDvds = computed(() => {
-  const sorted = [...props.dvds].sort((a, b) => {
-    const aVal = a[sortColumn.value];
-    const bVal = b[sortColumn.value];
-    
-    if (typeof aVal === 'string') {
-      return sortDirection.value === 'asc' 
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    
-    return sortDirection.value === 'asc' 
-      ? aVal - bVal
-      : bVal - aVal;
-  });
-  
-  return sorted;
-});
+// Server-side sorting: don't sort the page locally. The parent will request sorted pages.
+const sortedDvds = computed(() => props.dvds);
 
 const sortBy = (column) => {
-  if (sortColumn.value === column) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortColumn.value = column;
-    sortDirection.value = 'asc';
-  }
+  // compute the new direction based on the parent's current state
+  const currentCol = props.sortColumn || 'title';
+  const currentDir = props.sortDirection || 'asc';
+  const newDir = (currentCol === column && currentDir === 'asc') ? 'desc' : 'asc';
+  // Ask parent to reload data using server-side sorting
+  emit('sort', { column, direction: newDir });
 };
 
 const selectDvd = (dvd) => {

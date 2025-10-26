@@ -7,7 +7,8 @@ class DvdApiService {
   }
 
   // `signal` is optional AbortSignal to allow callers to cancel in-flight requests
-  async fetchDvds(page = 1, limit = 10, q = null, signal = undefined) {
+  // `sort` and `dir` are optional server-side sorting parameters
+  async fetchDvds(page = 1, limit = 10, q = null, signal = undefined, sort = null, dir = null) {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -16,6 +17,8 @@ class DvdApiService {
       if (q && typeof q === 'string' && q.trim() !== '') {
         params.set('q', q.trim());
       }
+      if (sort && typeof sort === 'string') params.set('sort', sort);
+      if (dir && typeof dir === 'string') params.set('dir', dir);
       
   const response = await fetch(`${this.baseUrl}/dvds.php?${params}`, { signal });
       
@@ -39,6 +42,14 @@ class DvdApiService {
 
   async createDvd(dvdData) {
     try {
+      // debug: log whether image is present and its size (if available)
+      try {
+        if (dvdData && dvdData.image && dvdData.image.data) {
+          console.debug('createDvd: image present, size=', dvdData.image.data.length);
+        } else {
+          console.debug('createDvd: no image in payload');
+        }
+      } catch (e) {}
       const response = await fetch(`${this.baseUrl}/dvds.php`, {
         method: 'POST',
         headers: {
@@ -66,6 +77,14 @@ class DvdApiService {
 
   async updateDvd(dvdData) {
     try {
+      // debug: log whether image is present and its size (if available)
+      try {
+        if (dvdData && dvdData.image && dvdData.image.data) {
+          console.debug('updateDvd: image present, size=', dvdData.image.data.length);
+        } else {
+          console.debug('updateDvd: no image in payload');
+        }
+      } catch (e) {}
       const response = await fetch(`${this.baseUrl}/dvds.php`, {
         method: 'PUT',
         headers: {

@@ -13,6 +13,8 @@ const loading = ref(true);
 const error = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const sortColumn = ref('title');
+const sortDirection = ref('asc');
 // Controller used to cancel in-flight list/search requests
 let dvdsController = null;
 
@@ -38,7 +40,8 @@ const loadDvds = async (page = currentPage.value, q = undefined) => {
       loading.value = true;
     }
     error.value = null;
-    const response = await dvdApi.fetchDvds(page, itemsPerPage.value, q, signal);
+    // Pass current sort settings into the API call so server-side sorting is applied
+    const response = await dvdApi.fetchDvds(page, itemsPerPage.value, q, signal, sortColumn.value, sortDirection.value);
     dvds.value = response.data || response; // Handle both new and old response formats
     pagination.value = response.pagination || {};
     currentPage.value = page;
@@ -80,6 +83,15 @@ const goToPage = async (page) => {
   if (page >= 1 && page <= pagination.value.total_pages) {
     await loadDvds(page, searchTerm.value !== '' ? searchTerm.value : undefined);
   }
+};
+
+// Handle sort events coming from the table component
+const handleSort = async ({ column, direction }) => {
+  // store sort state and reload page 1 with the new ordering
+  sortColumn.value = column || 'title';
+  sortDirection.value = direction === 'desc' ? 'desc' : 'asc';
+  currentPage.value = 1;
+  await loadDvds(1, searchTerm.value !== '' ? searchTerm.value : undefined);
 };
 
 const getVisiblePages = () => {
@@ -170,6 +182,17 @@ const handleClose = () => {
   editMode.value = false;
 };
 
+const handleDeletedDvd = async (id) => {
+  // Close modal and refresh list
+  selectedDvd.value = null;
+  editMode.value = false;
+  try {
+    await loadDvds(currentPage.value);
+  } catch (e) {
+    console.error('Error refreshing after delete', e);
+  }
+};
+
 const retryLoad = () => {
   loadDvds(currentPage.value);
 };
@@ -212,10 +235,13 @@ const retryLoad = () => {
         <DvdTable 
           :dvds="dvds"
           :pagination="pagination"
+          :sort-column="sortColumn"
+          :sort-direction="sortDirection"
           @select-dvd="handleSelectDvd"
           @edit-dvd="handleEditDvd"
           @create-dvd="handleCreateDvd"
           @search="handleSearch"
+          @sort="handleSort"
         />
         
         <!-- Pagination controls -->
@@ -254,6 +280,7 @@ const retryLoad = () => {
           :edit-mode="editMode"
           @update-dvd="handleUpdateDvd"
           @close="handleClose"
+          @deleted="handleDeletedDvd"
         />
       </template>
     </main>
