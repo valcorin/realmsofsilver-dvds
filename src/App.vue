@@ -19,9 +19,10 @@ onMounted(async () => {
   await loadDvds();
 });
 
-const loadDvds = async (page = currentPage.value, q = null) => {
-  // If this is a typed search (q provided), avoid toggling the global loading state
-  const isSearch = q !== null && q !== undefined && q !== '';
+const loadDvds = async (page = currentPage.value, q = undefined) => {
+  // If this is a typed search (q provided by caller), avoid toggling the global loading state.
+  // We consider it a search when the caller passes a value (even an empty string).
+  const isSearch = typeof q !== 'undefined';
   try {
     if (!isSearch) {
       loading.value = true;
@@ -42,27 +43,27 @@ const loadDvds = async (page = currentPage.value, q = null) => {
 };
 
 const handleSearch = async (query) => {
-  // Server-side search: remember query, reload page 1 with q parameter
+  // Server-side search: remember query and reload page 1 with q parameter (pass empty string when cleared)
   searchTerm.value = query || '';
   currentPage.value = 1;
-  await loadDvds(1, searchTerm.value || null);
+  await loadDvds(1, searchTerm.value);
 };
 
 const nextPage = async () => {
   if (pagination.value.has_next) {
-    await loadDvds(currentPage.value + 1, searchTerm.value || null);
+    await loadDvds(currentPage.value + 1, searchTerm.value !== '' ? searchTerm.value : undefined);
   }
 };
 
 const prevPage = async () => {
   if (pagination.value.has_prev) {
-    await loadDvds(currentPage.value - 1, searchTerm.value || null);
+    await loadDvds(currentPage.value - 1, searchTerm.value !== '' ? searchTerm.value : undefined);
   }
 };
 
 const goToPage = async (page) => {
   if (page >= 1 && page <= pagination.value.total_pages) {
-    await loadDvds(page, searchTerm.value || null);
+    await loadDvds(page, searchTerm.value !== '' ? searchTerm.value : undefined);
   }
 };
 
