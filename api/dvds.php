@@ -94,7 +94,31 @@ try {
             if (preg_match('/^\s*\{\{\s*Plain\s*list\b/i', $s) || preg_match('/^\s*\{\{\s*Plainlist\b/i', $s)) {
                 return '';
             }
-            return $s;
+            // Remove any tokens that are plain QIDs (e.g. Q12345)
+            $parts = preg_split('/[,|]+/', $s);
+            $clean = [];
+            foreach ($parts as $p) {
+                $t = trim($p);
+                if ($t === '') continue;
+                if (preg_match('/^[Qq]\d+$/', $t)) continue;
+                $clean[] = $t;
+            }
+            return implode(', ', $clean);
+        };
+
+        // Helper to strip QID tokens from a CSV or array-like string before inserting/updating DB
+        $strip_qids = function($s) {
+            if ($s === null) return '';
+            $s = (string)$s;
+            $parts = preg_split('/[,|]+/', $s);
+            $clean = [];
+            foreach ($parts as $p) {
+                $t = trim($p);
+                if ($t === '') continue;
+                if (preg_match('/^[Qq]\d+$/', $t)) continue;
+                $clean[] = $t;
+            }
+            return implode(', ', $clean);
         };
     
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -173,15 +197,15 @@ try {
                 // year is stored as tinytext in this schema; return as number when possible
                     'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
                 // map `stars` column to `actors` for the frontend; leave `director` separate (DB may add later)
-                'actors' => $normalize_plainlist($row['stars'] ?? ''),
-                'director' => $normalize_plainlist($row['director'] ?? ''),
-                'genre' => $normalize_plainlist($row['genre'] ?? $row['Genre'] ?? ''),
+                'actors' => $strip_qids($normalize_plainlist($row['stars'] ?? '')),
+                    'director' => $strip_qids($normalize_plainlist($row['director'] ?? '')),
+                    'genre' => $strip_qids($normalize_plainlist($row['genre'] ?? $row['Genre'] ?? '')),
                     'rating' => $row['rating'] ?? '',
                     // runtime is stored as text in the DB (e.g. "120 min", "130", "2h 10m")
                     'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
                 // database uses `type` column for format
                 'format' => $row['format'] ?? $row['type'] ?? $row['Type'] ?? 'DVD',
-                    'music' => $row['music'] ?? '',
+                    'music' => $strip_qids($row['music'] ?? ''),
                 // description column maps to notes
                 'notes' => $normalize_notes($row['description'] ?? $row['notes'] ?? '')
             ];
@@ -247,13 +271,21 @@ try {
         // Map incoming frontend fields to DB columns
     $stmt->bindValue(':title', $data['title'] ?? '', PDO::PARAM_STR);
     // map actors (frontend) or stars (legacy) into DB `stars` column
-    $stmt->bindValue(':stars', $data['actors'] ?? $data['stars'] ?? '', PDO::PARAM_STR);
+    // Strip any QID tokens from incoming actors/stars
+    $starsVal = isset($data['actors']) ? $data['actors'] : (isset($data['stars']) ? $data['stars'] : '');
+    if ($starsVal !== '') {
+        $starsVal = $strip_qids($starsVal);
+    }
+    $stmt->bindValue(':stars', $starsVal ?? '', PDO::PARAM_STR);
     // director is its own column
-    $stmt->bindValue(':director', $data['director'] ?? '', PDO::PARAM_STR);
+    $directorVal = isset($data['director']) ? $strip_qids($data['director']) : '';
+    $stmt->bindValue(':director', $directorVal ?? '', PDO::PARAM_STR);
         // genre and year stored as text
-    $stmt->bindValue(':genre', $data['genre'] ?? '', PDO::PARAM_STR);
+    $genreVal = isset($data['genre']) ? $strip_qids($data['genre']) : '';
+    $stmt->bindValue(':genre', $genreVal ?? '', PDO::PARAM_STR);
     // music (composer) optional text field
-    $stmt->bindValue(':music', $data['music'] ?? '', PDO::PARAM_STR);
+    $musicVal = isset($data['music']) ? $strip_qids($data['music']) : '';
+    $stmt->bindValue(':music', $musicVal ?? '', PDO::PARAM_STR);
         $stmt->bindValue(':year', isset($data['year']) ? (string)$data['year'] : '', PDO::PARAM_STR);
         // runtime stored as text in DB. Accept any string (e.g. "120 min", "130", "2h 10m").
         $runtimeVal = null;
@@ -291,12 +323,12 @@ try {
             'id' => isset($row['dkey']) ? (int)$row['dkey'] : (int)($row['id'] ?? 0),
             'title' => $row['title'] ?? '',
             'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
-            'actors' => $normalize_plainlist($row['stars'] ?? ''),
-            'director' => $normalize_plainlist($row['director'] ?? ''),
-            'genre' => $normalize_plainlist($row['genre'] ?? ''),
+            'actors' => $strip_qids($normalize_plainlist($row['stars'] ?? '')),
+            'director' => $strip_qids($normalize_plainlist($row['director'] ?? '')),
+            'genre' => $strip_qids($normalize_plainlist($row['genre'] ?? '')),
             'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
             'format' => $row['type'] ?? $row['format'] ?? 'DVD',
-            'music' => $row['music'] ?? '',
+            'music' => $strip_qids($row['music'] ?? ''),
             'notes' => $normalize_notes($row['description'] ?? $row['notes'] ?? '')
         ];
 
@@ -354,7 +386,12 @@ try {
                     }
                     $params[":$dbcol"] = $runtimeVal;
                 } else {
-                    $params[":$dbcol"] = $data[$field] === '' ? '' : $data[$field];
+                    // Strip QID tokens from tokenized fields before updating
+                    if (in_array($dbcol, ['stars', 'director', 'genre', 'music'])) {
+                        $params[":$dbcol"] = ($data[$field] === '' || $data[$field] === null) ? '' : $strip_qids($data[$field]);
+                    } else {
+                        $params[":$dbcol"] = $data[$field] === '' ? '' : $data[$field];
+                    }
                 }
             }
         }
@@ -421,12 +458,12 @@ try {
             'id' => isset($row['dkey']) ? (int)$row['dkey'] : (int)($row['id'] ?? 0),
             'title' => $row['title'] ?? '',
             'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
-            'actors' => $normalize_plainlist($row['stars'] ?? ''),
-            'director' => $normalize_plainlist($row['director'] ?? ''),
-            'genre' => $normalize_plainlist($row['genre'] ?? ''),
+            'actors' => $strip_qids($normalize_plainlist($row['stars'] ?? '')),
+            'director' => $strip_qids($normalize_plainlist($row['director'] ?? '')),
+            'genre' => $strip_qids($normalize_plainlist($row['genre'] ?? '')),
             'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
             'format' => $row['type'] ?? $row['format'] ?? 'DVD',
-            'music' => $row['music'] ?? '',
+            'music' => $strip_qids($row['music'] ?? ''),
             'notes' => $normalize_notes($row['description'] ?? $row['notes'] ?? '')
         ];
 

@@ -135,8 +135,49 @@ if ($titleParam && $tryPatterns && !$url) {
         $slug . '_poster_artwork.jpg'
     ];
     $patterns = $basePatterns;
+
+    // Also try compact / no-underscore variants (e.g. HungerGamesPoster.jpg)
+    $compact = str_replace(['_', '-'], '', $slug);
+    if ($compact !== $slug) {
+        $compactBase = [
+            $compact . '_Poster.jpg',
+            $compact . 'Poster.jpg'
+        ];
+        $patterns = array_merge($patterns, $compactBase);
+    }
+
+    // If the cleaned title does NOT already start with 'The', also try 'The_' prefixed variants
     if (!preg_match('/^\s*the\b/i', $clean)) {
         foreach ($basePatterns as $p) $patterns[] = 'The_' . $p;
+        if (isset($compactBase)) {
+            foreach ($compactBase as $cp) $patterns[] = 'The_' . $cp;
+        }
+    }
+
+    // Additionally, try variants with a leading 'The' removed (so "The Hunger Games" will
+    // also try patterns for "Hunger_Games" and compact "HungerGamesPoster.jpg")
+    try {
+        $cleanNoThe = preg_replace('/^\s*the\s+/i', '', $clean);
+        if ($cleanNoThe && strcasecmp($cleanNoThe, $clean) !== 0) {
+            $slugNoThe = preg_replace('/\s+/', '_', trim($cleanNoThe));
+            $compactNoThe = str_replace(['_', '-'], '', $slugNoThe);
+            $baseNoThe = [
+                $slugNoThe . '_Film_Poster.jpg',
+                $slugNoThe . '_film_poster.jpg',
+                $slugNoThe . '_Poster.jpg',
+                $slugNoThe . '_poster.jpg',
+                $slugNoThe . '_theatrical_poster.jpg',
+                $slugNoThe . '_poster_art.jpg',
+                $slugNoThe . '_poster_artwork.jpg'
+            ];
+            $patterns = array_merge($patterns, $baseNoThe);
+            if ($compactNoThe !== $slugNoThe) {
+                $compactBaseNoThe = [$compactNoThe . '_Poster.jpg', $compactNoThe . 'Poster.jpg'];
+                $patterns = array_merge($patterns, $compactBaseNoThe);
+            }
+        }
+    } catch (Exception $e) {
+        // ignore variant generation failures
     }
     $found = null;
     $resolved_file = null;
@@ -144,6 +185,7 @@ if ($titleParam && $tryPatterns && !$url) {
     $resolved_height = null;
     $resolved_source = null;
     foreach ($patterns as $p) {
+        if ($debug) $debugAttempts[] = ['pattern_try' => $p];
         $fileTitle = 'File:' . $p;
         // 1) Try en.wikipedia.org Special:FilePath first (server-side) to follow redirects there
         $enResolved = resolve_enwiki_file_url($p);

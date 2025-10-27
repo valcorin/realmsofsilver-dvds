@@ -60,13 +60,13 @@
               <img 
                 v-if="getDvdImageUrl(dvd)" 
                 :src="getDvdImageUrl(dvd)" 
-                :alt="dvd.title"
+                :alt="displayTitle(dvd)"
                 class="cover-thumbnail"
                 @error="handleImageError"
               />
               <div v-else class="no-cover">📀</div>
             </td>
-            <td>{{ dvd.title }}</td>
+            <td>{{ displayTitle(dvd) }}</td>
             <td>{{ dvd.year }}</td>
             <td>{{ displayType(dvd.type || dvd.format) }}</td>
             <td>{{ dvd.directors || dvd.director }}</td>
@@ -206,6 +206,21 @@ const displayType = (code) => {
   if (/\s|[a-z]/.test(s)) return s;
   const key = s.toUpperCase();
   return TYPE_LABELS[key] || s;
+};
+
+// Display-only title normalization:
+// - remove trailing parenthetical like "(film)" or "(1954 film)"
+// - remove leading article "The " (case-insensitive) for presentation only
+const displayTitle = (dvdOrTitle) => {
+  let t = '';
+  if (!dvdOrTitle) return '';
+  if (typeof dvdOrTitle === 'string') t = dvdOrTitle;
+  else t = String(dvdOrTitle.title || dvdOrTitle.name || '');
+  // remove any trailing parenthetical that contains the word 'film' (case-insensitive)
+  t = t.replace(/\s*\([^)]*\bfilm\b[^)]*\)\s*$/i, '').trim();
+  // remove leading "The " (case-insensitive)
+  t = t.replace(/^\s*the\s+/i, '').trim();
+  return t;
 };
 </script>
 
