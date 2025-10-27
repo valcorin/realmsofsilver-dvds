@@ -2345,6 +2345,24 @@ const onDirectorEditKeydown = (e) => {
   background-color: #c53030;
 }
 
+/* Visual styles for disabled/aria-disabled buttons to make them appear inactive */
+.btn-primary[disabled], .btn-secondary[disabled], .btn-delete[disabled],
+.btn-primary[aria-disabled="true"], .btn-secondary[aria-disabled="true"], .btn-delete[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: grayscale(20%);
+  pointer-events: none; /* ensure hover/clicks don't trigger when aria-disabled used */
+}
+
+/* Ensure hover rules don't apply when disabled */
+.btn-primary[disabled]:hover, .btn-secondary[disabled]:hover, .btn-delete[disabled]:hover,
+.btn-primary[aria-disabled="true"]:hover, .btn-secondary[aria-disabled="true"]:hover, .btn-delete[aria-disabled="true"]:hover {
+  transform: none;
+  background-color: inherit;
+}
+
 @media (max-width: 768px) {
   .modal-overlay {
     padding: 10px;

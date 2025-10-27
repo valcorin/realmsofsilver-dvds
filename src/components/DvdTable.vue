@@ -261,6 +261,14 @@ const displayType = (code) => {
 
 .btn-new:hover { background: #16a34a; }
 
+/* Disabled style for New button to clearly indicate when admin-required */
+.btn-new[disabled], .btn-new[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(20%);
+  pointer-events: none;
+}
+
 h2 {
   color: #2c3e50;
   margin-bottom: 20px;
