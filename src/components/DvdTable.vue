@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, watch } from 'vue';
 import dvdApi from '../services/dvdApi.js';
 
 const props = defineProps({
@@ -107,11 +107,16 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
+  ,
+  searchTerm: {
+    type: String,
+    default: ''
+  }
 });
 
 const emit = defineEmits(['select-dvd', 'edit-dvd', 'create-dvd', 'search']);
 
-const searchQuery = ref('');
+const searchQuery = ref(props.searchTerm || '');
 let searchDebounce = null;
 const searchInput = ref(null);
 
@@ -126,6 +131,12 @@ const onSearchInput = () => {
     }
   }, 300);
 };
+
+// Keep local input in sync with parent-provided searchTerm prop.
+watch(() => props.searchTerm, (v) => {
+  const val = v || '';
+  if (val !== searchQuery.value) searchQuery.value = val;
+});
 
 // Note: visual sort state comes from the parent via props.sortColumn / props.sortDirection.
 

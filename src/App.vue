@@ -109,9 +109,29 @@ const loadDvds = async (page = currentPage.value, q = undefined) => {
     }
     error.value = null;
     // Pass current sort settings into the API call so server-side sorting is applied
-    const response = await dvdApi.fetchDvds(page, itemsPerPage.value, q, signal, sortColumn.value, sortDirection.value);
-    dvds.value = response.data || response; // Handle both new and old response formats
-    pagination.value = response.pagination || {};
+  // If caller didn't provide a search query, prefer the current global searchTerm.
+  const effectiveQ = (typeof q === 'undefined') ? (searchTerm.value !== '' ? searchTerm.value : undefined) : q;
+  const response = await dvdApi.fetchDvds(page, itemsPerPage.value, effectiveQ, signal, sortColumn.value, sortDirection.value);
+    // Normalize response to ensure dvds is always an array and pagination is an object
+    let list = [];
+    let pag = {};
+    if (response) {
+      if (Array.isArray(response)) {
+        list = response;
+      } else if (Array.isArray(response.data)) {
+        list = response.data;
+        pag = response.pagination || {};
+      } else if (response.data && Array.isArray(response.data)) {
+        list = response.data;
+        pag = response.pagination || {};
+      } else {
+        // unknown shape, try to be defensive
+        list = [];
+        pag = response.pagination || {};
+      }
+    }
+    dvds.value = list;
+    pagination.value = pag;
     currentPage.value = page;
   } catch (err) {
     if (err && err.name === 'AbortError') {
@@ -323,6 +343,7 @@ const retryLoad = () => {
           :pagination="pagination"
           :sort-column="sortColumn"
           :sort-direction="sortDirection"
+          :search-term="searchTerm"
           :is-admin="!!adminToken"
           @select-dvd="handleSelectDvd"
           @edit-dvd="handleEditDvd"

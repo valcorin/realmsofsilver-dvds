@@ -289,11 +289,11 @@
 
         <div class="form-actions">
           <template v-if="!isEditing">
-            <button @click="startEdit" type="button" class="btn-primary">Edit</button>
+            <button @click="startEdit" type="button" class="btn-primary" :disabled="!props.isAdmin" :aria-disabled="!props.isAdmin">Edit</button>
           </template>
           <template v-else>
-            <button v-if="!isNew" type="button" class="btn-delete" @click.prevent="confirmAndDelete">Delete</button>
-            <button type="submit" class="btn-primary">Save</button>
+            <button v-if="!isNew" type="button" class="btn-delete" @click.prevent="confirmAndDelete" :disabled="!props.isAdmin" :aria-disabled="!props.isAdmin">Delete</button>
+            <button type="submit" class="btn-primary" :disabled="!props.isAdmin" :aria-disabled="!props.isAdmin">Save</button>
             <button @click="cancel" type="button" class="btn-secondary">Cancel</button>
           </template>
           <button v-if="!isEditing" @click="close" type="button" class="btn-secondary">Close</button>
@@ -316,10 +316,15 @@ const props = defineProps({
   editMode: {
     type: Boolean,
     default: false
+  },
+  // passed from App.vue to gate mutating actions
+  isAdmin: {
+    type: Boolean,
+    default: false
   }
 });
 
-const emit = defineEmits(['update-dvd', 'close']);
+const emit = defineEmits(['update-dvd', 'close', 'deleted']);
 
 const isEditing = ref(props.editMode);
 const formData = ref({ ...props.dvd });
@@ -1605,10 +1610,20 @@ watch(() => props.editMode, (newMode) => {
 });
 
 const startEdit = () => {
+  if (!props.isAdmin) {
+    console.warn('Edit blocked: admin required');
+    try { alert('Editing is disabled: admin access required.'); } catch (e) {}
+    return;
+  }
   isEditing.value = true;
 };
 
 const save = () => {
+  if (!props.isAdmin) {
+    console.warn('Save blocked: admin required');
+    try { alert('Save is disabled: admin access required.'); } catch (e) {}
+    return;
+  }
   // convert selected file to base64 (if any) and attach
   const performSave = async () => {
     try {
@@ -1708,6 +1723,11 @@ const cancel = () => {
 
 // Delete handler: confirm then call backend and notify parent
 const confirmAndDelete = async () => {
+  if (!props.isAdmin) {
+    console.warn('Delete blocked: admin required');
+    try { alert('Delete is disabled: admin access required.'); } catch (e) {}
+    return;
+  }
   const id = formData.value.dkey || formData.value.id;
   if (!id) {
     // nothing to delete

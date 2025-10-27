@@ -175,7 +175,7 @@ try {
                 // map `stars` column to `actors` for the frontend; leave `director` separate (DB may add later)
                 'actors' => $normalize_plainlist($row['stars'] ?? ''),
                 'director' => $normalize_plainlist($row['director'] ?? ''),
-                'genre' => $row['genre'] ?? $row['Genre'] ?? '',
+                'genre' => $normalize_plainlist($row['genre'] ?? $row['Genre'] ?? ''),
                     'rating' => $row['rating'] ?? '',
                     // runtime is stored as text in the DB (e.g. "120 min", "130", "2h 10m")
                     'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
@@ -293,7 +293,7 @@ try {
             'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
             'actors' => $normalize_plainlist($row['stars'] ?? ''),
             'director' => $normalize_plainlist($row['director'] ?? ''),
-            'genre' => $row['genre'] ?? '',
+            'genre' => $normalize_plainlist($row['genre'] ?? ''),
             'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
             'format' => $row['type'] ?? $row['format'] ?? 'DVD',
             'music' => $row['music'] ?? '',
@@ -423,7 +423,7 @@ try {
             'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
             'actors' => $normalize_plainlist($row['stars'] ?? ''),
             'director' => $normalize_plainlist($row['director'] ?? ''),
-            'genre' => $row['genre'] ?? '',
+            'genre' => $normalize_plainlist($row['genre'] ?? ''),
             'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
             'format' => $row['type'] ?? $row['format'] ?? 'DVD',
             'music' => $row['music'] ?? '',
