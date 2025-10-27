@@ -1333,7 +1333,20 @@ const fetchFromWikipedia = async () => {
     // directors
     const dirRaw = extractInfobox('director|directed by|directors');
     if (dirRaw) {
-      const parts = dirRaw.split(',').map(s => s.trim()).filter(Boolean);
+      let parts = [];
+      // Handle Plainlist template and pipe-separated lists similar to actors/starring
+      if (/\{\{\s*Plainlist\b/i.test(dirRaw)) {
+        // extract inside of Plainlist and split on pipes/newlines/bullets
+        const m = dirRaw.match(/\{\{\s*Plainlist\s*\|(.*?)\}\}/is);
+        if (m) {
+          const inner = m[1];
+          parts = inner.split(/[|\n\r]+/).map(s => s.replace(/^\s*\*\s*/, '').trim()).filter(Boolean);
+        }
+      } else if (dirRaw.indexOf('|') !== -1 && dirRaw.indexOf(',') === -1) {
+        parts = dirRaw.split('|').map(s => s.trim()).filter(Boolean);
+      } else {
+        parts = dirRaw.split(',').map(s => s.trim()).filter(Boolean);
+      }
       // respect overwriteMode: only set if overwriting or no existing directors
       if (overwriteMode || !directorsArray.value || directorsArray.value.length === 0 || !formData.value.directors || String(formData.value.directors).trim() === '') {
         directorsArray.value = parts;
