@@ -86,6 +86,17 @@ try {
         return $s;
     };
     
+        // Helper to ignore '{{Plainlist' or '{{Plain list' template values which are not valid data
+        $normalize_plainlist = function($s) {
+            if ($s === null) return '';
+            $s = (string)$s;
+            // If the value is a Plainlist/Plain list template or begins with it, consider it invalid and return empty
+            if (preg_match('/^\s*\{\{\s*Plain\s*list\b/i', $s) || preg_match('/^\s*\{\{\s*Plainlist\b/i', $s)) {
+                return '';
+            }
+            return $s;
+        };
+    
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // Get pagination parameters
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -162,8 +173,8 @@ try {
                 // year is stored as tinytext in this schema; return as number when possible
                     'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
                 // map `stars` column to `actors` for the frontend; leave `director` separate (DB may add later)
-                'actors' => $row['stars'] ?? '',
-                'director' => $row['director'] ?? '',
+                'actors' => $normalize_plainlist($row['stars'] ?? ''),
+                'director' => $normalize_plainlist($row['director'] ?? ''),
                 'genre' => $row['genre'] ?? $row['Genre'] ?? '',
                     'rating' => $row['rating'] ?? '',
                     // runtime is stored as text in the DB (e.g. "120 min", "130", "2h 10m")
@@ -280,8 +291,8 @@ try {
             'id' => isset($row['dkey']) ? (int)$row['dkey'] : (int)($row['id'] ?? 0),
             'title' => $row['title'] ?? '',
             'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
-            'actors' => $row['stars'] ?? '',
-            'director' => $row['director'] ?? '',
+            'actors' => $normalize_plainlist($row['stars'] ?? ''),
+            'director' => $normalize_plainlist($row['director'] ?? ''),
             'genre' => $row['genre'] ?? '',
             'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
             'format' => $row['type'] ?? $row['format'] ?? 'DVD',
@@ -410,8 +421,8 @@ try {
             'id' => isset($row['dkey']) ? (int)$row['dkey'] : (int)($row['id'] ?? 0),
             'title' => $row['title'] ?? '',
             'year' => is_numeric($row['year'] ?? '') ? (int)$row['year'] : ($row['year'] ?? 0),
-            'actors' => $row['stars'] ?? '',
-            'director' => $row['director'] ?? '',
+            'actors' => $normalize_plainlist($row['stars'] ?? ''),
+            'director' => $normalize_plainlist($row['director'] ?? ''),
             'genre' => $row['genre'] ?? '',
             'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
             'format' => $row['type'] ?? $row['format'] ?? 'DVD',

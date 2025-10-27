@@ -46,7 +46,7 @@
               Genre
               <span v-if="sortColumn === 'genre'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th>Actions</th>
+            
           </tr>
         </thead>
         <tbody>
@@ -72,10 +72,7 @@
             <td>{{ dvd.directors || dvd.director }}</td>
             <td>{{ dvd.actors || dvd.stars }}</td>
             <td>{{ dvd.genre }}</td>
-            <td class="actions-cell">
-              <button @click.stop="editDvd(dvd)" class="btn-edit" :disabled="!props.isAdmin" :aria-disabled="!props.isAdmin">Edit</button>
-              <button @click.stop="viewDetails(dvd)" class="btn-view">View</button>
-            </td>
+            
           </tr>
         </tbody>
       </table>
@@ -217,31 +214,7 @@ const displayType = (code) => {
   margin-bottom: 12px;
 }
 
-/* Actions (Edit/View) layout: side-by-side on desktop, stacked on narrow screens */
-.actions-cell {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  white-space: nowrap;
-}
-
-.actions-cell .btn-edit,
-.actions-cell .btn-view {
-  display: inline-block;
-  width: auto;
-}
-
-@media (max-width: 640px) {
-  .actions-cell {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .actions-cell .btn-edit,
-  .actions-cell .btn-view {
-    width: 100%;
-  }
-}
+/* Actions column removed - per-row Edit/View buttons hidden */
 
 /* Search input centered between title and New button */
 .table-header .search-wrap {
@@ -297,13 +270,16 @@ h2 {
 .dvd-table th {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 12px;
+  padding: 8px 12px;
   text-align: left;
   font-weight: 600;
   cursor: pointer;
   user-select: none;
   transition: background 0.3s;
+  vertical-align: middle;
 }
+
+/* actions-header removed */
 
 .dvd-table th:hover {
   opacity: 0.9;
@@ -341,13 +317,14 @@ h2 {
 }
 
 .btn-edit, .btn-view {
-  padding: 6px 12px;
-  margin-right: 5px;
+  padding: 6px 10px;
+  margin: 0 4px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9em;
   transition: all 0.3s;
+  line-height: 1;
 }
 
 .btn-edit {

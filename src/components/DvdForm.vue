@@ -600,18 +600,12 @@ const fetchFromWikipedia = async () => {
       return;
     }
     const apiTitle = hit.title; // canonical title returned by Wikipedia (use for API requests)
-    // Create a display title (strip a leading 'The ' for user preference) but keep
-    // apiTitle unchanged so subsequent Wikipedia/Wikidata queries use the exact page title.
-    let displayTitle = apiTitle;
-    try {
-      if (/^The\s+/i.test(displayTitle)) {
-        displayTitle = displayTitle.replace(/^The\s+/i, '').trim();
-      }
-    } catch (e) {
-      console.debug('Failed to normalize title', e);
-    }
-    // update the form title that the user sees, but keep apiTitle for lookups
-    formData.value.title = displayTitle;
+    // Use the canonical Wikipedia title for both lookups and display to preserve
+    // subtitle information (do not strip parts such as ": Dark Fury").
+    // If you prefer a user-visible normalization (e.g. dropping a leading 'The ')
+    // we should do that only for presentation without overwriting the canonical
+    // title — currently we prefer to show the exact apiTitle.
+    formData.value.title = apiTitle;
     // Use apiTitle for all following API calls
     const pageTitle = apiTitle;
 
