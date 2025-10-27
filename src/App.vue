@@ -135,7 +135,7 @@ const handleEditDvd = (dvd) => {
   editMode.value = true;
 };
 
-const handleCreateDvd = () => {
+  const handleCreateDvd = () => {
   // open the form with an empty DVD object for creation
   selectedDvd.value = {
     title: '',
@@ -148,7 +148,7 @@ const handleCreateDvd = () => {
     genre: '',
     runtime: '',
     format: 'DVD',
-    condition: 'Excellent',
+    music: '',
     notes: ''
   };
   editMode.value = true;
@@ -202,7 +202,10 @@ const retryLoad = () => {
   <div class="app-container">
     <header class="app-header">
       <h1>🎬 Realms of Silver DVD Collection</h1>
-      <p class="subtitle">Manage and browse your DVD collection</p>
+      <p class="subtitle">
+        Manage and browse your DVD collection
+        <span v-if="pagination.total_records"> — Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, pagination.total_records) }} of {{ pagination.total_records }} DVDs</span>
+      </p>
     </header>
 
     <main class="app-main">
@@ -223,14 +226,7 @@ const retryLoad = () => {
 
       <!-- Main content -->
       <template v-else>
-        <!-- Pagination info and controls -->
-        <div v-if="pagination.total_records" class="pagination-info">
-          <p>
-            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - 
-            {{ Math.min(currentPage * itemsPerPage, pagination.total_records) }} 
-            of {{ pagination.total_records }} DVDs
-          </p>
-        </div>
+        <!-- Pagination controls (count shown in header subtitle) -->
         
         <DvdTable 
           :dvds="dvds"

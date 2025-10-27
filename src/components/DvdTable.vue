@@ -68,7 +68,7 @@
             </td>
             <td>{{ dvd.title }}</td>
             <td>{{ dvd.year }}</td>
-            <td>{{ dvd.type || dvd.format }}</td>
+            <td>{{ displayType(dvd.type || dvd.format) }}</td>
             <td>{{ dvd.directors || dvd.director }}</td>
             <td>{{ dvd.actors || dvd.stars }}</td>
             <td>{{ dvd.genre }}</td>
@@ -166,6 +166,25 @@ const createDvd = () => {
 
 const viewDetails = (dvd) => {
   emit('select-dvd', dvd);
+};
+
+// Map internal type/format codes to user-friendly labels
+const TYPE_LABELS = {
+  'DVD': 'DVD',
+  'BLU': 'Blu-ray',
+  '4K': '4K UHD',
+  'DIG': 'Digital',
+  'BCK': 'Backup',
+  'VHS': 'VHS'
+};
+
+const displayType = (code) => {
+  if (!code && code !== 0) return '';
+  const s = String(code).trim();
+  // If the value already looks like a friendly label (contains spaces or lowercase letters), show as-is
+  if (/\s|[a-z]/.test(s)) return s;
+  const key = s.toUpperCase();
+  return TYPE_LABELS[key] || s;
 };
 </script>
 

@@ -7,6 +7,27 @@
       </div>
       
       <div class="form-content">
+        <!-- Inline chooser shown when server-deterministic poster and another candidate conflict -->
+        <div v-if="showServerChooser" class="server-chooser-overlay">
+          <div class="server-chooser" @click.stop>
+            <h3 style="margin:0 0 10px 0;">Choose cover image</h3>
+            <div class="server-chooser-grid">
+              <div class="chooser-card">
+                <div class="chooser-label">Server conventional poster</div>
+                <img v-if="competingCandidate && competingCandidate.server && competingCandidate.server.data" :src="'data:' + (competingCandidate.server.contentType||'image/jpeg') + ';base64,' + competingCandidate.server.data" class="chooser-img" />
+                <div class="chooser-fname">{{ (competingCandidate && competingCandidate.server && (competingCandidate.server.resolved_file || '')) }}</div>
+                <button class="btn-primary" @click="chooseServer">Use server poster</button>
+              </div>
+              <div class="chooser-card">
+                <div class="chooser-label">Other candidate</div>
+                <img v-if="competingCandidate && competingCandidate.other && competingCandidate.other.data" :src="'data:' + (competingCandidate.other.contentType||'image/jpeg') + ';base64,' + competingCandidate.other.data" class="chooser-img" />
+                <div class="chooser-fname">{{ (competingCandidate && competingCandidate.other && competingCandidate.other.filename) }}</div>
+                <button class="btn-secondary" @click="chooseOther">Use this image</button>
+              </div>
+            </div>
+            <div style="text-align:center; margin-top:10px;"><button class="btn-secondary" @click="showServerChooser=false">Cancel</button></div>
+          </div>
+        </div>
   <form @submit.prevent="save" class="dvd-form">
   <!-- DVD Cover Image and upload (moved inside the form so fields can span under it) -->
   <div class="dvd-image-section">
@@ -27,50 +48,61 @@
         <div class="form-group">
           <label for="title">Title:</label>
           <div class="title-row">
-            <input 
-              ref="titleInput"
-              v-model="formData.title" 
-              id="title" 
-              type="text" 
-              :disabled="!isEditing"
-              required
-            />
+            <template v-if="isEditing">
+              <input 
+                ref="titleInput"
+                v-model="formData.title" 
+                id="title" 
+                type="text" 
+                required
+              />
 
-            <button
-              type="button"
-              class="btn-fetch"
-              :disabled="!isEditing || !formData.title || wikiLoading"
-              @click="fetchFromWikipedia"
-              title="Fetch details from Wikipedia"
-            >
-              <span v-if="!wikiLoading">Fetch</span>
-              <span v-else>Loading…</span>
-            </button>
-              <!-- Wikidata indicator moved into Notes instead of displaying inline -->
+              <button
+                type="button"
+                class="btn-fetch"
+                :disabled="!formData.title || wikiLoading"
+                @click="fetchFromWikipedia"
+                title="Fetch details from Wikipedia"
+              >
+                <span v-if="!wikiLoading">Fetch</span>
+                <span v-else>Loading…</span>
+              </button>
               <div class="fetch-image-status" v-if="fetchImageStatus">{{ fetchImageStatus }}</div>
+            </template>
+            <template v-else>
+              <div class="plain-value" id="title">{{ formData.title }}</div>
+            </template>
           </div>
           <div class="fetch-error" v-if="wikiError">{{ wikiError }}</div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="year">Year:</label>
-            <input 
-              v-model.number="formData.year" 
-              id="year" 
-              type="number" 
-              :disabled="!isEditing"
-              required
-            />
+            <template v-if="isEditing">
+              <input 
+                v-model.number="formData.year" 
+                id="year" 
+                type="number" 
+                required
+              />
+            </template>
+            <template v-else>
+              <div class="plain-value" id="year">{{ formData.year }}</div>
+            </template>
           </div>
 
           <div class="form-group">
             <label for="rating">Rating:</label>
-            <input 
-              v-model="formData.rating" 
-              id="rating" 
-              type="text" 
-              :disabled="!isEditing"
-            />
+            <template v-if="isEditing">
+              <input 
+                v-model="formData.rating" 
+                id="rating" 
+                type="text" 
+              />
+            </template>
+            <template v-else>
+              <div class="plain-value" id="rating">{{ formData.rating || '' }}</div>
+            </template>
           </div>
         </div>
 
@@ -106,53 +138,48 @@
 
           <div class="form-group">
             <label for="runtime">Runtime:</label>
-            <input 
-              v-model="formData.runtime" 
-              id="runtime" 
-              type="text" 
-              :disabled="!isEditing"
-            />
+            <template v-if="isEditing">
+              <input 
+                v-model="formData.runtime" 
+                id="runtime" 
+                type="text" 
+              />
+            </template>
+            <template v-else>
+              <div class="plain-value" id="runtime">{{ formData.runtime || '' }}</div>
+            </template>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="format">Format:</label>
-            <select 
-              v-model="formData.format" 
-              id="format" 
-              :disabled="!isEditing"
-            >
-              <option value="DVD">DVD</option>
-              <option value="BLU">Blu-ray</option>
-              <option value="4K">4K UHD</option>
-              <option value="DIG">Digital</option>
-              <option value="BCK">Backup</option>
-              <option value="VHS">VHS</option>
-            </select>
+            <template v-if="isEditing">
+              <select 
+                v-model="formData.format" 
+                id="format"
+              >
+                <option value="DVD">DVD</option>
+                <option value="BLU">Blu-ray</option>
+                <option value="4K">4K UHD</option>
+                <option value="DIG">Digital</option>
+                <option value="BCK">Backup</option>
+                <option value="VHS">VHS</option>
+              </select>
+            </template>
+            <template v-else>
+              <div class="plain-value" id="format">{{ formatLabel(formData.format) }}</div>
+            </template>
           </div>
-
-          <div class="form-group">
-            <label for="condition">Condition:</label>
-            <select 
-              v-model="formData.condition" 
-              id="condition" 
-              :disabled="!isEditing"
-            >
-              <option value="Excellent">Excellent</option>
-              <option value="Very Good">Very Good</option>
-              <option value="Good">Good</option>
-              <option value="Fair">Fair</option>
-              <option value="Poor">Poor</option>
-            </select>
-          </div>
+          <!-- music input moved to full-width token area below; keep this column for layout alignment -->
+          <div class="form-group" aria-hidden="true"></div>
         </div>
 
         </div> <!-- .right-column -->
 
         <div class="form-group full-width">
           <label for="directors">Directors:</label>
-          <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
+          <div v-if="isEditing" class="actor-input" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
             <template v-for="(dir, idx) in directorsArray" :key="idx">
               <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
                 {{ dir }}
@@ -175,13 +202,50 @@
               @blur="onDirectorBlur"
               placeholder="Add director and press Enter or comma"
             />
-            <div v-if="!isEditing && directorsArray.length === 0" class="hint">No director listed</div>
+            <div v-if="isEditing && directorsArray.length === 0" class="hint">No director listed</div>
+          </div>
+          <div v-else class="plain-list">
+            <span v-if="directorsArray && directorsArray.length">{{ directorsArray.join(', ') }}</span>
+            <span v-else class="hint">No director listed</span>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="music">Music / Composer:</label>
+          <div v-if="isEditing" class="actor-input" :class="{ disabled: !isEditing }" @click="focusMusicInput">
+            <template v-for="(m, idx) in musicArray" :key="idx">
+              <span v-if="musicEditIndex !== idx" class="actor-token" @click.stop="startEditMusic(idx)">
+                {{ m }}
+                <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeMusic(idx)">✕</button>
+              </span>
+              <input
+                v-else
+                ref="musicEditInput"
+                class="token-edit-input"
+                v-model="musicEditValue"
+                @keydown="onMusicEditKeydown"
+                @blur="commitMusicEdit"
+              />
+            </template>
+            <input
+              ref="musicInput"
+              v-show="isEditing && musicEditIndex === -1"
+              v-model="musicInputValue"
+              @keydown="onMusicKeydown"
+              @blur="onMusicBlur"
+              placeholder="Add composer and press Enter or comma"
+            />
+            <div v-if="isEditing && musicArray.length === 0" class="hint">No composer listed</div>
+          </div>
+          <div v-else class="plain-list">
+            <span v-if="musicArray && musicArray.length">{{ musicArray.join(', ') }}</span>
+            <span v-else class="hint">No composer listed</span>
           </div>
         </div>
 
         <div class="form-group full-width">
           <label for="actors">Actors:</label>
-          <div class="actor-input" :class="{ disabled: !isEditing }" @click="focusActorInput">
+          <div v-if="isEditing" class="actor-input" :class="{ disabled: !isEditing }" @click="focusActorInput">
             <template v-for="(actor, idx) in actorsArray" :key="idx">
               <span v-if="actorEditIndex !== idx" class="actor-token" @click.stop="startEditActor(idx)">
                 {{ actor }}
@@ -204,43 +268,42 @@
               @blur="onActorBlur"
               placeholder="Add actor and press Enter or comma"
             />
-            <div v-if="!isEditing && actorsArray.length === 0" class="hint">No actors listed</div>
+            <div v-if="isEditing && actorsArray.length === 0" class="hint">No actors listed</div>
+          </div>
+          <div v-else class="plain-list">
+            <span v-if="actorsArray && actorsArray.length">{{ actorsArray.join(', ') }}</span>
+            <span v-else class="hint">No actors listed</span>
           </div>
         </div>
 
         <div class="form-group full-width">
           <label for="notes">Notes:</label>
+          <div v-if="!isEditing" class="notes-view" id="notes">{{ formData.notes }}</div>
           <textarea 
+            v-else
             v-model="formData.notes" 
             id="notes" 
             rows="5"
-            :disabled="!isEditing"
           ></textarea>
         </div>
 
         <div class="form-actions">
-          <button 
-            v-if="!isEditing" 
-            @click="startEdit" 
-            type="button" 
-            class="btn-primary"
-          >
-            Edit
-          </button>
+          <template v-if="!isEditing">
+            <button @click="startEdit" type="button" class="btn-primary">Edit</button>
+          </template>
           <template v-else>
-            <!-- Delete button left-aligned in the action row -->
             <button v-if="!isNew" type="button" class="btn-delete" @click.prevent="confirmAndDelete">Delete</button>
             <button type="submit" class="btn-primary">Save</button>
             <button @click="cancel" type="button" class="btn-secondary">Cancel</button>
           </template>
           <button v-if="!isEditing" @click="close" type="button" class="btn-secondary">Close</button>
         </div>
-        </form>
+
+      </form>
       </div>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import dvdApi from '../services/dvdApi.js';
@@ -294,6 +357,15 @@ const genreEditIndex = ref(-1);
 const genreEditValue = ref('');
 const genreEditInput = ref(null);
 
+// Music (composer) token input state
+const musicArray = ref([]);
+const musicInputValue = ref('');
+const musicInput = ref(null);
+// editing state for a music token
+const musicEditIndex = ref(-1);
+const musicEditValue = ref('');
+const musicEditInput = ref(null);
+
 // refs for focusing
 const titleInput = ref(null);
 
@@ -335,6 +407,62 @@ let pendingAttribution = '';
 // Controller to cancel in-flight wiki/wikidata requests
 let wikiController = null;
 
+// Server-side chooser state (moved to component scope so template can access it)
+const serverCandidate = ref(null);
+const showServerChooser = ref(false);
+const competingCandidate = ref(null);
+let _chooserResolve = null;
+
+const awaitServerChoice = (srv, other) => {
+  console.debug('awaitServerChoice invoked, srv=', srv, 'other=', other);
+  return new Promise((resolve) => {
+    _chooserResolve = (v) => {
+      try { showServerChooser.value = false; } catch (e) {}
+      competingCandidate.value = null;
+      _chooserResolve = null;
+      console.debug('awaitServerChoice resolved with', v);
+      resolve(v);
+    };
+    competingCandidate.value = { server: srv, other };
+    showServerChooser.value = true;
+    console.debug('awaitServerChoice: showServerChooser set true, competingCandidate=', competingCandidate.value);
+  });
+};
+
+const chooseServer = () => {
+  console.debug('chooseServer clicked');
+  if (_chooserResolve) _chooserResolve(true);
+};
+
+const chooseOther = () => {
+  console.debug('chooseOther clicked');
+  if (_chooserResolve) _chooserResolve(false);
+};
+
+const applyServerCandidate = (srv) => {
+  try {
+    console.debug('applyServerCandidate called with', srv);
+    const contentType = srv.contentType || 'image/jpeg';
+    const b64 = srv.data;
+    try { previewUrl.value = 'data:' + contentType + ';base64,' + b64; } catch (e) { previewUrl.value = null; }
+    let fname = '';
+    try { if (srv.resolved_file) fname = String(srv.resolved_file).replace(/^File:/i, ''); } catch (e) { fname = ''; }
+    const subtype = (contentType && contentType.indexOf('/') !== -1) ? contentType.split('/')[1] : 'jpeg';
+    formData.value.image = { name: fname || ('image.' + subtype), type: subtype, data: b64 };
+    fetchImageStatus.value = 'Cover image assigned (server)';
+    try {
+      const attribution = fname ? ('Image: ' + fname + ' (Wikimedia Commons)') : 'Image from Wikimedia Commons';
+      if (!formData.value.notes || formData.value.notes.trim() === '') {
+        pendingAttribution = attribution;
+      } else if (formData.value.notes.indexOf(attribution) === -1) {
+        formData.value.notes += '\n\n' + attribution;
+      }
+    } catch (e) {}
+  } catch (e) {
+    console.debug('applyServerCandidate failed', e);
+  }
+};
+
 const fetchFromWikipedia = async () => {
   const title = (formData.value.title || '').trim();
   if (!title) return;
@@ -362,27 +490,130 @@ const fetchFromWikipedia = async () => {
     overwriteMode = true;
   }
   try {
-    // 1) search for the page
-  const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(title) + '&format=json&utf8=1&srlimit=1&origin=*';
+    // 1) search for the page — fetch several results (top 10), then use Wikidata to
+    // confirm which candidates are films. From that subset, pick the candidate whose
+    // title most closely matches the user's input title.
+  const searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(title) + '&format=json&utf8=1&srlimit=10&origin=*';
   const sr = await fetch(searchUrl, { signal }).then(r => r.json());
-    const hit = sr?.query?.search?.[0];
+    const hits = sr?.query?.search || [];
+    let hit = null;
+    if (hits.length > 0) {
+      // helper: normalize a title for comparison
+      const normalize = (s) => {
+        if (!s) return '';
+        let t = String(s).toLowerCase().trim();
+        // remove parenthetical suffixes: "Foo (2009 film)" -> "Foo"
+        t = t.replace(/\s*\([^)]*\)\s*$/, '');
+        // drop leading "the "
+        t = t.replace(/^the\s+/i, '');
+        // remove non-alphanumeric characters
+        t = t.replace(/[^a-z0-9\s]/g, '');
+        t = t.replace(/\s+/g, ' ').trim();
+        return t;
+      };
+
+      // simple Levenshtein distance for tie-breaking
+      const levenshtein = (a, b) => {
+        if (a === b) return 0;
+        const al = a.length, bl = b.length;
+        if (al === 0) return bl;
+        if (bl === 0) return al;
+        const v0 = new Array(bl + 1).fill(0).map((_, i) => i);
+        const v1 = new Array(bl + 1).fill(0);
+        for (let i = 0; i < al; i++) {
+          v1[0] = i + 1;
+          for (let j = 0; j < bl; j++) {
+            const cost = a[i] === b[j] ? 0 : 1;
+            v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+          }
+          for (let j = 0; j <= bl; j++) v0[j] = v1[j];
+        }
+        return v1[bl];
+      };
+
+      const queryNorm = normalize(title);
+      const filmCandidates = [];
+
+      // Check candidates serially (to avoid too many parallel requests); collect confirmed films
+      for (const candidate of hits) {
+        try {
+          // fetch pageprops to resolve wikibase_item
+          const propsUrlCandidate = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(candidate.title) + '&prop=pageprops&format=json&origin=*';
+          const propsRespCand = await fetch(propsUrlCandidate, { signal }).then(r => r.json());
+          const pagesPropsCand = propsRespCand?.query?.pages || {};
+          const pageObjCand = Object.values(pagesPropsCand)[0] || {};
+          const wikibaseItemCand = pageObjCand.pageprops && pageObjCand.pageprops.wikibase_item;
+          if (wikibaseItemCand) {
+            try {
+              const entUrl = 'https://www.wikidata.org/wiki/Special:EntityData/' + encodeURIComponent(wikibaseItemCand) + '.json';
+              const entResp = await fetch(entUrl, { signal }).then(r => r.json());
+              const entities = entResp?.entities || {};
+              const ent = entities[wikibaseItemCand] || Object.values(entities)[0] || {};
+              const claims = ent.claims || {};
+              const p31 = claims.P31 || [];
+              const isFilm = p31.some(cl => {
+                const v = cl.mainsnak && cl.mainsnak.datavalue && cl.mainsnak.datavalue.value;
+                if (!v) return false;
+                if (typeof v === 'string') return v === 'Q11424';
+                if (v && v.id) return v.id === 'Q11424';
+                return false;
+              });
+              if (isFilm) {
+                filmCandidates.push(candidate);
+              }
+            } catch (e) {
+              console.debug('Wikidata entity check failed for', wikibaseItemCand, e);
+            }
+          }
+        } catch (e) {
+          if (e && e.name === 'AbortError') throw e;
+        }
+      }
+
+      // If we have film candidates, pick the one most similar to the query title
+      if (filmCandidates.length > 0) {
+        let best = null;
+        let bestScore = Infinity;
+        for (const c of filmCandidates) {
+          const candNorm = normalize(c.title);
+          let score = 0;
+          if (candNorm === queryNorm) {
+            score = 0;
+          } else if (candNorm.includes(queryNorm) || queryNorm.includes(candNorm)) {
+            score = 1;
+          } else {
+            score = levenshtein(candNorm, queryNorm);
+          }
+          if (score < bestScore) {
+            bestScore = score;
+            best = c;
+          }
+        }
+        hit = best;
+      } else {
+        // fall back to title heuristics if no film candidates confirmed via Wikidata
+        hit = hits.find(h => /\(\s*\d{4}\s+film\s*\)/i.test(h.title)) || hits.find(h => /\(\s*film\s*\)/i.test(h.title)) || hits[0];
+      }
+    }
     if (!hit) {
       wikiError.value = 'No Wikipedia page found for this title.';
       return;
     }
-    let pageTitle = hit.title;
-    // If the returned title starts with 'The ', strip that leading article when
-    // placing it into the form (user preference).
+    const apiTitle = hit.title; // canonical title returned by Wikipedia (use for API requests)
+    // Create a display title (strip a leading 'The ' for user preference) but keep
+    // apiTitle unchanged so subsequent Wikipedia/Wikidata queries use the exact page title.
+    let displayTitle = apiTitle;
     try {
-      if (/^The\s+/i.test(pageTitle)) {
-        pageTitle = pageTitle.replace(/^The\s+/i, '').trim();
+      if (/^The\s+/i.test(displayTitle)) {
+        displayTitle = displayTitle.replace(/^The\s+/i, '').trim();
       }
     } catch (e) {
-      // ignore regexp errors and fall back to original title
       console.debug('Failed to normalize title', e);
     }
-  // update the form title to the canonical Wikipedia page title (fix case/spacing)
-  formData.value.title = pageTitle;
+    // update the form title that the user sees, but keep apiTitle for lookups
+    formData.value.title = displayTitle;
+    // Use apiTitle for all following API calls
+    const pageTitle = apiTitle;
 
       // Additionally, check whether this page transcludes Template:Infobox_film.
       // Some pages use nested templates where the starring list is harder to extract from revisions; if
@@ -423,10 +654,11 @@ const fetchFromWikipedia = async () => {
         if (wikibaseItem) {
           // Query Wikidata SPARQL endpoint for structured fields
           // Require that the Wikidata item is an instance of a film (P31 = Q11424)
-          const sparql = `SELECT ?directorLabel ?castLabel ?genreLabel ?duration ?publicationDate WHERE {
+          const sparql = `SELECT ?directorLabel ?castLabel ?genreLabel ?composerLabel ?duration ?publicationDate WHERE {
             wd:${wikibaseItem} wdt:P31 wd:Q11424 .
             OPTIONAL { wd:${wikibaseItem} wdt:P57 ?director. }
             OPTIONAL { wd:${wikibaseItem} wdt:P161 ?cast. }
+            OPTIONAL { wd:${wikibaseItem} wdt:P86 ?composer. }
             OPTIONAL { wd:${wikibaseItem} wdt:P136 ?genre. }
             OPTIONAL { wd:${wikibaseItem} wdt:P2047 ?duration. }
             OPTIONAL { wd:${wikibaseItem} wdt:P577 ?publicationDate. }
@@ -441,6 +673,7 @@ const fetchFromWikipedia = async () => {
           const directorList = [];
           const castList = [];
           const genreList = [];
+          const composerList = [];
           let durationVal = null;
           let pubDateVal = null;
 
@@ -457,6 +690,7 @@ const fetchFromWikipedia = async () => {
             const g = pick(row, ['genreLabel', 'genre']);
             const dur = pick(row, ['duration']);
             const pub = pick(row, ['publicationDate']);
+            const comp = pick(row, ['composerLabel', 'composer']);
 
             if (d) {
               const kd = String(d).trim();
@@ -469,6 +703,10 @@ const fetchFromWikipedia = async () => {
             if (g) {
               const kg = String(g).trim();
               if (kg && !genreList.some(x => x.toLowerCase() === kg.toLowerCase())) genreList.push(kg);
+            }
+            if (comp) {
+              const kc = String(comp).trim();
+              if (kc && !composerList.some(x => x.toLowerCase() === kc.toLowerCase())) composerList.push(kc);
             }
             if (!durationVal && dur) durationVal = dur;
             if (!pubDateVal && pub) pubDateVal = pub;
@@ -509,6 +747,16 @@ const fetchFromWikipedia = async () => {
             }
           }
 
+          if (composerList.length > 0) {
+            // respect overwriteMode: only replace if overwriting or no existing music/composer
+            if (overwriteMode || !musicArray.value || musicArray.value.length === 0 || !formData.value.music || String(formData.value.music).trim() === '') {
+              musicArray.value = composerList;
+              formData.value.music = composerList.join(', ');
+              // keep legacy composer field for backward compatibility
+              formData.value.composer = composerList.join(', ');
+            }
+          }
+
           if (durationVal) {
             // respect overwriteMode: only set runtime if overwriting or runtime empty
             if (overwriteMode || !formData.value.runtime || String(formData.value.runtime).trim() === '') {
@@ -528,7 +776,7 @@ const fetchFromWikipedia = async () => {
             } catch (e) {}
           }
 
-          if (directorList.length > 0 || castList.length > 0 || genreList.length > 0 || durationVal || pubDateVal) {
+          if (directorList.length > 0 || castList.length > 0 || genreList.length > 0 || composerList.length > 0 || durationVal || pubDateVal) {
             wikidataUsed.value = true;
             // Instead of showing a badge in the UI, append a short note.
             // If notes are empty, defer appending until after we fetch the article extract
@@ -571,16 +819,49 @@ const fetchFromWikipedia = async () => {
       };
 
       try {
-        let imageUrl = null;
-        let imageFilename = null;
+  let imageUrl = null;
+  let imageFilename = null;
+  // Flag set when the server returns a deterministic/enwiki-resolved image
+  // so we can prefer it over Wikidata P18 results.
+  let serverResolvedFlag = false;
+        // helpers to prefer poster/promotional images and avoid cosplay/fanart/screenshot files
+        const isUndesirableImage = (name) => {
+          if (!name) return false;
+          // include common misspelling 'cossplay' as well as 'cosplay'
+          return /(cosplay|cossplay|fanart|screenshot|still|screencap|screengrab|behind[-_ ]?the[-_ ]?scenes)/i.test(name);
+        };
+        const isPosterish = (name) => {
+          if (!name) return false;
+          return /poster|promotional|promo|theatrical|teaser|poster[-_ ]?art/i.test(name);
+        };
         fetchImageStatus.value = 'Searching for cover image…';
 
+        
         // helper to attempt downloading and assigning an image URL (tries server proxy first, then original/thumbnail)
         const downloadAndAssign = async (imageUrlParam, imageFilenameParam) => {
           let imageUrlLocal = imageUrlParam;
           let imageFilenameLocal = imageFilenameParam;
           if (!imageUrlLocal) return false;
           console.log('fetchFromWikipedia: resolved imageUrl=', imageUrlLocal, 'imageFilename=', imageFilenameLocal);
+
+          // Strict rule: avoid any image URL that contains 'cosplay' (case-insensitive).
+          // Decode the URL for safety (handles percent-encoding) but fall back to raw string.
+          try {
+            const decoded = decodeURIComponent(String(imageUrlLocal).toLowerCase());
+            if (/(cosplay|cossplay)/i.test(decoded)) {
+              console.debug('fetchFromWikipedia: skipping image because URL contains "cosplay/cossplay"', imageUrlLocal);
+              fetchImageStatus.value = 'Skipped unsuitable image (cosplay)';
+              return false;
+            }
+          } catch (e) {
+            try {
+              if (/(cosplay|cossplay)/i.test(String(imageUrlLocal).toLowerCase())) {
+                console.debug('fetchFromWikipedia: skipping image because URL contains "cosplay/cossplay"', imageUrlLocal);
+                fetchImageStatus.value = 'Skipped unsuitable image (cosplay)';
+                return false;
+              }
+            } catch (ee) {}
+          }
 
           // If the user chose "Fill" (overwriteMode === false), do not replace an
           // existing image/preview/selected file. This prevents Fetch from
@@ -611,6 +892,27 @@ const fetchFromWikipedia = async () => {
             if (proxyResp && proxyResp.ok && proxyResp.data) {
               const contentType = proxyResp.contentType || '';
               const base64Data = proxyResp.data;
+              // If we have a serverCandidate (deterministic match) and this is a different
+              // candidate (e.g., from P18), ask the user which to keep.
+              try {
+                if (serverCandidate && serverCandidate.value && imageFilenameLocal) {
+                  const srv = serverCandidate.value;
+                  const other = { contentType: contentType || '', data: base64Data, filename: imageFilenameLocal };
+                  try {
+                    const useServer = await awaitServerChoice(srv, other);
+                    if (useServer) {
+                      applyServerCandidate(srv);
+                      serverCandidate.value = null;
+                      return true;
+                    }
+                    // else: user chose the other image — continue to assign below
+                  } catch (e) {
+                    // if chooser failed, fall through and assign this image
+                    console.debug('server chooser failed', e);
+                  }
+                }
+              } catch (e) {}
+
               previewUrl.value = 'data:' + (contentType || 'image/jpeg') + ';base64,' + base64Data;
               const subtype = (contentType && contentType.indexOf('/') !== -1) ? contentType.split('/')[1] : (imageFilenameLocal ? imageFilenameLocal.split('.').pop() : 'jpeg');
               formData.value.image = {
@@ -652,6 +954,31 @@ const fetchFromWikipedia = async () => {
           // If initial response not ok, try constructing a commons thumbnail URL when possible
           if (!(imgResp && imgResp.ok)) {
             try {
+              // If the URL points to a Commons Special:FilePath (or commons page) and we
+              // have the filename, try resolving it via the Commons API to get a direct
+              // file URL. This avoids CORS/redirects when fetching Special:FilePath URLs.
+              try {
+                if (imageFilenameLocal && imageUrlLocal && (imageUrlLocal.includes('Special:FilePath') || imageUrlLocal.includes('commons.wikimedia.org'))) {
+                  const commonsApi = 'https://commons.wikimedia.org/w/api.php?action=query&titles=' + encodeURIComponent('File:' + imageFilenameLocal) + '&prop=imageinfo&iiprop=url&format=json&origin=*';
+                  console.debug('fetchFromWikipedia: attempting Commons API imageinfo for', imageFilenameLocal, commonsApi);
+                  try {
+                    const infoResp2 = await fetch(commonsApi, { signal }).then(r => r.json());
+                    const infoPages2 = infoResp2?.query?.pages || {};
+                    const infoPg2 = Object.values(infoPages2)[0] || {};
+                    const imageinfo2 = infoPg2.imageinfo || [];
+                    if (imageinfo2.length > 0 && imageinfo2[0].url) {
+                      imageUrlLocal = imageinfo2[0].url;
+                      console.debug('fetchFromWikipedia: resolved commons imageinfo URL', imageUrlLocal);
+                      imgResp = await fetch(imageUrlLocal, { signal });
+                      console.debug('fetchFromWikipedia: fetched resolved commons URL', { ok: imgResp && imgResp.ok, status: imgResp && imgResp.status });
+                    }
+                  } catch (e) {
+                    console.debug('fetchFromWikipedia: Commons API imageinfo request failed', e);
+                  }
+                }
+              } catch (e) {
+                console.debug('fetchFromWikipedia: commons resolution attempted and failed', e);
+              }
               if (!imageFilenameLocal && imageUrlLocal) {
                 const parts = imageUrlLocal.split('/');
                 imageFilenameLocal = parts[parts.length - 1] || imageFilenameLocal;
@@ -684,6 +1011,25 @@ const fetchFromWikipedia = async () => {
             const buf = await imgResp.arrayBuffer();
             const base64Data = arrayBufferToBase64(buf);
             console.log('fetchFromWikipedia: downloaded image; contentType=', contentType, 'bytes=', buf.byteLength);
+            // If serverCandidate exists, ask user whether to prefer that over this download
+            try {
+              if (serverCandidate && serverCandidate.value && imageFilenameLocal) {
+                const srv = serverCandidate.value;
+                const other = { contentType: contentType || '', data: base64Data, filename: imageFilenameLocal };
+                try {
+                  const useServer = await awaitServerChoice(srv, other);
+                  if (useServer) {
+                    applyServerCandidate(srv);
+                    serverCandidate.value = null;
+                    return true; // assigned server image
+                  }
+                  // else: user chose the downloaded image; proceed to assign below
+                } catch (e) {
+                  console.debug('server chooser failed', e);
+                }
+              }
+            } catch (e) {}
+
             fetchImageStatus.value = 'Cover image downloaded';
             const subtype = contentType && contentType.indexOf('/') !== -1 ? contentType.split('/')[1] : (imageFilenameLocal ? imageFilenameLocal.split('.').pop() : 'jpeg');
             previewUrl.value = 'data:' + (contentType || ('image/' + subtype)) + ';base64,' + base64Data;
@@ -707,6 +1053,26 @@ const fetchFromWikipedia = async () => {
           console.debug('fetchFromWikipedia: image fetch ultimately failed, imgResp=', imgResp);
           return false;
         };
+  // SERVER-FIRST: Ask the server to attempt deterministic File: pattern resolution
+  // Do this before the pageimages and Wikidata fallbacks so deterministic
+  // filenames (including The_ variants) are preferred and resolved server-side
+  // to avoid browser CORS/redirect issues. If a server candidate and another
+  // candidate (e.g., Wikidata P18) both exist, we'll ask the user which to keep.
+
+        try {
+          fetchImageStatus.value = 'Checking server for conventional poster filenames…';
+          const proxyApi = '/api/fetch-image.php?title=' + encodeURIComponent(pageTitle) + '&tryPatterns=1';
+          const srv = await fetch(proxyApi).then(r => r.json());
+          if (srv && srv.ok && srv.data) {
+            // store candidate but don't force-assign yet — give user a choice if another
+            // strong candidate (like Wikidata P18) also appears.
+            serverCandidate.value = srv;
+            console.debug('fetchFromWikipedia: server deterministic candidate stored in serverCandidate', srv);
+            fetchImageStatus.value = 'Server found a conventional poster; awaiting confirmation';
+          }
+        } catch (e) {
+          console.debug('fetchFromWikipedia: server deterministic check failed', e);
+        }
 
         // 1) Wikipedia pageimages API (prefer original, else thumbnail)
         try {
@@ -716,6 +1082,18 @@ const fetchFromWikipedia = async () => {
           const piPages = piResp?.query?.pages || {};
           const piPage = Object.values(piPages)[0] || {};
           imageUrl = piPage?.original?.source || piPage?.thumbnail?.source || null;
+          // if the resolved pageimage filename looks undesirable (cosplay/fanart/etc.) and
+          // doesn't contain poster/promotional hints, skip using it
+          try {
+            if (imageUrl) {
+              const parts = imageUrl.split('/');
+              const fname = parts[parts.length - 1] || '';
+              if (isUndesirableImage(fname) && !isPosterish(fname)) {
+                console.debug('fetchFromWikipedia: skipping undesirable pageimage filename', fname);
+                imageUrl = null;
+              }
+            }
+          } catch (e) {}
           if (!imageUrl) {
             fetchImageStatus.value = 'No image on Wikipedia page; checking Wikidata...';
             console.debug('fetchFromWikipedia: no pageimage found for', pageTitle, 'page object:', piPage);
@@ -740,8 +1118,13 @@ const fetchFromWikipedia = async () => {
               if (val) {
                 // val is usually like 'File:Something.jpg'
                 imageFilename = String(val).replace(/^File:/i, '');
-                imageUrl = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(imageFilename);
-                console.debug('fetchFromWikipedia: wikidata P18 found', imageFilename, imageUrl);
+                // skip undesirable wikidata images unless they indicate poster/promotional
+                if (isUndesirableImage(imageFilename) && !isPosterish(imageFilename)) {
+                  console.debug('fetchFromWikipedia: skipping wikidata P18 undesirable filename', imageFilename);
+                } else {
+                  imageUrl = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(imageFilename);
+                  console.debug('fetchFromWikipedia: wikidata P18 found', imageFilename, imageUrl);
+                }
               }
             }
           } catch (e) {
@@ -765,6 +1148,31 @@ const fetchFromWikipedia = async () => {
             console.debug('fetchFromWikipedia: downloadAndAssign threw', e);
           }
         }
+        // Ask the server to attempt deterministic File: pattern resolution.
+        // The server will resolve Commons File: pages and return the image via the proxy to avoid CORS issues.
+        if (!imageUrl) {
+          try {
+            fetchImageStatus.value = 'Checking server for conventional poster filenames…';
+            const proxyApi = '/api/fetch-image.php?title=' + encodeURIComponent(pageTitle) + '&tryPatterns=1';
+            const srv = await fetch(proxyApi).then(r => r.json());
+            if (srv && srv.ok && srv.data) {
+              const contentType = srv.contentType || 'image/jpeg';
+              const b64 = srv.data;
+              // set preview and form image directly from returned base64
+              try {
+                previewUrl.value = 'data:' + contentType + ';base64,' + b64;
+              } catch (e) {
+                previewUrl.value = null;
+              }
+              const subtype = (contentType && contentType.indexOf('/') !== -1) ? contentType.split('/')[1] : 'jpeg';
+              formData.value.image = { name: '', type: subtype, data: b64 };
+              fetchImageStatus.value = 'Cover image assigned (server)';
+              imageUrl = 'server-resolved';
+            }
+          } catch (e) {
+            console.debug('fetchFromWikipedia: server deterministic check failed', e);
+          }
+        }
         // Fallback: if no imageUrl found yet, use the Wikipedia API to list images on the page
         // (avoids CORS issues fetching raw HTML). We'll prefer image titles containing 'poster'
         if (!imageUrl) {
@@ -776,13 +1184,82 @@ const fetchFromWikipedia = async () => {
             const pagesObj = imagesResp?.query?.pages || {};
             const pg = Object.values(pagesObj)[0] || {};
             const imgs = pg.images || [];
-            // Filter for likely poster files (jpg/png/webp) and prefer ones with 'poster' in the name
-            const candidates = imgs.map(i => i.title).filter(Boolean).filter(t => /\.(jpg|jpeg|png|webp)$/i.test(t));
+            // Filter for likely poster files (jpg/png/webp)
+            const candidatesRaw = imgs.map(i => i.title).filter(Boolean).filter(t => /\.(jpg|jpeg|png|webp)$/i.test(t));
+            // filter out clearly undesirable images first (cosplay, fanart, screenshots)
+            const candidates = candidatesRaw.filter(c => !isUndesirableImage(c));
             let chosenFile = null;
-            for (const c of candidates) {
-              if (/poster/i.test(c)) { chosenFile = c; break; }
+            try {
+              // normalize the page title (remove File: prefix and parentheticals)
+              const normPage = (pageTitle || '').toLowerCase().replace(/^file:/i, '').replace(/\s*\([^)]*\)\s*$/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+
+              // initial lightweight scoring based on filename
+              const scores = candidates.map(c => {
+                const fname = (c || '').toLowerCase();
+                let score = 1000;
+                // exact file match (ignoring File: prefix)
+                if (fname === ('file:' + normPage + '.jpg') || fname === (normPage + '.jpg')) score = 0;
+                // filename starts with normalized page title (strong signal)
+                else if (fname.replace(/^file:/, '').indexOf(normPage) === 0) score = 1;
+                // contains normalized page title words
+                else if (fname.indexOf(normPage.replace(/\s+/g, ' ')) !== -1) score = 5;
+                // poster/promotional hint lowers score
+                if (isPosterish(fname) || /poster|promotional|theatrical|promo|cover/i.test(fname)) score -= 3;
+                // shorter filenames slightly preferred
+                score += Math.min(20, fname.length / 20);
+                return { fname: c, score };
+              });
+
+              // take top candidates and fetch imageinfo in parallel to prefer upload.wikimedia.org and larger images
+              scores.sort((a,b) => a.score - b.score);
+              const top = scores.slice(0, 6).map(s => s.fname);
+              const enriched = await Promise.all(top.map(async (fname) => {
+                try {
+                  const infoApi2 = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(fname) + '&prop=imageinfo&iiprop=url|size&format=json&origin=*';
+                  const infoResp2 = await fetch(infoApi2, { signal }).then(r => r.json());
+                  const pages2 = infoResp2?.query?.pages || {};
+                  const pg2 = Object.values(pages2)[0] || {};
+                  const ii = (pg2.imageinfo && pg2.imageinfo[0]) || {};
+                  const url = ii.url || null;
+                  const width = ii.width || 0;
+                  return { fname, url, width };
+                } catch (err) {
+                  return { fname, url: null, width: 0 };
+                }
+              }));
+
+              // compute final score using filename match, poster hint, host, and image width
+              const finalScores = enriched.map(e => {
+                const fname = (e.fname || '').toLowerCase();
+                let score = 1000;
+                if (fname.replace(/^file:/, '') === normPage + '.jpg' || fname === normPage + '.jpg') score = 0;
+                else if (fname.replace(/^file:/, '').indexOf(normPage) === 0) score = 1;
+                else if (fname.indexOf(normPage.replace(/\s+/g, ' ')) !== -1) score = 10;
+                if (isPosterish(fname) || /poster|promotional|theatrical|promo|cover/i.test(fname)) score -= 4;
+                // prefer upload.wikimedia.org canonical host
+                if (e.url && /upload\.wikimedia\.org/i.test(e.url)) score -= 5;
+                // prefer larger images (width) - modest bonus scaled and capped
+                if (e.width && e.width > 0) {
+                  score -= Math.min(10, Math.floor(e.width / 400));
+                }
+                // small tie-breaker: shorter filename
+                score += Math.min(20, fname.length / 30);
+                return { fname: e.fname, score, url: e.url };
+              });
+
+              finalScores.sort((a,b) => a.score - b.score);
+              if (finalScores.length > 0) {
+                chosenFile = finalScores[0].fname;
+              }
+            } catch (e) {
+              // fallback to more basic heuristics
+              for (const c of candidates) {
+                if (isPosterish(c) || /poster/i.test(c)) { chosenFile = c; break; }
+              }
+              if (!chosenFile && candidates.length > 0) chosenFile = candidates[0];
             }
-            if (!chosenFile && candidates.length > 0) chosenFile = candidates[0];
+            // fallback: if all candidates were undesirable, fall back to the raw list
+            if (!chosenFile && candidatesRaw.length > 0) chosenFile = candidatesRaw[0];
             if (chosenFile) {
               // Now request imageinfo to get the direct URL (this API supports origin=*)
               fetchImageStatus.value = 'Resolving file URL…';
@@ -1027,6 +1504,19 @@ function parseIsoDurationToMinutes(v) {
   return null;
 }
 
+// Format label helper for display when viewing
+function formatLabel(f) {
+  const map = {
+    'DVD': 'DVD',
+    'BLU': 'Blu-ray',
+    '4K': '4K UHD',
+    'DIG': 'Digital',
+    'BCK': 'Backup',
+    'VHS': 'VHS'
+  };
+  return (f && map[f]) ? map[f] : (f || '');
+}
+
 onMounted(() => {
   document.addEventListener('keydown', handleEscape);
   // Prevent body scroll when modal is open
@@ -1083,6 +1573,17 @@ watch(() => props.dvd, (newDvd) => {
     } else {
       genresArray.value = [];
     }
+    // initialize music (composer) array from incoming data (comma separated or array)
+    if (newDvd.music && typeof newDvd.music === 'string') {
+      musicArray.value = newDvd.music.split(',').map(s => s.trim()).filter(Boolean);
+    } else if (Array.isArray(newDvd.music)) {
+      musicArray.value = newDvd.music.map(s => String(s).trim()).filter(Boolean);
+    } else if (newDvd.composer && String(newDvd.composer).trim() !== '') {
+      // fallback if older payload used `composer`
+      musicArray.value = String(newDvd.composer).split(',').map(s => s.trim()).filter(Boolean);
+    } else {
+      musicArray.value = [];
+    }
     // If this is a newly-created DVD and we're in edit mode, autofocus title
     if (isEditing.value && (!newDvd.id && !newDvd.dkey)) {
       nextTick(() => {
@@ -1104,8 +1605,8 @@ const save = () => {
   // convert selected file to base64 (if any) and attach
   const performSave = async () => {
     try {
-      // sync actors tokens back into formData as comma-separated string
-      formData.value.actors = actorsArray.value.join(', ');
+  // sync actors tokens back into formData as comma-separated string
+  formData.value.actors = actorsArray.value.join(', ');
         // sync directors tokens back into formData as comma-separated string
         formData.value.directors = directorsArray.value.join(', ');
         // also set legacy `director` field for server compatibility
@@ -1114,6 +1615,8 @@ const save = () => {
         formData.value.stars = actorsArray.value.join(', ');
         // sync genres tokens back into formData as comma-separated string
         formData.value.genre = genresArray.value.join(', ');
+  // sync music/composer tokens back into formData as comma-separated string
+  formData.value.music = musicArray.value.join(', ');
 
       if (selectedFile.value) {
         const base64 = await fileToBase64(selectedFile.value);
@@ -1300,6 +1803,10 @@ const focusGenreInput = () => {
   if (genreInput.value && isEditing.value) genreInput.value.focus();
 };
 
+const focusMusicInput = () => {
+  if (musicInput.value && isEditing.value) musicInput.value.focus();
+};
+
 const addGenre = (raw) => {
   if (!raw) return;
   const parts = String(raw).split(',').map(s => cleanGenreTerm(s)).map(s => s.trim()).filter(Boolean);
@@ -1326,6 +1833,34 @@ const onGenreKeydown = (e) => {
 const onGenreBlur = () => {
   if (genreInputValue.value && genreInputValue.value.trim()) {
     addGenre(genreInputValue.value);
+  }
+};
+
+const addMusic = (raw) => {
+  if (!raw) return;
+  const parts = String(raw).split(',').map(s => s.trim()).filter(Boolean);
+  for (const p of parts) {
+    if (!musicArray.value.includes(p)) musicArray.value.push(p);
+  }
+  musicInputValue.value = '';
+};
+
+const removeMusic = (idx) => {
+  musicArray.value.splice(idx, 1);
+};
+
+const onMusicKeydown = (e) => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    addMusic(musicInputValue.value);
+  } else if (e.key === 'Backspace' && (!musicInputValue.value || musicInputValue.value.length === 0)) {
+    musicArray.value.pop();
+  }
+};
+
+const onMusicBlur = () => {
+  if (musicInputValue.value && musicInputValue.value.trim()) {
+    addMusic(musicInputValue.value);
   }
 };
 
@@ -1359,6 +1894,39 @@ const onGenreEditKeydown = (e) => {
   } else if (e.key === 'Escape') {
     genreEditIndex.value = -1;
     genreEditValue.value = '';
+  }
+};
+
+// token edit handlers for music
+const startEditMusic = (idx) => {
+  if (!isEditing.value) return;
+  musicEditIndex.value = idx;
+  musicEditValue.value = musicArray.value[idx] || '';
+  nextTick(() => {
+    if (musicEditInput.value) musicEditInput.value.focus();
+  });
+};
+
+const commitMusicEdit = () => {
+  const idx = musicEditIndex.value;
+  if (idx < 0) return;
+  const v = (musicEditValue.value || '').trim();
+  if (v === '') {
+    musicArray.value.splice(idx, 1);
+  } else {
+    musicArray.value.splice(idx, 1, v);
+  }
+  musicEditIndex.value = -1;
+  musicEditValue.value = '';
+};
+
+const onMusicEditKeydown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    commitMusicEdit();
+  } else if (e.key === 'Escape') {
+    musicEditIndex.value = -1;
+    musicEditValue.value = '';
   }
 };
 
@@ -1489,7 +2057,7 @@ const onDirectorEditKeydown = (e) => {
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 800px;
+  max-width: 1100px; /* increased overall modal width */
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -1555,11 +2123,11 @@ const onDirectorEditKeydown = (e) => {
 }
 
 .dvd-image-section {
-  min-width: 200px;
+  min-width: 260px; /* increased to give more room and keep cover visually balanced */
 }
 
 .dvd-cover {
-  width: 200px;
+  width: 260px;
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -1568,8 +2136,8 @@ const onDirectorEditKeydown = (e) => {
 
 .dvd-form {
   display: grid;
-  grid-template-columns: 200px 1fr; /* left column for cover, right for fields */
-  gap: 20px;
+  grid-template-columns: 260px 1fr; /* left column for cover, right for fields */
+  gap: 16px 64px; /* smaller vertical gap, large horizontal gap between cover and fields */
 }
 
 .right-column {
@@ -1799,8 +2367,27 @@ const onDirectorEditKeydown = (e) => {
     padding: 15px;
   }
 }
-</style>
-<style scoped>
+
+/* Notes view and token styles merged into the main style block for cleanliness */
+.notes-view {
+  white-space: pre-wrap; /* preserve paragraphs/newlines */
+  padding: 14px; /* breathing room inside the note box */
+  background: #f1f7ff; /* slightly darker, still very light */
+  border: 1px solid #d7ecff; /* subtle border with a bit more contrast */
+  border-left: 4px solid #a9d3ff; /* thin left accent bar */
+  border-radius: 8px;
+  color: #111827;
+  line-height: 1.45;
+  box-shadow: 0 1px 0 rgba(16,24,40,0.02) inset;
+}
+
+.plain-value {
+  padding: 10px 0; /* align visually with inputs but without borders */
+  color: #111827;
+  font-size: 1rem;
+  min-height: 38px;
+}
+
 .actor-input {
   display: flex;
   flex-wrap: wrap;
@@ -1838,4 +2425,54 @@ const onDirectorEditKeydown = (e) => {
   min-width: 120px;
   font-size: 1em;
 }
+
+/* Server chooser styles */
+.server-chooser-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 1200;
+}
+.server-chooser {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  max-width: 900px;
+  width: 95%;
+}
+.server-chooser-grid {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+}
+.chooser-card {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.chooser-img {
+  max-width: 320px;
+  max-height: 400px;
+  width: auto;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.chooser-label {
+  font-size: 0.9rem;
+  color: #374151;
+}
+.chooser-fname {
+  font-size: 0.85rem;
+  color: #4b5563;
+  text-align: center;
+  word-break: break-word;
+}
+
 </style>
