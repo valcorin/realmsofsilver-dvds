@@ -15,13 +15,81 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const sortColumn = ref('title');
 const sortDirection = ref('asc');
+const adminToken = ref('');
 // Controller used to cancel in-flight list/search requests
 let dvdsController = null;
 
 // Load DVDs from the API when component mounts
 onMounted(async () => {
+  try {
+    const t = localStorage.getItem('apiToken');
+    if (t) adminToken.value = t;
+  } catch (e) {}
   await loadDvds();
 });
+
+// Show a small masked password login modal instead of using window.prompt
+const showAdminLogin = ref(false);
+const adminLoginValue = ref('');
+
+const loginAdmin = () => {
+  adminLoginValue.value = '';
+  showAdminLogin.value = true;
+};
+
+const adminLoginBusy = ref(false);
+const adminLoginError = ref('');
+
+const submitAdminLogin = async () => {
+  const t = adminLoginValue.value && adminLoginValue.value.trim();
+  adminLoginError.value = '';
+  if (!t) {
+    adminLoginError.value = 'Please enter the API key.';
+    return;
+  }
+  adminLoginBusy.value = true;
+  try {
+    const res = await fetch('/api/validate-token.php', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + t,
+        'Accept': 'application/json'
+      }
+    });
+    if (!res.ok) {
+      // try to read json error message
+      let body = {};
+      try { body = await res.json(); } catch (e) {}
+      adminLoginError.value = body && body.error ? String(body.error) : 'Invalid API key';
+      return;
+    }
+    const j = await res.json();
+    if (j && j.ok) {
+      try { localStorage.setItem('apiToken', t); } catch (e) {}
+      adminToken.value = t;
+      adminLoginValue.value = '';
+      showAdminLogin.value = false;
+      adminLoginError.value = '';
+    } else {
+      adminLoginError.value = (j && j.error) ? String(j.error) : 'Invalid API key';
+    }
+  } catch (err) {
+    console.error('Token validation failed', err);
+    adminLoginError.value = 'Network or server error validating key';
+  } finally {
+    adminLoginBusy.value = false;
+  }
+};
+
+const cancelAdminLogin = () => {
+  adminLoginValue.value = '';
+  showAdminLogin.value = false;
+};
+
+const logoutAdmin = () => {
+  try { localStorage.removeItem('apiToken'); } catch (e) {}
+  adminToken.value = '';
+};
 
 const loadDvds = async (page = currentPage.value, q = undefined) => {
   // If this is a typed search (q provided by caller), avoid toggling the global loading state.
@@ -201,12 +269,34 @@ const retryLoad = () => {
 <template>
   <div class="app-container">
     <header class="app-header">
-      <h1>🎬 Realms of Silver DVD Collection</h1>
+      <h1>🎬 My DVD Collection</h1>
+        <div style="position:absolute; top:18px; right:20px;">
+          <template v-if="adminToken">
+            <button @click="logoutAdmin" class="btn-secondary">Admin: Logged in</button>
+          </template>
+          <template v-else>
+            <button @click="loginAdmin" class="btn-secondary">Admin login</button>
+          </template>
+        </div>
       <p class="subtitle">
         Manage and browse your DVD collection
         <span v-if="pagination.total_records"> — Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, pagination.total_records) }} of {{ pagination.total_records }} DVDs</span>
       </p>
     </header>
+
+    <!-- Admin login modal (masked password input) -->
+    <div v-if="showAdminLogin" class="admin-login-modal" role="dialog" aria-modal="true">
+      <div class="admin-login-backdrop" @click="cancelAdminLogin"></div>
+      <div class="admin-login-box">
+        <h3>Admin Login</h3>
+        <input type="password" v-model="adminLoginValue" placeholder="Enter API key" class="admin-password-input" />
+        <div v-if="adminLoginError" class="admin-login-error" role="alert" style="color:#b91c1c;margin-bottom:8px">{{ adminLoginError }}</div>
+        <div class="modal-actions">
+          <button @click="submitAdminLogin" class="btn-primary" :disabled="adminLoginBusy">{{ adminLoginBusy ? 'Checking…' : 'Login' }}</button>
+          <button @click="cancelAdminLogin" class="btn-secondary" :disabled="adminLoginBusy">Cancel</button>
+        </div>
+      </div>
+    </div>
 
     <main class="app-main">
       <!-- Loading state -->
@@ -233,6 +323,7 @@ const retryLoad = () => {
           :pagination="pagination"
           :sort-column="sortColumn"
           :sort-direction="sortDirection"
+          :is-admin="!!adminToken"
           @select-dvd="handleSelectDvd"
           @edit-dvd="handleEditDvd"
           @create-dvd="handleCreateDvd"
@@ -274,6 +365,7 @@ const retryLoad = () => {
           v-if="selectedDvd"
           :dvd="selectedDvd"
           :edit-mode="editMode"
+          :is-admin="!!adminToken"
           @update-dvd="handleUpdateDvd"
           @close="handleClose"
           @deleted="handleDeletedDvd"
@@ -509,4 +601,40 @@ const retryLoad = () => {
     min-width: 120px;
   }
 }
+
+/* Admin login modal styles */
+.admin-login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.admin-login-backdrop {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+}
+.admin-login-box {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  z-index: 1201;
+  min-width: 320px;
+}
+.admin-password-input {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 10px 0 16px 0;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; }
+
 </style>

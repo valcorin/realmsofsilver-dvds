@@ -15,7 +15,7 @@
         />
       </div>
 
-      <button class="btn-new" @click.stop="createDvd">New</button>
+  <button class="btn-new" @click.stop="createDvd" :disabled="!props.isAdmin" :aria-disabled="!props.isAdmin">New</button>
     </div>
     <div class="table-wrapper">
       <table class="dvd-table">
@@ -73,7 +73,7 @@
             <td>{{ dvd.actors || dvd.stars }}</td>
             <td>{{ dvd.genre }}</td>
             <td class="actions-cell">
-              <button @click.stop="editDvd(dvd)" class="btn-edit">Edit</button>
+              <button @click.stop="editDvd(dvd)" class="btn-edit" :disabled="!props.isAdmin" :aria-disabled="!props.isAdmin">Edit</button>
               <button @click.stop="viewDetails(dvd)" class="btn-view">View</button>
             </td>
           </tr>
@@ -104,6 +104,11 @@ const props = defineProps({
   sortDirection: {
     type: String,
     default: 'asc'
+  }
+  ,
+  isAdmin: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -157,10 +162,18 @@ const selectDvd = (dvd) => {
 };
 
 const editDvd = (dvd) => {
+  if (!props.isAdmin) {
+    console.warn('Edit action blocked: admin required');
+    return;
+  }
   emit('edit-dvd', dvd);
 };
 
 const createDvd = () => {
+  if (!props.isAdmin) {
+    console.warn('Create action blocked: admin required');
+    return;
+  }
   emit('create-dvd');
 };
 
@@ -302,10 +315,13 @@ h2 {
 }
 
 .dvd-table td {
-  padding: 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid #e0e0e0;
   color: #2c3e50;
   font-weight: 500;
+  vertical-align: middle;
+  line-height: 1.25;
+  white-space: normal; /* allow wrapping but keep rows tight */
 }
 
 .clickable-row {
@@ -371,22 +387,24 @@ h2 {
 
 /* Cover image styles */
 .cover-cell {
-  width: 50px;
+  width: 56px;
   text-align: center;
-  padding: 8px !important;
+  padding: 6px 8px !important;
 }
 
 .cover-thumbnail {
-  width: 40px;
-  height: 60px;
+  width: 36px;
+  height: 54px; /* constrained to keep row heights consistent */
   object-fit: cover;
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .cover-thumbnail:hover {
-  transform: scale(1.1);
+  transform: scale(1.06);
 }
 
 .no-cover {

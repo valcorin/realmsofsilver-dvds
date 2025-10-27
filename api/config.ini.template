@@ -4,3 +4,9 @@ username = your_db_username
 password = your_db_password
 dbname = your_database_name
 charset = utf8mb4
+
+[auth]
+# Optional API key used to secure create/update/delete operations.
+# If empty, the API remains open for mutating requests (useful for local/dev).
+# To enable auth, set a strong random token and provide it to admin clients.
+api_key = 

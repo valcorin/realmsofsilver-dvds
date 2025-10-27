@@ -50,11 +50,14 @@ class DvdApiService {
           console.debug('createDvd: no image in payload');
         }
       } catch (e) {}
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const token = localStorage.getItem('apiToken');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+      } catch (e) {}
       const response = await fetch(`${this.baseUrl}/dvds.php`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(dvdData)
       });
 
@@ -85,11 +88,14 @@ class DvdApiService {
           console.debug('updateDvd: no image in payload');
         }
       } catch (e) {}
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const token = localStorage.getItem('apiToken');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+      } catch (e) {}
       const response = await fetch(`${this.baseUrl}/dvds.php`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(dvdData)
       });
 
@@ -112,8 +118,14 @@ class DvdApiService {
 
   async deleteDvd(id) {
     try {
+      const headers = {};
+      try {
+        const token = localStorage.getItem('apiToken');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+      } catch (e) {}
       const response = await fetch(`${this.baseUrl}/dvds.php?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       });
 
       if (!response.ok) {
