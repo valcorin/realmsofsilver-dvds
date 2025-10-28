@@ -119,6 +119,60 @@
               </div>
             </div>
 
+            <!-- place Genre, Directors, and Music/Composer in the right column -->
+            
+            <div class="form-group">
+              <label for="directors">Directors:</label>
+              <div v-if="isEditing" class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
+                <template v-for="(dir, idx) in directorsArray" :key="idx">
+                  <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
+                    {{ dir }}
+                    <button v-if="isEditing" type="button" class="token-remove"
+                      @click.stop="removeDirector(idx)">✕</button>
+                  </span>
+                  <input v-else ref="directorEditInput" class="token-edit-input" v-model="directorEditValue"
+                    @keydown="onDirectorEditKeydown" @blur="commitDirectorEdit" />
+                </template>
+                <input ref="directorInput" v-show="isEditing && directorEditIndex === -1" v-model="directorInputValue"
+                  @keydown="onDirectorKeydown" @blur="onDirectorBlur"
+                  placeholder="Add director and press Enter or comma" />
+                <div v-if="isEditing && directorsArray.length === 0" class="hint">No director listed</div>
+              </div>
+              <div v-else>
+                <div class="actor-input actor-input--shrink" :class="{ disabled: true }">
+                  <template v-if="directorsArray && directorsArray.length">
+                    <span v-for="(d, i) in directorsArray" :key="'dir-'+i" class="actor-token">{{ d }}</span>
+                  </template>
+                  <span v-else class="hint">No director listed</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="music">Music:</label>
+              <div v-if="isEditing" class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusMusicInput">
+                <template v-for="(m, idx) in musicArray" :key="idx">
+                  <span v-if="musicEditIndex !== idx" class="actor-token" @click.stop="startEditMusic(idx)">
+                    {{ m }}
+                    <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeMusic(idx)">✕</button>
+                  </span>
+                  <input v-else ref="musicEditInput" class="token-edit-input" v-model="musicEditValue"
+                    @keydown="onMusicEditKeydown" @blur="commitMusicEdit" />
+                </template>
+                <input ref="musicInput" v-show="isEditing && musicEditIndex === -1" v-model="musicInputValue"
+                  @keydown="onMusicKeydown" @blur="onMusicBlur" placeholder="Add composer and press Enter or comma" />
+                <div v-if="isEditing && musicArray.length === 0" class="hint">No composer listed</div>
+              </div>
+              <div v-else>
+                <div class="actor-input actor-input--shrink" :class="{ disabled: true }">
+                  <template v-if="musicArray && musicArray.length">
+                    <span v-for="(m, i) in musicArray" :key="'music-'+i" class="actor-token">{{ m }}</span>
+                  </template>
+                  <span v-else class="hint">No composer listed</span>
+                </div>
+              </div>
+            </div>
+
           </div> <!-- .right-column -->
 
           <!-- Cover image controls: put Browse and Remove on their own full-width row -->
@@ -135,49 +189,7 @@
           </div>
 
           
-          <div class="form-group full-width">
-            <label for="directors">Directors:</label>
-            <div v-if="isEditing" class="actor-input" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
-              <template v-for="(dir, idx) in directorsArray" :key="idx">
-                <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
-                  {{ dir }}
-                  <button v-if="isEditing" type="button" class="token-remove"
-                    @click.stop="removeDirector(idx)">✕</button>
-                </span>
-                <input v-else ref="directorEditInput" class="token-edit-input" v-model="directorEditValue"
-                  @keydown="onDirectorEditKeydown" @blur="commitDirectorEdit" />
-              </template>
-              <input ref="directorInput" v-show="isEditing && directorEditIndex === -1" v-model="directorInputValue"
-                @keydown="onDirectorKeydown" @blur="onDirectorBlur"
-                placeholder="Add director and press Enter or comma" />
-              <div v-if="isEditing && directorsArray.length === 0" class="hint">No director listed</div>
-            </div>
-            <div v-else class="plain-list">
-              <span v-if="directorsArray && directorsArray.length">{{ directorsArray.join(', ') }}</span>
-              <span v-else class="hint">No director listed</span>
-            </div>
-          </div>
-
-          <div class="form-group full-width">
-            <label for="music">Music / Composer:</label>
-            <div v-if="isEditing" class="actor-input" :class="{ disabled: !isEditing }" @click="focusMusicInput">
-              <template v-for="(m, idx) in musicArray" :key="idx">
-                <span v-if="musicEditIndex !== idx" class="actor-token" @click.stop="startEditMusic(idx)">
-                  {{ m }}
-                  <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeMusic(idx)">✕</button>
-                </span>
-                <input v-else ref="musicEditInput" class="token-edit-input" v-model="musicEditValue"
-                  @keydown="onMusicEditKeydown" @blur="commitMusicEdit" />
-              </template>
-              <input ref="musicInput" v-show="isEditing && musicEditIndex === -1" v-model="musicInputValue"
-                @keydown="onMusicKeydown" @blur="onMusicBlur" placeholder="Add composer and press Enter or comma" />
-              <div v-if="isEditing && musicArray.length === 0" class="hint">No composer listed</div>
-            </div>
-            <div v-else class="plain-list">
-              <span v-if="musicArray && musicArray.length">{{ musicArray.join(', ') }}</span>
-              <span v-else class="hint">No composer listed</span>
-            </div>
-          </div>
+          <!-- Directors and Music relocated into the right column above; keep Actors and Notes below -->
 
           <div class="form-group full-width">
             <label for="actors">Actors:</label>
@@ -2456,10 +2468,11 @@ const onDirectorEditKeydown = (e) => {
   gap: 8px;
   align-items: center;
   padding: 8px;
-  border: 2px solid #e1e5e9;
+  /* make surrounding box fainter: thinner border and subtler background */
+  border: 1px solid #eef4ff;
   border-radius: 6px;
   min-height: 44px;
-  background: #fff;
+  background: #fbfdff;
 }
 
 /* Variant for token containers that should shrink to fit their contents (e.g. Genre) */
@@ -2469,8 +2482,13 @@ const onDirectorEditKeydown = (e) => {
   max-width: 100%; /* don't overflow container */
   padding: 6px 8px;
   min-height: 0;
-  /* Prevent parent .form-group (a column flex container) from stretching this item */
-  align-self: flex-start;
+  /* default alignment; overridden in non-full-width groups below */
+}
+
+/* For inline (non-full-width) form groups, align the token container baseline
+   so the token pills sit level with the label text rather than top-aligned. */
+.form-group:not(.full-width) .actor-input.actor-input--shrink {
+  align-self: baseline;
 }
 
 .actor-input--shrink input {
