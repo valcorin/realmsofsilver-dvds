@@ -41,16 +41,9 @@
             <!-- show preview of newly selected file first, otherwise existing image -->
             <img v-if="previewUrl" :src="previewUrl" :alt="formData.title" class="dvd-cover" />
             <img v-else-if="dvdImageUrl" :src="dvdImageUrl" :alt="formData.title" class="dvd-cover" />
-
-            <!-- File input only available when editing -->
-            <div v-if="isEditing" style="margin-top:12px; display:flex; gap:8px; flex-direction:column;">
+            <!-- File input only available when editing (small, left under the cover) -->
+            <div v-if="isEditing" class="file-controls">
               <input type="file" accept="image/*" @change="onFileChange" />
-              <div style="display:flex; gap:8px; align-items:center;">
-                <button v-if="(formData.image || previewUrl)" @click.prevent="removeImage" class="btn-secondary">Remove
-                  image</button>
-                <small v-if="formData.image && !previewUrl">Current: {{ formData.image.name || 'existing image'
-                  }}</small>
-              </div>
             </div>
           </div>
           <div class="right-column">
@@ -144,6 +137,11 @@
                   @keydown="onGenreKeydown" @blur="onGenreBlur" placeholder="Add genre and press Enter or comma" />
                 <div v-if="!isEditing && genresArray.length === 0" class="hint">No genre listed</div>
               </div>
+            </div>
+
+            <div class="form-group full-width image-actions">
+              <button v-if="isEditing && (formData.image || previewUrl)" @click.prevent="removeImage" class="btn-secondary">Remove image</button>
+              <small v-if="isEditing && formData.image && !previewUrl">Current: {{ formData.image.name || 'existing image' }}</small>
             </div>
 
           </div> <!-- .right-column -->
@@ -2273,14 +2271,14 @@ const onDirectorEditKeydown = (e) => {
 
 .btn-primary,
 .btn-secondary {
-  padding: 12px 24px;
+  padding: 6px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 1em;
+  font-size: .8em;
   font-weight: 600;
   transition: all 0.3s;
-  min-width: 100px;
+  min-width: 50px;
 }
 
 .btn-primary {
@@ -2536,5 +2534,58 @@ const onDirectorEditKeydown = (e) => {
   color: #4b5563;
   text-align: center;
   word-break: break-word;
+}
+
+/* File input + remove button inline controls inside the cover section */
+.file-controls {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.file-controls input[type="file"] {
+  /* default: allow the file control to shrink, but when inside the cover column we'll cap width */
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: calc(100% - 110px);
+}
+.dvd-image-section .file-controls input[type="file"] {
+  /* in the left cover column make the control compact but give more room so filename isn't obscured */
+  flex: 0 0 auto;
+  width: 180px;
+  max-width: 180px;
+}
+.file-controls .btn-secondary {
+  width: auto;
+  min-width: 0;
+  padding: 8px 12px;
+}
+@media (max-width: 768px) {
+  .file-controls .btn-secondary { width: auto; }
+}
+
+/* right-column image actions: place Remove button and "Current:" inline, top-left aligned */
+.image-actions {
+  display: flex;
+  /* arrange button and small text side-by-side */
+  flex-direction: row;
+  align-items: flex-start; /* top-align so the button sits at the top of the grid cell */
+  gap: 8px;
+  margin-top: 6px;
+  justify-content: flex-start;
+  align-self: start;
+}
+.image-actions small {
+  display: inline-block;
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.image-actions .btn-secondary {
+  min-width: 90px;
+  padding: 6px 10px;
 }
 </style>
