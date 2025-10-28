@@ -41,10 +41,6 @@
             <!-- show preview of newly selected file first, otherwise existing image -->
             <img v-if="previewUrl" :src="previewUrl" :alt="formData.title" class="dvd-cover" />
             <img v-else-if="dvdImageUrl" :src="dvdImageUrl" :alt="formData.title" class="dvd-cover" />
-            <!-- File input only available when editing (small, left under the cover) -->
-            <div v-if="isEditing" class="file-controls">
-              <input type="file" accept="image/*" @change="onFileChange" />
-            </div>
           </div>
           <div class="right-column">
             <div class="form-group">
@@ -139,13 +135,22 @@
               </div>
             </div>
 
-            <div class="form-group full-width image-actions">
-              <button v-if="isEditing && (formData.image || previewUrl)" @click.prevent="removeImage" class="btn-secondary">Remove image</button>
-              <small v-if="isEditing && formData.image && !previewUrl">Current: {{ formData.image.name || 'existing image' }}</small>
-            </div>
-
           </div> <!-- .right-column -->
 
+          <!-- Cover image controls: put Browse and Remove on their own full-width row -->
+          <div class="form-group full-width">
+            <div class="image-row" style="display:flex; gap:24px; align-items:center;">
+              <div v-if="isEditing" class="file-controls">
+                <input type="file" accept="image/*" @change="onFileChange" />
+              </div>
+              <div class="image-actions">
+                <button v-if="isEditing && (formData.image || previewUrl)" @click.prevent="removeImage" class="btn-secondary">Remove image</button>
+                <small v-if="isEditing && formData.image && !previewUrl">Current: {{ formData.image.name || 'existing image' }}</small>
+              </div>
+            </div>
+          </div>
+
+          
           <div class="form-group full-width">
             <label for="directors">Directors:</label>
             <div v-if="isEditing" class="actor-input" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
@@ -2538,7 +2543,7 @@ const onDirectorEditKeydown = (e) => {
 
 /* File input + remove button inline controls inside the cover section */
 .file-controls {
-  margin-top: 6px;
+  margin-top: 4px;
   display: flex;
   gap: 8px;
   align-items: center;
@@ -2549,12 +2554,33 @@ const onDirectorEditKeydown = (e) => {
   flex: 1 1 140px;
   min-width: 0;
   max-width: calc(100% - 110px);
+  /* reduce visual height of the native file input to better match other controls */
+  height: 36px;
+  padding: 6px 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  font-size: 0.95rem;
 }
 .dvd-image-section .file-controls input[type="file"] {
   /* in the left cover column make the control compact but give more room so filename isn't obscured */
   flex: 0 0 auto;
   width: 180px;
   max-width: 180px;
+  height: 32px;
+}
+/* When file-controls are inside a full-width form-group row, allow
+   the native file input to take the available horizontal space so
+   the Browse button and filename are fully visible. This overrides
+   the narrower defaults above using a more specific selector. */
+.form-group.full-width .image-row .file-controls {
+  flex: 1 1 auto;
+}
+.form-group.full-width .image-row .file-controls input[type="file"] {
+  width: 100%;
+  max-width: none;
+  flex: 1 1 auto;
+  height: 36px;
+  padding: 6px 10px;
 }
 .file-controls .btn-secondary {
   width: auto;
