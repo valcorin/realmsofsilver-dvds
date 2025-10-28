@@ -289,14 +289,14 @@ const retryLoad = () => {
   <div class="app-container">
     <header class="app-header">
       <h1>🎬 My DVD Collection</h1>
-        <div style="position:absolute; top:18px; right:20px;">
-          <template v-if="adminToken">
-            <button @click="logoutAdmin" class="btn-secondary">Admin: Logged in</button>
-          </template>
-          <template v-else>
-            <button @click="loginAdmin" class="btn-secondary">Admin login</button>
-          </template>
-        </div>
+      <div class="admin-toggle">
+        <template v-if="adminToken">
+          <button @click="logoutAdmin" class="btn-secondary">Admin: Logged in</button>
+        </template>
+        <template v-else>
+          <button @click="loginAdmin" class="btn-secondary">Admin login</button>
+        </template>
+      </div>
       <p class="subtitle">
         Manage and browse your DVD collection
         <span v-if="pagination.total_records"> — Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, pagination.total_records) }} of {{ pagination.total_records }} DVDs</span>
@@ -410,7 +410,24 @@ const retryLoad = () => {
 .app-header {
   text-align: center;
   padding: 20px 20px;
+  position: relative;
   color: white;
+}
+
+/* Admin toggle (positioned top-right on wide screens, stacked under title on small screens) */
+.admin-toggle {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+}
+
+@media (max-width: 520px) {
+  .admin-toggle {
+    position: static;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
 }
 
 .app-header h1 {

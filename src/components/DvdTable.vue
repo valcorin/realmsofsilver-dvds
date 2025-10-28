@@ -34,15 +34,15 @@
               Type
               <span v-if="sortColumn === 'type'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th @click="sortBy('director')">
+            <th class="col-directors" @click="sortBy('director')">
               Directors
               <span v-if="sortColumn === 'director'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th @click="sortBy('actors')">
+            <th class="col-actors" @click="sortBy('actors')">
               Actors
               <span v-if="sortColumn === 'actors'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th @click="sortBy('genre')">
+            <th class="col-genre" @click="sortBy('genre')">
               Genre
               <span v-if="sortColumn === 'genre'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
@@ -69,9 +69,9 @@
             <td>{{ displayTitle(dvd) }}</td>
             <td>{{ dvd.year }}</td>
             <td>{{ displayType(dvd.type || dvd.format) }}</td>
-            <td>{{ dvd.directors || dvd.director }}</td>
-            <td>{{ dvd.actors || dvd.stars }}</td>
-            <td>{{ dvd.genre }}</td>
+            <td class="col-directors">{{ dvd.directors || dvd.director }}</td>
+            <td class="col-actors">{{ dvd.actors || dvd.stars }}</td>
+            <td class="col-genre">{{ dvd.genre }}</td>
             
           </tr>
         </tbody>
@@ -445,6 +445,25 @@ h2 {
     width: 32px;
     height: 48px;
     font-size: 16px;
+  }
+
+  /* Mobile: simplify table to only Cover / Title / Year / Type for small screens */
+  .dvd-table th.col-directors,
+  .dvd-table th.col-actors,
+  .dvd-table th.col-genre,
+  .dvd-table td.col-directors,
+  .dvd-table td.col-actors,
+  .dvd-table td.col-genre {
+    display: none;
+  }
+
+  /* Make rows have a consistent vertical height on mobile */
+  .dvd-table td {
+    padding: 10px 8px;
+  }
+
+  .dvd-table tr {
+    height: 68px; /* consistent row height for mobile */
   }
 }
 </style>

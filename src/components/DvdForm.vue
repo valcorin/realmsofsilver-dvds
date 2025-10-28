@@ -100,42 +100,35 @@
             </div>
 
 
-            <div class="form-group">
+            
+
+            <!-- Desktop: Genre/Directors/Music stay in the right column when not on small screens -->
+            <div v-if="!isSmallScreen" class="form-group desktop-gap desktop-genre">
               <label for="genre">Genre:</label>
-              <!-- shrink-to-fit for genre tokens so the box sizes to its content -->
               <div class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusGenreInput">
                 <template v-for="(g, idx) in genresArray" :key="idx">
                   <span v-if="genreEditIndex !== idx" class="actor-token" @click.stop="startEditGenre(idx)">
                     {{ g }}
-                    <button v-if="isEditing" type="button" class="token-remove"
-                      @click.stop="removeGenre(idx)">✕</button>
+                    <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeGenre(idx)">✕</button>
                   </span>
-                  <input v-else ref="genreEditInput" class="token-edit-input" v-model="genreEditValue"
-                    @keydown="onGenreEditKeydown" @blur="commitGenreEdit" />
+                  <input v-else ref="genreEditInput" class="token-edit-input" v-model="genreEditValue" @keydown="onGenreEditKeydown" @blur="commitGenreEdit" />
                 </template>
-                <input ref="genreInput" v-show="isEditing && genreEditIndex === -1" v-model="genreInputValue"
-                  @keydown="onGenreKeydown" @blur="onGenreBlur" placeholder="Add genre and press Enter or comma" />
+                <input ref="genreInput" v-show="isEditing && genreEditIndex === -1" v-model="genreInputValue" @keydown="onGenreKeydown" @blur="onGenreBlur" placeholder="Add genre and press Enter or comma" />
                 <div v-if="!isEditing && genresArray.length === 0" class="hint">No genre listed</div>
               </div>
             </div>
 
-            <!-- place Genre, Directors, and Music/Composer in the right column -->
-            
-            <div class="form-group">
+            <div v-if="!isSmallScreen" class="form-group desktop-gap">
               <label for="directors">Directors:</label>
               <div v-if="isEditing" class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
                 <template v-for="(dir, idx) in directorsArray" :key="idx">
                   <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
                     {{ dir }}
-                    <button v-if="isEditing" type="button" class="token-remove"
-                      @click.stop="removeDirector(idx)">✕</button>
+                    <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeDirector(idx)">✕</button>
                   </span>
-                  <input v-else ref="directorEditInput" class="token-edit-input" v-model="directorEditValue"
-                    @keydown="onDirectorEditKeydown" @blur="commitDirectorEdit" />
+                  <input v-else ref="directorEditInput" class="token-edit-input" v-model="directorEditValue" @keydown="onDirectorEditKeydown" @blur="commitDirectorEdit" />
                 </template>
-                <input ref="directorInput" v-show="isEditing && directorEditIndex === -1" v-model="directorInputValue"
-                  @keydown="onDirectorKeydown" @blur="onDirectorBlur"
-                  placeholder="Add director and press Enter or comma" />
+                <input ref="directorInput" v-show="isEditing && directorEditIndex === -1" v-model="directorInputValue" @keydown="onDirectorKeydown" @blur="onDirectorBlur" placeholder="Add director and press Enter or comma" />
                 <div v-if="isEditing && directorsArray.length === 0" class="hint">No director listed</div>
               </div>
               <div v-else>
@@ -148,7 +141,7 @@
               </div>
             </div>
 
-            <div class="form-group">
+            <div v-if="!isSmallScreen" class="form-group desktop-gap">
               <label for="music">Music:</label>
               <div v-if="isEditing" class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusMusicInput">
                 <template v-for="(m, idx) in musicArray" :key="idx">
@@ -156,11 +149,9 @@
                     {{ m }}
                     <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeMusic(idx)">✕</button>
                   </span>
-                  <input v-else ref="musicEditInput" class="token-edit-input" v-model="musicEditValue"
-                    @keydown="onMusicEditKeydown" @blur="commitMusicEdit" />
+                  <input v-else ref="musicEditInput" class="token-edit-input" v-model="musicEditValue" @keydown="onMusicEditKeydown" @blur="commitMusicEdit" />
                 </template>
-                <input ref="musicInput" v-show="isEditing && musicEditIndex === -1" v-model="musicInputValue"
-                  @keydown="onMusicKeydown" @blur="onMusicBlur" placeholder="Add composer and press Enter or comma" />
+                <input ref="musicInput" v-show="isEditing && musicEditIndex === -1" v-model="musicInputValue" @keydown="onMusicKeydown" @blur="onMusicBlur" placeholder="Add composer and press Enter or comma" />
                 <div v-if="isEditing && musicArray.length === 0" class="hint">No composer listed</div>
               </div>
               <div v-else>
@@ -174,6 +165,68 @@
             </div>
 
           </div> <!-- .right-column -->
+
+          <!-- Mobile/full-width groups moved below the header so they span both columns -->
+          <div v-if="isSmallScreen" class="form-group full-width mobile-genre-gap">
+            <label for="genre">Genre:</label>
+            <div class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusGenreInput">
+              <template v-for="(g, idx) in genresArray" :key="idx">
+                <span v-if="genreEditIndex !== idx" class="actor-token" @click.stop="startEditGenre(idx)">
+                  {{ g }}
+                  <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeGenre(idx)">✕</button>
+                </span>
+                <input v-else ref="genreEditInput" class="token-edit-input" v-model="genreEditValue" @keydown="onGenreEditKeydown" @blur="commitGenreEdit" />
+              </template>
+              <input ref="genreInput" v-show="isEditing && genreEditIndex === -1" v-model="genreInputValue" @keydown="onGenreKeydown" @blur="onGenreBlur" placeholder="Add genre and press Enter or comma" />
+              <div v-if="!isEditing && genresArray.length === 0" class="hint">No genre listed</div>
+            </div>
+          </div>
+
+          <div v-if="isSmallScreen" class="form-group full-width">
+            <label for="directors">Directors:</label>
+            <div v-if="isEditing" class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusDirectorInput">
+              <template v-for="(dir, idx) in directorsArray" :key="idx">
+                <span v-if="directorEditIndex !== idx" class="actor-token" @click.stop="startEditDirector(idx)">
+                  {{ dir }}
+                  <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeDirector(idx)">✕</button>
+                </span>
+                <input v-else ref="directorEditInput" class="token-edit-input" v-model="directorEditValue" @keydown="onDirectorEditKeydown" @blur="commitDirectorEdit" />
+              </template>
+              <input ref="directorInput" v-show="isEditing && directorEditIndex === -1" v-model="directorInputValue" @keydown="onDirectorKeydown" @blur="onDirectorBlur" placeholder="Add director and press Enter or comma" />
+              <div v-if="isEditing && directorsArray.length === 0" class="hint">No director listed</div>
+            </div>
+            <div v-else>
+              <div class="actor-input actor-input--shrink" :class="{ disabled: true }">
+                <template v-if="directorsArray && directorsArray.length">
+                  <span v-for="(d, i) in directorsArray" :key="'dir-'+i" class="actor-token">{{ d }}</span>
+                </template>
+                <span v-else class="hint">No director listed</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="isSmallScreen" class="form-group full-width">
+            <label for="music">Music:</label>
+            <div v-if="isEditing" class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusMusicInput">
+              <template v-for="(m, idx) in musicArray" :key="idx">
+                <span v-if="musicEditIndex !== idx" class="actor-token" @click.stop="startEditMusic(idx)">
+                  {{ m }}
+                  <button v-if="isEditing" type="button" class="token-remove" @click.stop="removeMusic(idx)">✕</button>
+                </span>
+                <input v-else ref="musicEditInput" class="token-edit-input" v-model="musicEditValue" @keydown="onMusicEditKeydown" @blur="commitMusicEdit" />
+              </template>
+              <input ref="musicInput" v-show="isEditing && musicEditIndex === -1" v-model="musicInputValue" @keydown="onMusicKeydown" @blur="onMusicBlur" placeholder="Add composer and press Enter or comma" />
+              <div v-if="isEditing && musicArray.length === 0" class="hint">No composer listed</div>
+            </div>
+            <div v-else>
+              <div class="actor-input actor-input--shrink" :class="{ disabled: true }">
+                <template v-if="musicArray && musicArray.length">
+                  <span v-for="(m, i) in musicArray" :key="'music-'+i" class="actor-token">{{ m }}</span>
+                </template>
+                <span v-else class="hint">No composer listed</span>
+              </div>
+            </div>
+          </div>
 
           <!-- Cover image controls: put Browse and Remove on their own full-width row -->
           <div class="form-group full-width">
@@ -307,6 +360,9 @@ const musicEditInput = ref(null);
 
 // refs for focusing
 const titleInput = ref(null);
+
+// Responsive flag to toggle DOM placement for mobile vs desktop
+const isSmallScreen = ref(false);
 
 // Computed property for DVD image URL
 const dvdImageUrl = computed(() => {
@@ -1496,6 +1552,17 @@ onMounted(() => {
   document.addEventListener('keydown', handleEscape);
   // Prevent body scroll when modal is open
   document.body.style.overflow = 'hidden';
+    // responsive flag for mobile vs desktop DOM placement
+    try {
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        const mq = window.matchMedia('(max-width: 640px)');
+        const set = () => { isSmallScreen.value = !!mq.matches; };
+        set();
+        mq.addEventListener ? mq.addEventListener('change', set) : mq.addListener(set);
+        // store on window so we can remove later (simple cleanup reference)
+        window.__dvdform_mq = mq;
+      }
+    } catch (e) { console.debug('matchMedia setup failed', e); }
 });
 
 onUnmounted(() => {
@@ -1504,6 +1571,15 @@ onUnmounted(() => {
   document.body.style.overflow = '';
   // abort any in-flight wiki lookup
   try { if (wikiController) wikiController.abort(); } catch (e) { }
+    // cleanup matchMedia listener
+    try {
+      if (typeof window !== 'undefined' && window.__dvdform_mq) {
+        const mq = window.__dvdform_mq;
+        const set = () => { isSmallScreen.value = !!mq.matches; };
+        mq.removeEventListener ? mq.removeEventListener('change', set) : mq.removeListener(set);
+        delete window.__dvdform_mq;
+      }
+    } catch (e) { }
 });
 
 // Initialize actors when the prop is available. Use immediate:true so opening the modal
@@ -2422,6 +2498,171 @@ const onDirectorEditKeydown = (e) => {
   }
 }
 
+/* Mobile full-screen modal: maximize vertical height and let content scroll */
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: stretch; /* allow container to fill height */
+    padding: 0; /* remove outer padding so modal can be full-bleed */
+  }
+
+  .modal-container {
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-radius: 0;
+  }
+
+  .form-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  /* Make the cover smaller and stack nicely for narrow screens inside the full-height modal */
+  .dvd-form {
+    grid-template-columns: 180px 1fr;
+    gap: 2px 4px;
+  }
+}
+
+/* Mobile readability tweaks: compact two-column header on narrow screens
+   Left column: cover image (compact)
+   Right column: Title / Year / Format / Runtime stacked compactly
+   Below that, full-width fields (genre, actors, notes) continue to span both columns.
+*/
+@media (max-width: 640px) {
+  .dvd-form {
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 4px;
+    align-items: start;
+  }
+
+  .dvd-image-section {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 8px;
+    /* allow the image column to shrink */
+    min-width: 0;
+    grid-column: 1;
+  }
+
+  .right-column {
+    grid-column: 2;
+  }
+
+  .dvd-cover {
+    width: 100%;
+    max-width: 140px; /* slightly larger on mobile */
+    height: auto;
+    margin: 0;
+    display: block;
+  }
+
+  /* Keep the label/value block compact and left-aligned in the right column */
+  .form-group:not(.full-width) {
+    /* default compact settings; overridden for inline rows below */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  /* Tighten spacing in the right column so label/value pairs are compact */
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .form-group:not(.full-width) {
+    margin: 0;
+    padding: 0 0 4px 0;
+  }
+
+  .form-group:not(.full-width) label {
+    width: auto;
+    text-align: left;
+    margin-bottom: 4px;
+    font-size: 0.95em;
+  }
+
+  .form-group:not(.full-width) .plain-value,
+  .form-group:not(.full-width) input,
+  .form-group:not(.full-width) select,
+  .form-group:not(.full-width) textarea {
+    text-align: left;
+    padding: 6px 8px;
+    font-size: 1rem;
+  }
+
+  /* On mobile, render the right-column's compact fields inline (label left, value right)
+     so Title/Year/Format/Runtime appear beside their labels rather than stacked. */
+  .right-column > .form-group:not(.full-width) {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .right-column > .form-group:not(.full-width) label {
+    margin-bottom: 0;
+    width: 80px;
+    flex: 0 0 80px;
+    text-align: right;
+    padding-right: 6px;
+  }
+
+  .right-column > .form-group:not(.full-width) .plain-value {
+    margin: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 4px 0;
+  }
+
+  /* reduce the default min height of plain-value so values don't create large gaps */
+  .plain-value {
+    min-height: 20px;
+    padding: 4px 0;
+  }
+
+  /* reduce title-row spacing on mobile */
+  .title-row {
+    margin-bottom: 4px;
+    gap: 8px;
+  }
+
+  /* Make genre/actors token containers full-width below header so tokens wrap */
+  .actor-input.actor-input--shrink {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* Mobile-only: allow marked groups to span both columns below the compact header */
+  .form-group.mobile-full {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  /* Small vertical gap above the Genre block so it doesn't sit flush with the cover image */
+  .form-group.full-width.mobile-genre-gap {
+    margin-top: 8px;
+  }
+}
+
 @media (max-width: 480px) {
   .form-header {
     padding: 15px 20px 10px 20px;
@@ -2455,11 +2696,11 @@ const onDirectorEditKeydown = (e) => {
 }
 
 .plain-value {
-  padding: 10px 0;
+  padding: 6px 0;
   /* align visually with inputs but without borders */
   color: #111827;
   font-size: 1rem;
-  min-height: 38px;
+  min-height: 20px;
 }
 
 .actor-input {
@@ -2652,5 +2893,15 @@ const onDirectorEditKeydown = (e) => {
 .image-actions .btn-secondary {
   min-width: 90px;
   padding: 6px 10px;
+}
+
+/* Desktop-only small vertical gap for the stacked Genre->Directors->Music items in the right column */
+.right-column > .desktop-gap {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  /* ensure the class does not introduce spacing on mobile (the desktop blocks are hidden, but keep safe) */
+  .right-column > .desktop-gap { margin-bottom: 0; }
 }
 </style>
