@@ -200,8 +200,7 @@ try {
                 'actors' => $strip_qids($normalize_plainlist($row['stars'] ?? '')),
                     'director' => $strip_qids($normalize_plainlist($row['director'] ?? '')),
                     'genre' => $strip_qids($normalize_plainlist($row['genre'] ?? $row['Genre'] ?? '')),
-                    'rating' => $row['rating'] ?? '',
-                    // runtime is stored as text in the DB (e.g. "120 min", "130", "2h 10m")
+                        // runtime is stored as text in the DB (e.g. "120 min", "130", "2h 10m")
                     'runtime' => isset($row['runtime']) && $row['runtime'] !== null ? (string)$row['runtime'] : null,
                 // database uses `type` column for format
                 'format' => $row['format'] ?? $row['type'] ?? $row['Type'] ?? 'DVD',

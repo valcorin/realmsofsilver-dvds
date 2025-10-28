@@ -93,7 +93,6 @@ To populate the application with your actual DVD collection:
   year: 2024,              // Release year
   director: "Director",     // Director name
   genre: "Genre",          // Genre(s)
-  rating: "PG-13",         // MPAA rating
   runtime: "120 min",      // Runtime
   format: "DVD",           // Format (DVD/Blu-ray/4K UHD/Digital)
   condition: "Excellent",  // Condition (Excellent/Very Good/Good/Fair/Poor)

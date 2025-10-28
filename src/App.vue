@@ -228,7 +228,6 @@ const handleEditDvd = (dvd) => {
   selectedDvd.value = {
     title: '',
     year: '',
-    rating: '',
     directors: [],
     director: '',
     actors: [],

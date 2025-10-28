@@ -62,61 +62,45 @@
               </div>
               <div class="fetch-error" v-if="wikiError">{{ wikiError }}</div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="year">Year:</label>
-                <template v-if="isEditing">
-                  <input v-model.number="formData.year" id="year" type="number" required />
-                </template>
-                <template v-else>
-                  <div class="plain-value" id="year">{{ formData.year }}</div>
-                </template>
-              </div>
-
-              <div class="form-group">
-                <label for="rating">Rating:</label>
-                <template v-if="isEditing">
-                  <input v-model="formData.rating" id="rating" type="text" />
-                </template>
-                <template v-else>
-                  <div class="plain-value" id="rating">{{ formData.rating || '' }}</div>
-                </template>
-              </div>
+            <div class="form-group">
+              <label for="year">Year:</label>
+              <template v-if="isEditing">
+                <input v-model.number="formData.year" id="year" type="number" required />
+              </template>
+              <template v-else>
+                <div class="plain-value" id="year">{{ formData.year }}</div>
+              </template>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="runtime">Runtime:</label>
-                <template v-if="isEditing">
-                  <input v-model="formData.runtime" id="runtime" type="text" />
-                </template>
-                <template v-else>
-                  <div class="plain-value" id="runtime">{{ formData.runtime || '' }}</div>
-                </template>
-              </div>
+            <div class="form-group">
+              <label for="format">Format:</label>
+              <template v-if="isEditing">
+                <select v-model="formData.format" id="format">
+                  <option value="DVD">DVD</option>
+                  <option value="BLU">Blu-ray</option>
+                  <option value="4K">4K UHD</option>
+                  <option value="DIG">Digital</option>
+                  <option value="BCK">Backup</option>
+                  <option value="VHS">VHS</option>
+                </select>
+              </template>
+              <template v-else>
+                <div class="plain-value" id="format">{{ formatLabel(formData.format) }}</div>
+              </template>
+            </div>
 
-              <div class="form-group">
-                <label for="format">Format:</label>
-                <template v-if="isEditing">
-                  <select v-model="formData.format" id="format">
-                    <option value="DVD">DVD</option>
-                    <option value="BLU">Blu-ray</option>
-                    <option value="4K">4K UHD</option>
-                    <option value="DIG">Digital</option>
-                    <option value="BCK">Backup</option>
-                    <option value="VHS">VHS</option>
-                  </select>
-                </template>
-                <template v-else>
-                  <div class="plain-value" id="format">{{ formatLabel(formData.format) }}</div>
-                </template>
-              </div>
-              <!-- music input moved to full-width token area below; keep this column for layout alignment -->
-              <div class="form-group" aria-hidden="true"></div>
+            <div class="form-group">
+              <label for="runtime">Runtime:</label>
+              <template v-if="isEditing">
+                <input v-model="formData.runtime" id="runtime" type="text" />
+              </template>
+              <template v-else>
+                <div class="plain-value" id="runtime">{{ formData.runtime || '' }}</div>
+              </template>
             </div>
 
 
-            <div class="form-group full-width">
+            <div class="form-group">
               <label for="genre">Genre:</label>
               <!-- shrink-to-fit for genre tokens so the box sizes to its content -->
               <div class="actor-input actor-input--shrink" :class="{ disabled: !isEditing }" @click="focusGenreInput">
@@ -2162,6 +2146,33 @@ const onDirectorEditKeydown = (e) => {
   /* default: place in right column */
 }
 
+/* Place label and value side-by-side for non-full-width fields so the
+   value appears to the right of the label instead of below it. Full-width
+   groups (e.g. Genre) remain stacked. On small screens we revert to stacked.
+*/
+.form-group:not(.full-width) {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+.form-group:not(.full-width) label {
+  margin-bottom: 0;
+  width: 96px;
+  flex: 0 0 96px;
+  text-align: right;
+  padding-right: 8px;
+}
+.form-group:not(.full-width) .plain-value {
+  margin: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.form-group:not(.full-width) input,
+.form-group:not(.full-width) select,
+.form-group:not(.full-width) textarea {
+  flex: 1 1 auto;
+}
+
 .form-group.full-width {
   grid-column: 1 / -1;
   /* span both columns (under the cover) */
@@ -2197,7 +2208,7 @@ const onDirectorEditKeydown = (e) => {
 .title-row {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: baseline;
   margin-bottom: 6px;
 }
 
@@ -2366,6 +2377,16 @@ const onDirectorEditKeydown = (e) => {
     grid-template-columns: 1fr;
     gap: 20px;
     padding: 20px;
+  }
+
+  /* Revert to stacked labels on smaller screens for readability */
+  .form-group:not(.full-width) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-group:not(.full-width) label {
+    width: auto;
+    margin-bottom: 6px;
   }
 
   .form-row {
