@@ -14,6 +14,14 @@ dist-ssr
 
 config.ini
 
+# Python
+__pycache__
+*.pyc
+*.pyo
+
+# TV price monitor data
+scripts/tv_price_history.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

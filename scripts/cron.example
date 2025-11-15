@@ -1,0 +1,23 @@
+# Example cron configuration for LG TV Price Monitor
+# 
+# To use this, run: crontab -e
+# Then add one of the following lines (uncomment and adjust path):
+
+# Check every 6 hours
+# 0 */6 * * * cd /path/to/realmsofsilver-dvds && python3 scripts/monitor_tv_prices.py >> /tmp/tv_monitor.log 2>&1
+
+# Check twice daily at 8 AM and 8 PM
+# 0 8,20 * * * cd /path/to/realmsofsilver-dvds && python3 scripts/monitor_tv_prices.py >> /tmp/tv_monitor.log 2>&1
+
+# Check once daily at 9 AM
+# 0 9 * * * cd /path/to/realmsofsilver-dvds && python3 scripts/monitor_tv_prices.py >> /tmp/tv_monitor.log 2>&1
+
+# Check every 4 hours
+# 0 */4 * * * cd /path/to/realmsofsilver-dvds && python3 scripts/monitor_tv_prices.py >> /tmp/tv_monitor.log 2>&1
+
+# Notes:
+# - Replace /path/to/realmsofsilver-dvds with your actual repository path
+# - Make sure Python 3 is installed: python3 --version
+# - Install dependencies: pip3 install -r scripts/requirements.txt
+# - Test first: python3 scripts/monitor_tv_prices.py --dry-run
+# - Logs are written to /tmp/tv_monitor.log (or customize the path)
