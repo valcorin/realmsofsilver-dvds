@@ -1,15 +1,30 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-// Load config
-$configPath = __DIR__ . '/config.ini';
-if (!file_exists($configPath)) {
+$find_config = function() {
+    // Only load configuration from the parent directory which is outside the webroot.
+    $candidates = [
+        dirname(__DIR__) . '/config.ini'
+    ];
+    foreach ($candidates as $p) {
+        if (file_exists($p) && is_readable($p)) return $p;
+    }
+    return null;
+};
+
+$configPath = $find_config();
+if (!$configPath) {
     http_response_code(500);
-    echo json_encode(["ok" => false, "error" => "config.ini not found"]);
+    echo json_encode(["ok" => false, "error" => "Configuration file not found"]);
     exit;
 }
 
-$config = parse_ini_file($configPath, true);
+$config = @parse_ini_file($configPath, true);
+if ($config === false) {
+    http_response_code(500);
+    echo json_encode(["ok" => false, "error" => "Configuration file invalid"]);
+    exit;
+}
 $apiKey = '';
 if (isset($config['auth']) && isset($config['auth']['api_key'])) {
     $apiKey = trim($config['auth']['api_key']);

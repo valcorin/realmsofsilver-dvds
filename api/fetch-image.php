@@ -12,6 +12,82 @@ if (PHP_SAPI === 'cli') {
     exit(1);
 }
 
+// --- Load config and optionally require API key ---
+$find_config = function() {
+    $candidates = [
+        dirname(__DIR__) . '/config.ini'
+    ];
+    foreach ($candidates as $p) {
+        if (file_exists($p) && is_readable($p)) return $p;
+    }
+    return null;
+};
+
+$configPath = $find_config();
+if (!$configPath) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Server configuration error']);
+    exit;
+}
+
+$config = @parse_ini_file($configPath, true);
+if ($config === false) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Server configuration error']);
+    exit;
+}
+
+$apiKey = '';
+if (isset($config['auth']) && isset($config['auth']['api_key'])) {
+    $apiKey = trim($config['auth']['api_key']);
+}
+
+// If an api_key is configured, require it for all requests to this proxy
+if ($apiKey) {
+    // Helper to fetch the Authorization header in various SAPIs
+    $getAuthHeader = function() {
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) return trim($_SERVER['HTTP_AUTHORIZATION']);
+        if (function_exists('getallheaders')) {
+            $h = getallheaders();
+            if (isset($h['Authorization'])) return trim($h['Authorization']);
+            if (isset($h['authorization'])) return trim($h['authorization']);
+        }
+        return null;
+    };
+
+    $authHeader = $getAuthHeader();
+    $authorized = false;
+    if ($authHeader) {
+        if (stripos($authHeader, 'Bearer ') === 0) {
+            $tok = substr($authHeader, 7);
+            if (hash_equals($apiKey, $tok)) $authorized = true;
+        }
+        if (!$authorized && hash_equals($apiKey, $authHeader)) $authorized = true;
+    }
+    // Also allow ?api_key= in query string for compatibility
+    if (!$authorized && isset($_REQUEST['api_key']) && hash_equals($apiKey, trim((string)$_REQUEST['api_key']))) {
+        $authorized = true;
+    }
+
+    if (!$authorized) {
+        // Log auth failure lightly (mask the provided token)
+        try {
+            $logFile = __DIR__ . '/auth_failures.log';
+            $masked = $authHeader ? (strlen($authHeader) > 8 ? '****' . substr($authHeader, -8) : '****') : '';
+            $entry = json_encode([
+                'time' => date('c'),
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+                'uri' => $_SERVER['REQUEST_URI'] ?? '',
+                'provided' => $masked
+            ]) . PHP_EOL;
+            @file_put_contents($logFile, $entry, FILE_APPEND | LOCK_EX);
+        } catch (Exception $e) {}
+        http_response_code(401);
+        echo json_encode(['ok' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+}
+
 // New: support three modes:
 // 1) ?url=<upload.wikimedia.org url> (existing behavior)
 // 2) ?file=File:Name.jpg -> resolve via Commons API and fetch resulting upload URL

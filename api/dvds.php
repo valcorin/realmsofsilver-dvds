@@ -9,13 +9,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
-    // Read configuration from file
-    $config = parse_ini_file(__DIR__ . '/config.ini', true);
-    
-    if (!$config || !isset($config['database'])) {
+    // Locate configuration file from a short list of possible locations
+    $find_config = function() {
+        // Only allow loading the configuration from the parent directory (one level up)
+        // which is outside the served webroot (e.g. /srv/www/htdocs/dvds/config.ini).
+        $candidates = [
+            dirname(__DIR__) . '/config.ini'
+        ];
+        foreach ($candidates as $p) {
+            if (file_exists($p) && is_readable($p)) return $p;
+        }
+        return null;
+    };
+
+    $configPath = $find_config();
+    if (!$configPath) {
         throw new Exception('Configuration file not found or invalid');
     }
-    
+
+    $config = @parse_ini_file($configPath, true);
+    if ($config === false || !isset($config['database'])) {
+        throw new Exception('Configuration file not found or invalid');
+    }
+
     $db = $config['database'];
     $pdo = new PDO(
         "mysql:host={$db['host']};dbname={$db['dbname']};charset={$db['charset']}", 
@@ -494,6 +510,9 @@ try {
     }
     
 } catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    // Log the detailed error server-side for debugging but return a safe message to the client
+    @file_put_contents(__DIR__ . '/error.log', date('c') . " " . $e->getMessage() . PHP_EOL, FILE_APPEND | LOCK_EX);
+    http_response_code(500);
+    echo json_encode(['error' => 'Server configuration error']);
 }
 ?>
