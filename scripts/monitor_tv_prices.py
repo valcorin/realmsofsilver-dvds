@@ -27,12 +27,26 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 # Configuration
 SCRIPT_DIR = Path(__file__).parent
 PRICE_HISTORY_FILE = SCRIPT_DIR / 'tv_price_history.json'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+# Configure a requests Session with retries to handle transient network issues
+SESSION = requests.Session()
+RETRY_STRATEGY = Retry(
+    total=3,
+    backoff_factor=1,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=frozenset(['GET', 'POST'])
+)
+ADAPTER = HTTPAdapter(max_retries=RETRY_STRATEGY)
+SESSION.mount('https://', ADAPTER)
+SESSION.mount('http://', ADAPTER)
 
 # TV models to monitor
 TV_MODELS = [
@@ -98,24 +112,31 @@ def save_price_history(history: Dict):
         print(f"Error saving price history: {e}", file=sys.stderr)
 
 
-def http_get(url: str, timeout: int = 15) -> Optional[requests.Response]:
-    """Make HTTP GET request with error handling."""
+def http_get(url: str, timeout: int = 30) -> Optional[requests.Response]:
+    """Make HTTP GET request with a session that retries on transient failures.
+
+    Uses a shared `SESSION` configured with a urllib3 `Retry` strategy. Default
+    timeout increased to 30 seconds to reduce false timeouts for slow hosts.
+    """
+    headers = {
+        'User-Agent': USER_AGENT,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+    }
+
     try:
-        headers = {
-            'User-Agent': USER_AGENT,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-        }
-        response = requests.get(url, headers=headers, timeout=timeout)
+        response = SESSION.get(url, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response
+    except requests.Timeout as e:
+        print(f"HTTP request timed out for {url}: {e}", file=sys.stderr)
     except requests.RequestException as e:
         print(f"HTTP request failed for {url}: {e}", file=sys.stderr)
-        return None
+    return None
 
 
 def extract_price_from_text(text: str) -> Optional[float]:
