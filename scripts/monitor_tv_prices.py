@@ -36,6 +36,9 @@ SCRIPT_DIR = Path(__file__).parent
 PRICE_HISTORY_FILE = SCRIPT_DIR / 'tv_price_history.json'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
+# If True, attempt to fetch Best Buy pages with Playwright first (handles JS-heavy pages)
+USE_PLAYWRIGHT_FIRST = True
+
 # Configure a requests Session with retries to handle transient network issues
 SESSION = requests.Session()
 RETRY_STRATEGY = Retry(
@@ -139,6 +142,45 @@ def http_get(url: str, timeout: int = 30) -> Optional[requests.Response]:
     return None
 
 
+def fetch_with_playwright(url: str, timeout: int = 30) -> Optional[requests.Response]:
+    """Fetch page content using Playwright (headless browser) as a fallback.
+
+    Returns a simple object with `.content` (bytes) and `.status_code` attributes
+    similar to `requests.Response`, or `None` if Playwright isn't available.
+    """
+    try:
+        from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+    except Exception:
+        # Playwright not installed; caller should handle None
+        print("Playwright not installed; install with: pip install playwright && playwright install", file=sys.stderr)
+        return None
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(user_agent=USER_AGENT)
+            page = context.new_page()
+            # Playwright timeouts are milliseconds
+            page.goto(url, timeout=int(timeout * 1000), wait_until='networkidle')
+            html = page.content()
+            context.close()
+            browser.close()
+
+            class SimpleResp:
+                pass
+
+            r = SimpleResp()
+            r.content = html.encode('utf-8')
+            r.status_code = 200
+            return r
+    except PlaywrightTimeoutError as e:
+        print(f"Playwright timeout for {url}: {e}", file=sys.stderr)
+    except Exception as e:
+        print(f"Playwright fetch failed for {url}: {e}", file=sys.stderr)
+
+    return None
+
+
 def extract_price_from_text(text: str) -> Optional[float]:
     """Extract price from text string."""
     # Match patterns like $1,999.99, $1999, etc.
@@ -161,9 +203,23 @@ def extract_price_from_text(text: str) -> Optional[float]:
 def scrape_bestbuy(url: str) -> List[Dict]:
     """Scrape TV prices from Best Buy."""
     results = []
-    response = http_get(url)
+    response = None
+    # Try Playwright first for Best Buy if enabled (handles JS-rendered pages)
+    if USE_PLAYWRIGHT_FIRST:
+        response = fetch_with_playwright(url)
+        if response:
+            print(f"Using Playwright-first fetch for {url}", file=sys.stderr)
+
+    # Fall back to requests if Playwright not available or failed
     if not response:
-        return results
+        response = http_get(url)
+        if not response:
+            # Try Playwright as a second attempt before giving up
+            response = fetch_with_playwright(url)
+            if response:
+                print(f"Fallback to Playwright succeeded for {url}", file=sys.stderr)
+            else:
+                return results
     
     try:
         soup = BeautifulSoup(response.content, 'html.parser')
