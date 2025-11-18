@@ -26,7 +26,7 @@ from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup # type: ignore
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -132,13 +132,23 @@ def http_get(url: str, timeout: int = 30) -> Optional[requests.Response]:
     }
 
     try:
+        print(f"[requests] GET {url}", file=sys.stderr)
+        start = time.time()
         response = SESSION.get(url, headers=headers, timeout=timeout)
-        response.raise_for_status()
-        return response
+        elapsed = time.time() - start
+        try:
+            response.raise_for_status()
+            print(f"[requests] Success {getattr(response, 'status_code', 'unknown')} in {elapsed:.2f}s for {url}", file=sys.stderr)
+            return response
+        except requests.HTTPError as e:
+            print(f"[requests] Non-success status {getattr(response, 'status_code', 'unknown')} in {elapsed:.2f}s for {url}: {e}", file=sys.stderr)
+            return None
     except requests.Timeout as e:
-        print(f"HTTP request timed out for {url}: {e}", file=sys.stderr)
+        elapsed = time.time() - start if 'start' in locals() else 0
+        print(f"[requests] Timeout after {elapsed:.2f}s for {url}: {e}", file=sys.stderr)
     except requests.RequestException as e:
-        print(f"HTTP request failed for {url}: {e}", file=sys.stderr)
+        elapsed = time.time() - start if 'start' in locals() else 0
+        print(f"[requests] Request failed after {elapsed:.2f}s for {url}: {e}", file=sys.stderr)
     return None
 
 
@@ -149,34 +159,82 @@ def fetch_with_playwright(url: str, timeout: int = 30) -> Optional[requests.Resp
     similar to `requests.Response`, or `None` if Playwright isn't available.
     """
     try:
-        from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+        from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError # type: ignore
     except Exception:
         # Playwright not installed; caller should handle None
         print("Playwright not installed; install with: pip install playwright && playwright install", file=sys.stderr)
         return None
 
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(user_agent=USER_AGENT)
-            page = context.new_page()
-            # Playwright timeouts are milliseconds
-            page.goto(url, timeout=int(timeout * 1000), wait_until='networkidle')
-            html = page.content()
-            context.close()
-            browser.close()
+    # Playwright-specific tuning
+    PLAYWRIGHT_MAX_ATTEMPTS = 3
+    PLAYWRIGHT_SELECTOR = 'li.sku-item'
+    BLOCK_RESOURCE_TYPES = {'image', 'font', 'stylesheet', 'media'}
 
-            class SimpleResp:
+    for attempt in range(1, PLAYWRIGHT_MAX_ATTEMPTS + 1):
+        browser = None
+        try:
+            print(f"Playwright: attempt {attempt}/{PLAYWRIGHT_MAX_ATTEMPTS} fetching {url}", file=sys.stderr)
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(user_agent=USER_AGENT)
+
+                # Block heavy resource types to speed up navigation and reduce timeouts
+                try:
+                    context.route("**/*", lambda route: route.abort() if route.request.resource_type in BLOCK_RESOURCE_TYPES else route.continue_())
+                except Exception:
+                    # Some playwright versions may not allow routing in certain contexts; ignore failure
+                    pass
+
+                page = context.new_page()
+                start = time.time()
+                # First navigate; use domcontentloaded to avoid waiting extra time for analytics
+                page.goto(url, timeout=int(timeout * 1000), wait_until='domcontentloaded')
+
+                # Wait for a product selector to appear; shorter timeout helps detect missing elements
+                try:
+                    page.wait_for_selector(PLAYWRIGHT_SELECTOR, timeout=5000)
+                except Exception:
+                    # If selector doesn't appear, we'll still capture the HTML to let parsing try
+                    pass
+
+                html = page.content()
+                elapsed = time.time() - start
+                print(f"Playwright: fetched {url} in {elapsed:.2f}s on attempt {attempt}", file=sys.stderr)
+
+                # Clean up
+                try:
+                    context.close()
+                except Exception:
+                    pass
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+
+                class SimpleResp:
+                    pass
+
+                r = SimpleResp()
+                r.content = html.encode('utf-8')
+                r.status_code = 200
+                return r
+        except PlaywrightTimeoutError as e:
+            print(f"Playwright timeout for {url} on attempt {attempt}: {e}", file=sys.stderr)
+        except Exception as e:
+            print(f"Playwright fetch failed for {url} on attempt {attempt}: {e}", file=sys.stderr)
+        finally:
+            # Ensure browser is closed if created
+            try:
+                if browser:
+                    browser.close()
+            except Exception:
                 pass
 
-            r = SimpleResp()
-            r.content = html.encode('utf-8')
-            r.status_code = 200
-            return r
-    except PlaywrightTimeoutError as e:
-        print(f"Playwright timeout for {url}: {e}", file=sys.stderr)
-    except Exception as e:
-        print(f"Playwright fetch failed for {url}: {e}", file=sys.stderr)
+        # Backoff before retrying
+        if attempt < PLAYWRIGHT_MAX_ATTEMPTS:
+            backoff = 2 ** (attempt - 1)
+            print(f"Playwright: waiting {backoff}s before next attempt", file=sys.stderr)
+            time.sleep(backoff)
 
     return None
 
