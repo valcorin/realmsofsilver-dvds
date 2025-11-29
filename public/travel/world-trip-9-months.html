@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9-Month Around the World Adventure: Boston to Boston</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; }
+        header { background: linear-gradient(135deg, #0f3460 0%, #e94560 100%); color: white; padding: 50px 40px; text-align: center; }
+        header h1 { font-size: 2.8em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        header p { font-size: 1.3em; opacity: 0.95; }
+        .trip-stats { display: flex; justify-content: center; gap: 40px; margin-top: 30px; flex-wrap: wrap; }
+        .stat-box { background: rgba(255,255,255,0.15); padding: 15px 25px; border-radius: 10px; text-align: center; }
+        .stat-box .number { font-size: 2em; font-weight: bold; display: block; }
+        .stat-box .label { font-size: 0.9em; opacity: 0.9; }
+        .trip-overview { background: #f8f9fa; padding: 40px; border-bottom: 4px solid #e94560; }
+        .trip-overview h2 { color: #0f3460; margin-bottom: 20px; font-size: 1.8em; }
+        .trip-overview > p { font-size: 1.1em; color: #555; max-width: 900px; }
+        .continent-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 30px 0; justify-content: center; }
+        .continent-btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; font-weight: 600; transition: all 0.3s; color: white; }
+        .continent-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .continent-btn.north-america { background: #3498db; }
+        .continent-btn.south-america { background: #27ae60; }
+        .continent-btn.oceania { background: #9b59b6; }
+        .continent-btn.asia { background: #e74c3c; }
+        .continent-btn.africa { background: #f39c12; }
+        .continent-btn.europe { background: #1abc9c; }
+        .continent-btn.antarctica { background: #34495e; }
+        .route-visual { background: white; padding: 30px; margin: 20px 0; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .route-visual h3 { text-align: center; color: #0f3460; margin-bottom: 20px; }
+        .route-path { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px; }
+        .route-stop { padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 600; color: white; white-space: nowrap; }
+        .route-arrow { color: #666; font-size: 1.2em; }
+        .month-section { padding: 0; border-bottom: 1px solid #e0e0e0; }
+        .month-header { background: linear-gradient(135deg, #0f3460 0%, #16213e 100%); color: white; padding: 25px 40px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background 0.3s; }
+        .month-header:hover { background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); }
+        .month-header h2 { display: flex; align-items: center; gap: 15px; font-size: 1.6em; flex-wrap: wrap; }
+        .month-header .continent-badge { font-size: 0.6em; padding: 5px 12px; border-radius: 15px; background: rgba(255,255,255,0.2); }
+        .month-header .toggle-icon { font-size: 1.5em; transition: transform 0.3s; }
+        .month-content { padding: 40px; display: block; }
+        .month-content.hidden { display: none; }
+        .week-section { margin-bottom: 40px; padding: 25px; background: #f8f9fa; border-radius: 15px; border-left: 5px solid #e94560; }
+        .week-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .week-number { background: linear-gradient(135deg, #e94560 0%, #0f3460 100%); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; flex-shrink: 0; }
+        .week-title h3 { color: #0f3460; font-size: 1.4em; margin-bottom: 5px; }
+        .week-title .location { color: #e94560; font-weight: 600; }
+        .week-title .dates { color: #666; font-size: 0.95em; }
+        .base-info { background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db; }
+        .base-info h4 { color: #2980b9; margin-bottom: 10px; }
+        .day-trips { margin-top: 20px; }
+        .day-trips h4 { color: #0f3460; margin-bottom: 15px; font-size: 1.1em; }
+        .day-trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .day-trip-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-left: 4px solid #27ae60; transition: transform 0.2s; }
+        .day-trip-card:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(0,0,0,0.15); }
+        .day-trip-card h5 { color: #27ae60; margin-bottom: 8px; font-size: 1.05em; }
+        .day-trip-card p { color: #666; font-size: 0.9em; line-height: 1.5; }
+        .landmark { border-left-color: #f39c12; }
+        .landmark h5 { color: #e67e22; }
+        .highlights { background: #fff9e6; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #f39c12; }
+        .highlights h4 { color: #e67e22; margin-bottom: 10px; }
+        .highlights ul { list-style: none; padding: 0; }
+        .highlights li { padding: 8px 0; padding-left: 25px; position: relative; }
+        .highlights li::before { content: '✨'; position: absolute; left: 0; }
+        .travel-info { background: #e8f8f5; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #1abc9c; }
+        .travel-info h4 { color: #16a085; margin-bottom: 10px; }
+        .accommodation { background: #f3e8ff; padding: 15px 20px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #9b59b6; }
+        .accommodation h4 { color: #8e44ad; margin-bottom: 5px; }
+        footer { background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%); color: white; padding: 50px 40px; text-align: center; }
+        footer h3 { font-size: 1.8em; margin-bottom: 30px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto 30px; }
+        .summary-item { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; }
+        .summary-item strong { display: block; font-size: 1.1em; margin-bottom: 5px; color: #e94560; }
+        .tips-section { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 15px; margin: 30px auto; max-width: 800px; text-align: left; }
+        .tips-section h4 { color: #e94560; margin-bottom: 15px; text-align: center; }
+        .tips-section ul { list-style: none; padding: 0; }
+        .tips-section li { padding: 10px 0; padding-left: 30px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tips-section li::before { content: '💡'; position: absolute; left: 0; }
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            .trip-stats { gap: 15px; }
+            .stat-box { padding: 10px 15px; }
+            .stat-box .number { font-size: 1.5em; }
+            .month-header h2 { font-size: 1.2em; }
+            .month-content { padding: 20px; }
+            .week-section { padding: 15px; }
+            .day-trip-grid { grid-template-columns: 1fr; }
+            .month-header { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🌍 9-Month Around the World Adventure</h1>
+        <p>Boston → South America → Oceania → Asia → Africa → Europe → Boston</p>
+        <div class="trip-stats">
+            <div class="stat-box"><span class="number">9</span><span class="label">Months</span></div>
+            <div class="stat-box"><span class="number">7</span><span class="label">Continents</span></div>
+            <div class="stat-box"><span class="number">36</span><span class="label">Weeks</span></div>
+            <div class="stat-box"><span class="number">25+</span><span class="label">Countries</span></div>
+        </div>
+    </header>
+    
+    <div class="trip-overview">
+        <h2>Trip Overview</h2>
+        <p>Embark on an epic 9-month journey around the globe, starting from Boston and traveling westward. This carefully crafted itinerary takes you through all seven continents, with week-long stays in strategic hub locations that offer excellent day-trip opportunities.</p>
+        <div class="continent-nav">
+            <button class="continent-btn north-america" onclick="scrollToMonth(1)">🇺🇸 North America</button>
+            <button class="continent-btn south-america" onclick="scrollToMonth(2)">🌎 South America</button>
+            <button class="continent-btn antarctica" onclick="scrollToMonth(3)">🧊 Antarctica</button>
+            <button class="continent-btn oceania" onclick="scrollToMonth(4)">🦘 Oceania</button>
+            <button class="continent-btn asia" onclick="scrollToMonth(5)">🏯 Asia</button>
+            <button class="continent-btn africa" onclick="scrollToMonth(7)">🦁 Africa</button>
+            <button class="continent-btn europe" onclick="scrollToMonth(8)">🏰 Europe</button>
+        </div>
+        <div class="route-visual">
+            <h3>Your Journey Around the World</h3>
+            <div class="route-path">
+                <span class="route-stop" style="background:#3498db">Boston</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#27ae60">Lima</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#27ae60">Buenos Aires</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#34495e">Antarctica</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#9b59b6">Sydney</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#9b59b6">Auckland</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#e74c3c">Bali</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#e74c3c">Bangkok</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#e74c3c">Tokyo</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#e74c3c">Beijing</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#e74c3c">Delhi</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#f39c12">Cape Town</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#f39c12">Nairobi</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#f39c12">Cairo</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#1abc9c">Rome</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#1abc9c">Paris</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#1abc9c">London</span><span class="route-arrow">→</span>
+                <span class="route-stop" style="background:#3498db">Boston</span>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 1: North America to South America -->
+    <div class="month-section" id="month-1">
+        <div class="month-header" onclick="toggleMonth(1)">
+            <h2>📅 Month 1: Boston Departure & Peru <span class="continent-badge">🇺🇸 North America → 🌎 South America</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-1-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">1</div>
+                    <div class="week-title">
+                        <h3>Boston Departure & Lima, Peru</h3>
+                        <div class="location">📍 Lima, Peru</div>
+                        <div class="dates">Week 1</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Miraflores District, Lima</h4>
+                    <p>Start your world journey by flying south from Boston to Lima, Peru. The Miraflores district offers excellent access to Lima's attractions and is a perfect base for exploring Peru's capital and nearby sites.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Historic Lima Centro</h5>
+                            <p>Explore Plaza Mayor, the Cathedral of Lima, and the catacombs of San Francisco Monastery. UNESCO World Heritage Site.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Pachacamac Ruins</h5>
+                            <p>Ancient archaeological site 40km south of Lima. Pre-Incan temple complex with stunning desert views.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Barranco District</h5>
+                            <p>Bohemian neighborhood known for street art, the Bridge of Sighs, and vibrant nightlife.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Peruvian Cooking Class</h5>
+                            <p>Learn to make ceviche, lomo saltado, and other Peruvian classics at a local culinary school.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Hotel in Miraflores with ocean views. Budget: Mid-range boutique hotels.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">2</div>
+                    <div class="week-title">
+                        <h3>Cusco & Sacred Valley</h3>
+                        <div class="location">📍 Cusco, Peru</div>
+                        <div class="dates">Week 2</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Cusco Historic Center</h4>
+                    <p>The ancient Incan capital at 3,400m elevation. Allow time to acclimatize. The historic center provides easy access to the Sacred Valley and Machu Picchu.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Machu Picchu</h5>
+                            <p>UNESCO World Heritage Site and one of the New Seven Wonders of the World. Take the train from Ollantaytambo for this iconic day trip.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Sacred Valley Tour</h5>
+                            <p>Visit Pisac ruins and market, Ollantaytambo fortress, and the Moray agricultural terraces.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Rainbow Mountain</h5>
+                            <p>Vinicunca (Rainbow Mountain) - a challenging high-altitude hike to see the colorful striped mountain.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Cusco City Walking Tour</h5>
+                            <p>Sacsayhuaman fortress, Qorikancha temple, San Pedro Market, and colonial architecture.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <ul>
+                        <li>Book Machu Picchu tickets well in advance - they sell out!</li>
+                        <li>Try guinea pig (cuy) - a traditional Peruvian delicacy</li>
+                        <li>Altitude sickness is real - drink coca tea and take it slow</li>
+                    </ul>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Boutique hotel in Cusco's San Blas neighborhood with character and charm.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">3-4</div>
+                    <div class="week-title">
+                        <h3>Bolivia: La Paz & Uyuni Salt Flats</h3>
+                        <div class="location">📍 La Paz & Uyuni, Bolivia</div>
+                        <div class="dates">Weeks 3-4</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: La Paz (Week 3) → Uyuni (Week 4)</h4>
+                    <p>Continue south into Bolivia. La Paz is the world's highest capital city, and Uyuni offers access to the otherworldly salt flats.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Salar de Uyuni</h5>
+                            <p>World's largest salt flat. Take a multi-day tour including Isla Incahuasi with giant cacti, colored lagoons, and geysers.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Death Road Cycling</h5>
+                            <p>Mountain bike down the famous "World's Most Dangerous Road" from La Paz - an adrenaline-pumping experience.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Tiwanaku Ruins</h5>
+                            <p>Pre-Columbian archaeological site near La Paz, predating the Incan Empire.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Valle de la Luna</h5>
+                            <p>Moon Valley near La Paz with unusual eroded rock formations and hiking trails.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>La Paz: Hotel in historic center. Uyuni: Salt hotel for unique experience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 2: Argentina & Chile -->
+    <div class="month-section" id="month-2">
+        <div class="month-header" onclick="toggleMonth(2)">
+            <h2>📅 Month 2: Argentina & Chile <span class="continent-badge">🌎 South America</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-2-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">5</div>
+                    <div class="week-title">
+                        <h3>Buenos Aires, Argentina</h3>
+                        <div class="location">📍 Buenos Aires, Argentina</div>
+                        <div class="dates">Week 5</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Palermo or San Telmo District</h4>
+                    <p>The "Paris of South America" offers incredible architecture, passionate tango, world-class steak, and vibrant neighborhoods to explore.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Tango Show & Lesson</h5>
+                            <p>Experience authentic Argentine tango in San Telmo. Take a lesson and attend an evening milonga.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Tigre Delta</h5>
+                            <p>Day trip to the Parana Delta. Explore waterways by boat, visit artisan markets, and enjoy riverside cafes.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Colonia del Sacramento</h5>
+                            <p>Ferry across the Rio de la Plata to this charming UNESCO World Heritage town in Uruguay.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>La Boca & Recoleta</h5>
+                            <p>Visit the colorful Caminito street, Recoleta Cemetery (Eva Peron's grave), and MALBA art museum.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Boutique hotel in Palermo Soho or historic San Telmo apartment.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">6</div>
+                    <div class="week-title">
+                        <h3>Patagonia: El Calafate</h3>
+                        <div class="location">📍 El Calafate, Argentina</div>
+                        <div class="dates">Week 6</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: El Calafate</h4>
+                    <p>Gateway to Los Glaciares National Park and the famous Perito Moreno Glacier. Stunning Patagonian landscapes await.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Perito Moreno Glacier</h5>
+                            <p>One of the world's most accessible glaciers. Walk the boardwalks to see ice calving, or take an ice trek on the glacier itself.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Upsala & Spegazzini Glaciers</h5>
+                            <p>Full-day boat tour on Lago Argentino to see multiple glaciers and icebergs.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>El Chalten Day Trip</h5>
+                            <p>Hike to see Mount Fitz Roy and Cerro Torre - iconic Patagonian peaks.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Estancia Experience</h5>
+                            <p>Visit a traditional Patagonian ranch. Horseback riding, lamb asado, and gaucho culture.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Cozy hotel or cabin with mountain views in El Calafate town.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">7-8</div>
+                    <div class="week-title">
+                        <h3>Chilean Patagonia & Torres del Paine</h3>
+                        <div class="location">📍 Puerto Natales, Chile</div>
+                        <div class="dates">Weeks 7-8</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Puerto Natales</h4>
+                    <p>Gateway to Torres del Paine National Park - one of the world's most spectacular hiking destinations.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Torres del Paine W Trek</h5>
+                            <p>Multi-day trek through stunning scenery: the Torres, French Valley, and Grey Glacier. Can also do day hikes.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Base of the Towers</h5>
+                            <p>Challenging day hike to see the iconic three granite towers - the park's most famous view.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Grey Glacier Kayaking</h5>
+                            <p>Paddle among icebergs with views of Grey Glacier - an unforgettable experience.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Pumas of Patagonia</h5>
+                            <p>Guided wildlife safari to spot pumas, guanacos, and condors in the park.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="travel-info">
+                    <h4>✈️ Preparing for Antarctica:</h4>
+                    <p>From Punta Arenas (near Puerto Natales), you'll depart for your Antarctic expedition. Book Antarctic cruises well in advance - departures typically from Ushuaia, Argentina or Punta Arenas, Chile.</p>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Hostel or hotel in Puerto Natales. For trekking: refugios along the W Trek route.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 3: Antarctica & Brazil -->
+    <div class="month-section" id="month-3">
+        <div class="month-header" onclick="toggleMonth(3)">
+            <h2>📅 Month 3: Antarctica & Brazil <span class="continent-badge">🧊 Antarctica → 🌎 South America</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-3-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">9-10</div>
+                    <div class="week-title">
+                        <h3>Antarctica Expedition</h3>
+                        <div class="location">📍 Antarctic Peninsula</div>
+                        <div class="dates">Weeks 9-10</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🚢 Antarctic Expedition Cruise</h4>
+                    <p>A once-in-a-lifetime journey to the world's last wilderness. Most expeditions depart from Ushuaia, Argentina and last 10-14 days including the Drake Passage crossing.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Expedition Highlights:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Penguin Colonies</h5>
+                            <p>Walk among thousands of Gentoo, Chinstrap, and Adelie penguins at various landing sites.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Zodiac Cruising</h5>
+                            <p>Navigate between towering icebergs, spot seals and whales, and explore glacial bays.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Deception Island</h5>
+                            <p>Sail into an active volcanic caldera. Visit abandoned whaling stations and swim in geothermally heated waters.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Lemaire Channel</h5>
+                            <p>Cruise through "Kodak Alley" - one of the most scenic passages in Antarctica.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Polar Plunge</h5>
+                            <p>Take the plunge into Antarctic waters - a rite of passage for polar explorers!</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Whale Watching</h5>
+                            <p>Spot humpback whales, orcas, and minke whales feeding in Antarctic waters.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="highlights">
+                    <h4>⭐ Antarctica Tips:</h4>
+                    <ul>
+                        <li>Best time to visit: November-March (Antarctic summer)</li>
+                        <li>Book 6-12 months in advance for the best ships and cabins</li>
+                        <li>Bring seasickness medication for the Drake Passage</li>
+                        <li>Waterproof layers and thermal underwear essential</li>
+                    </ul>
+                </div>
+                <div class="accommodation">
+                    <h4>🚢 Expedition Ship:</h4>
+                    <p>Small expedition vessel (100-200 passengers) with expert naturalists and comfortable cabins.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">11-12</div>
+                    <div class="week-title">
+                        <h3>Rio de Janeiro & Iguazu Falls</h3>
+                        <div class="location">📍 Rio de Janeiro & Foz do Iguacu, Brazil</div>
+                        <div class="dates">Weeks 11-12</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Copacabana/Ipanema (Rio) → Foz do Iguacu</h4>
+                    <p>Return to South America's vibrant Brazil. Experience Rio's iconic beaches and Christ the Redeemer, then witness the world's most impressive waterfalls.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Christ the Redeemer</h5>
+                            <p>Iconic statue atop Corcovado Mountain. Take the cog train for panoramic views of Rio.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Iguazu Falls</h5>
+                            <p>275 waterfalls spanning 2.7km. Visit both Brazilian and Argentine sides for the complete experience.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Sugarloaf Mountain</h5>
+                            <p>Cable car ride to the summit for sunset views over Rio, Copacabana, and Guanabara Bay.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Santa Teresa</h5>
+                            <p>Bohemian hillside neighborhood with colonial architecture, art galleries, and the famous Escadaria Selaron steps.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Tijuca Forest</h5>
+                            <p>World's largest urban rainforest. Hiking trails, waterfalls, and wildlife within the city.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Ilha Grande</h5>
+                            <p>Car-free tropical island paradise. Pristine beaches, snorkeling, and hiking trails.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="travel-info">
+                    <h4>✈️ Next Destination:</h4>
+                    <p>From Sao Paulo or Rio, fly west across the Pacific to Sydney, Australia - your gateway to Oceania!</p>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Rio: Beachfront hotel in Ipanema or Copacabana. Iguazu: Hotel with falls view.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 4: Australia & New Zealand -->
+    <div class="month-section" id="month-4">
+        <div class="month-header" onclick="toggleMonth(4)">
+            <h2>📅 Month 4: Australia & New Zealand <span class="continent-badge">🦘 Oceania</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-4-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">13</div>
+                    <div class="week-title">
+                        <h3>Sydney, Australia</h3>
+                        <div class="location">📍 Sydney, NSW, Australia</div>
+                        <div class="dates">Week 13</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Sydney CBD or Bondi Beach</h4>
+                    <p>Australia's largest city offers iconic landmarks, beautiful beaches, and easy access to the Blue Mountains and wine regions.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Sydney Opera House</h5>
+                            <p>UNESCO World Heritage Site. Take a guided tour or catch a performance in this architectural masterpiece.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Sydney Harbour Bridge</h5>
+                            <p>Walk across or do the famous BridgeClimb for panoramic harbor views.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Blue Mountains</h5>
+                            <p>World Heritage wilderness. See the Three Sisters, take the Scenic Railway, and hike through eucalyptus forests.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Bondi to Coogee Walk</h5>
+                            <p>Stunning 6km coastal walk past beaches, cliffs, and ocean pools.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Hunter Valley Wine</h5>
+                            <p>Australia's oldest wine region. Sample Semillon and Shiraz at cellar doors.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Taronga Zoo</h5>
+                            <p>See native Australian wildlife with stunning Sydney Harbour backdrop.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Hotel in The Rocks for historic charm, or Bondi Beach for surf culture.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">14</div>
+                    <div class="week-title">
+                        <h3>Great Barrier Reef & Cairns</h3>
+                        <div class="location">📍 Cairns, Queensland, Australia</div>
+                        <div class="dates">Week 14</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Cairns or Port Douglas</h4>
+                    <p>Gateway to the Great Barrier Reef and the ancient Daintree Rainforest. Tropical paradise meets natural wonder.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Great Barrier Reef</h5>
+                            <p>World's largest coral reef system. Snorkel or dive among 1,500 species of fish and 400 types of coral.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Daintree Rainforest</h5>
+                            <p>World's oldest rainforest (180 million years). Crocodile spotting, jungle walks, and Cape Tribulation.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Kuranda Village</h5>
+                            <p>Scenic railway and Skyrail cableway through rainforest to a charming mountain village.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Atherton Tablelands</h5>
+                            <p>Waterfalls circuit, crater lakes, and platypus spotting opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Cairns waterfront hotel or Port Douglas resort for upscale experience.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">15-16</div>
+                    <div class="week-title">
+                        <h3>New Zealand: North & South Islands</h3>
+                        <div class="location">📍 Auckland & Queenstown, New Zealand</div>
+                        <div class="dates">Weeks 15-16</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Auckland (Week 15) → Queenstown (Week 16)</h4>
+                    <p>From Auckland's Pacific culture to Queenstown's adventure capital, New Zealand offers dramatic landscapes at every turn.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Hobbiton Movie Set</h5>
+                            <p>Visit the real Hobbiton from Lord of the Rings in Matamata. Walking tour of the Shire!</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Milford Sound</h5>
+                            <p>New Zealand's most famous fiord. Cruise beneath towering cliffs and waterfalls.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Rotorua Geothermal</h5>
+                            <p>Bubbling mud pools, geysers, and Maori cultural experiences. Te Puia or Wai-O-Tapu.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Queenstown Adventures</h5>
+                            <p>Bungee jumping (birthplace of bungee!), jet boating, skiing, or skydiving.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Waitomo Caves</h5>
+                            <p>Glowworm caves - float through underground rivers lit by thousands of glowworms.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Tongariro Crossing</h5>
+                            <p>Epic day hike across volcanic terrain - the "Mordor" of LOTR.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="travel-info">
+                    <h4>✈️ Next Destination:</h4>
+                    <p>Fly from New Zealand to Bali, Indonesia - beginning your Asian adventure!</p>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Auckland: City center hotel. Queenstown: Lakeside accommodation with mountain views.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 5: Southeast Asia -->
+    <div class="month-section" id="month-5">
+        <div class="month-header" onclick="toggleMonth(5)">
+            <h2>📅 Month 5: Southeast Asia <span class="continent-badge">🏯 Asia</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-5-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">17</div>
+                    <div class="week-title">
+                        <h3>Bali, Indonesia</h3>
+                        <div class="location">📍 Ubud & Seminyak, Bali</div>
+                        <div class="dates">Week 17</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Ubud (Cultural) & Seminyak (Beach)</h4>
+                    <p>The Island of the Gods offers ancient temples, terraced rice paddies, yoga retreats, and stunning beaches.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Tegallalang Rice Terraces</h5>
+                            <p>Iconic stepped rice paddies near Ubud. Walk through the terraces and visit local coffee plantations.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Tanah Lot Temple</h5>
+                            <p>Spectacular sea temple perched on a rock formation. Visit at sunset for magical photos.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Mount Batur Sunrise</h5>
+                            <p>Pre-dawn trek to active volcano crater for breathtaking sunrise views.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Ubud Monkey Forest</h5>
+                            <p>Sacred sanctuary with over 700 Balinese long-tailed macaques among ancient temples.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Nusa Penida Island</h5>
+                            <p>Day trip to see Kelingking Beach (T-Rex cliff), Angel's Billabong, and manta rays.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Balinese Cooking Class</h5>
+                            <p>Visit local markets and learn to prepare traditional Balinese dishes.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Ubud: Jungle villa with pool. Seminyak: Beach resort.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">18</div>
+                    <div class="week-title">
+                        <h3>Vietnam: Ho Chi Minh City & Hoi An</h3>
+                        <div class="location">📍 Ho Chi Minh City & Hoi An, Vietnam</div>
+                        <div class="dates">Week 18</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: HCMC (3 days) → Hoi An (4 days)</h4>
+                    <p>Experience Vietnam's contrasts: bustling Saigon's street food scene and the ancient charm of UNESCO-listed Hoi An.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Cu Chi Tunnels</h5>
+                            <p>Underground tunnel network used during the Vietnam War. Crawl through actual tunnels.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Hoi An Ancient Town</h5>
+                            <p>UNESCO World Heritage trading port. Japanese Covered Bridge, lantern-lit streets, tailors.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Mekong Delta</h5>
+                            <p>Full-day tour to floating markets, coconut candy workshops, and sampan boat rides.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>My Son Sanctuary</h5>
+                            <p>Ancient Hindu temples of the Champa Kingdom. Vietnam's answer to Angkor Wat.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Street Food Tour</h5>
+                            <p>Sample pho, banh mi, com tam, and fresh spring rolls on a guided food tour.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Marble Mountains</h5>
+                            <p>Five marble and limestone hills with caves, tunnels, and Buddhist sanctuaries near Da Nang.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>HCMC: District 1 hotel. Hoi An: Riverside boutique hotel in Ancient Town.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">19-20</div>
+                    <div class="week-title">
+                        <h3>Thailand: Bangkok & North</h3>
+                        <div class="location">📍 Bangkok & Chiang Mai, Thailand</div>
+                        <div class="dates">Weeks 19-20</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Bangkok (Week 19) → Chiang Mai (Week 20)</h4>
+                    <p>From Bangkok's golden temples and street food to Chiang Mai's mountain temples and elephant sanctuaries.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Grand Palace & Wat Phra Kaew</h5>
+                            <p>Bangkok's most sacred temple complex housing the Emerald Buddha. Stunning gold spires.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Ayutthaya</h5>
+                            <p>UNESCO ancient capital. Explore temple ruins, Buddha heads in tree roots, and historic parks.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Floating Markets</h5>
+                            <p>Damnoen Saduak or Amphawa floating markets - shop from traditional wooden boats.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Elephant Nature Park</h5>
+                            <p>Ethical elephant sanctuary near Chiang Mai. Feed, bathe, and learn about rescued elephants.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Doi Suthep Temple</h5>
+                            <p>Golden temple on a mountain overlooking Chiang Mai. 309 steps to the top!</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Thai Cooking Class</h5>
+                            <p>Market tour and hands-on cooking of pad thai, green curry, and mango sticky rice.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Bangkok: Riverside hotel or near Khao San Road. Chiang Mai: Old City guesthouse.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 6: East Asia -->
+    <div class="month-section" id="month-6">
+        <div class="month-header" onclick="toggleMonth(6)">
+            <h2>📅 Month 6: East Asia <span class="continent-badge">🏯 Asia</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-6-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">21-22</div>
+                    <div class="week-title">
+                        <h3>Japan: Tokyo, Kyoto & Beyond</h3>
+                        <div class="location">📍 Tokyo & Kyoto, Japan</div>
+                        <div class="dates">Weeks 21-22</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Tokyo (Week 21) → Kyoto (Week 22)</h4>
+                    <p>Experience Japan's incredible contrast between ultra-modern Tokyo and traditional Kyoto. The JR Pass makes day trips easy.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Mount Fuji</h5>
+                            <p>Day trip to Japan's iconic volcano. Hakone for hot springs and views, or Kawaguchiko for lake reflections.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Fushimi Inari Shrine</h5>
+                            <p>10,000 vermillion torii gates winding up the mountainside in Kyoto. Best at dawn.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Hiroshima & Miyajima</h5>
+                            <p>Peace Memorial, floating torii gate, and powerful history lessons.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Nara Deer Park</h5>
+                            <p>Hundreds of bowing deer roam freely among ancient temples. Great day trip from Kyoto.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Tokyo's Districts</h5>
+                            <p>Shibuya crossing, Senso-ji temple in Asakusa, Akihabara electronics, Harajuku fashion.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Arashiyama Bamboo Grove</h5>
+                            <p>Ethereal bamboo forest walk in Kyoto, plus monkey park and riverside temple district.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="highlights">
+                    <h4>⭐ Japan Tips:</h4>
+                    <ul>
+                        <li>Get a 14-day JR Pass before arriving - saves money on bullet trains</li>
+                        <li>Try an onsen (hot spring bath) - amazing experience!</li>
+                        <li>7-Eleven ATMs are the most reliable for international cards</li>
+                    </ul>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Tokyo: Shinjuku or Shibuya for access. Kyoto: Gion district or near station. Try a ryokan!</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">23-24</div>
+                    <div class="week-title">
+                        <h3>China: Beijing, Xi'an & Shanghai</h3>
+                        <div class="location">📍 Beijing, Xi'an & Shanghai, China</div>
+                        <div class="dates">Weeks 23-24</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Beijing (5 days) → Xi'an (3 days) → Shanghai (6 days)</h4>
+                    <p>Ancient wonders meet modern megacities. From the Great Wall to the Terracotta Warriors to Shanghai's skyline.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Great Wall of China</h5>
+                            <p>Hike the world's longest wall. Mutianyu (restored) or Jinshanling (wilder) sections recommended.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Terracotta Warriors</h5>
+                            <p>8,000 life-sized clay soldiers guarding Emperor Qin's tomb in Xi'an. Mind-blowing!</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Forbidden City</h5>
+                            <p>Largest palace complex in the world. 980 buildings and centuries of imperial history.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Temple of Heaven</h5>
+                            <p>Beautiful circular temple in Beijing where emperors prayed for good harvests.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>The Bund & Pudong</h5>
+                            <p>Shanghai's iconic waterfront with colonial architecture facing futuristic skyscrapers.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Zhujiajiao Water Town</h5>
+                            <p>Venice of Shanghai - ancient canals, stone bridges, and traditional architecture.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="travel-info">
+                    <h4>🛂 China Visa Note:</h4>
+                    <p>Most nationalities need a visa for China. Apply in advance, or check if your country qualifies for transit visa exemption.</p>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Beijing: Hutong area courtyard hotel. Shanghai: Near The Bund or French Concession.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 7: India & Africa -->
+    <div class="month-section" id="month-7">
+        <div class="month-header" onclick="toggleMonth(7)">
+            <h2>📅 Month 7: India & South Africa <span class="continent-badge">🏯 Asia → 🦁 Africa</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-7-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">25-26</div>
+                    <div class="week-title">
+                        <h3>India: Golden Triangle</h3>
+                        <div class="location">📍 Delhi, Agra & Jaipur, India</div>
+                        <div class="dates">Weeks 25-26</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Delhi (4 days) → Agra (2 days) → Jaipur (5 days)</h4>
+                    <p>India's famous Golden Triangle offers an intense introduction to the subcontinent's incredible history, culture, and cuisine.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Taj Mahal</h5>
+                            <p>The world's most beautiful building. Visit at sunrise for smaller crowds and golden light.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Amber Fort</h5>
+                            <p>Magnificent hilltop fortress in Jaipur. Elephant rides and stunning Rajasthani architecture.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Old Delhi Walking Tour</h5>
+                            <p>Red Fort, Jama Masjid mosque, Chandni Chowk bazaar, and incredible street food.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Fatehpur Sikri</h5>
+                            <p>Abandoned Mughal capital near Agra. Ghost city frozen in red sandstone.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Hawa Mahal</h5>
+                            <p>Palace of Winds - Jaipur's iconic pink honeycomb facade with 953 windows.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Varanasi Extension</h5>
+                            <p>Optional: Holy city on the Ganges. Witness sunrise prayers and evening aartis.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Delhi: Paharganj or Karol Bagh. Jaipur: Heritage haveli. Agra: Taj view hotel.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">27-28</div>
+                    <div class="week-title">
+                        <h3>South Africa: Cape Town & Safari</h3>
+                        <div class="location">📍 Cape Town & Kruger Area, South Africa</div>
+                        <div class="dates">Weeks 27-28</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Cape Town (Week 27) → Kruger/Safari (Week 28)</h4>
+                    <p>From Table Mountain's dramatic beauty to the Big Five on safari - South Africa delivers unforgettable experiences.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Table Mountain</h5>
+                            <p>Cable car or hike to the top for 360-degree views of Cape Town and the Atlantic.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Big Five Safari</h5>
+                            <p>Spot lions, elephants, rhinos, leopards, and buffalo in Kruger or private reserves.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Cape Point & Penguins</h5>
+                            <p>Drive the Cape Peninsula. See African penguins at Boulders Beach and Cape of Good Hope.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Winelands</h5>
+                            <p>Stellenbosch, Franschhoek, and Paarl wine valleys. World-class wines in stunning settings.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Robben Island</h5>
+                            <p>Where Nelson Mandela was imprisoned. Powerful guided tour by former political prisoners.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Shark Cage Diving</h5>
+                            <p>Get up close with great white sharks in the waters off Gansbaai.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="travel-info">
+                    <h4>✈️ Next Destination:</h4>
+                    <p>Fly north through Africa to Kenya for more wildlife, then Egypt for ancient wonders!</p>
+                </div>
+                <div class="accommodation">
+                    <h4>�� Suggested Accommodation:</h4>
+                    <p>Cape Town: V&A Waterfront or Camps Bay. Safari: Lodge in Sabi Sands or Kruger area.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 8: East Africa & Egypt to Europe -->
+    <div class="month-section" id="month-8">
+        <div class="month-header" onclick="toggleMonth(8)">
+            <h2>📅 Month 8: Kenya, Egypt & Italy <span class="continent-badge">🦁 Africa → 🏰 Europe</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-8-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">29</div>
+                    <div class="week-title">
+                        <h3>Kenya Safari</h3>
+                        <div class="location">📍 Nairobi & Masai Mara, Kenya</div>
+                        <div class="dates">Week 29</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Nairobi (2 days) → Masai Mara (5 days)</h4>
+                    <p>Experience the world-famous Masai Mara, home to the Great Migration and incredible Big Five viewing.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Masai Mara Safari</h5>
+                            <p>Morning and evening game drives. Lions, cheetahs, elephants, and vast wildebeest herds.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Hot Air Balloon Safari</h5>
+                            <p>Sunrise balloon ride over the savanna, followed by champagne breakfast.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Masai Village Visit</h5>
+                            <p>Learn about Masai culture, traditions, and their relationship with wildlife.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Giraffe Centre</h5>
+                            <p>Hand-feed endangered Rothschild's giraffes at this Nairobi sanctuary.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Masai Mara: Tented safari camp for authentic bush experience. Nairobi: Giraffe Manor if budget allows!</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">30</div>
+                    <div class="week-title">
+                        <h3>Egypt: Cairo & Luxor</h3>
+                        <div class="location">📍 Cairo & Luxor, Egypt</div>
+                        <div class="dates">Week 30</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Cairo (4 days) → Luxor (3 days)</h4>
+                    <p>Walk in the footsteps of pharaohs. 5,000 years of history at the Pyramids, Sphinx, and Valley of the Kings.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Pyramids of Giza</h5>
+                            <p>The last surviving Ancient Wonder. Visit the Great Pyramid, Sphinx, and enjoy sunset views.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Valley of the Kings</h5>
+                            <p>Royal tombs including Tutankhamun. Hieroglyphics still vibrant after millennia.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Egyptian Museum</h5>
+                            <p>Tutankhamun's gold mask and treasures. The new Grand Egyptian Museum is also open!</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Karnak & Luxor Temples</h5>
+                            <p>Massive temple complexes on the Nile. Karnak's hypostyle hall is mind-blowing.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Nile Felucca Ride</h5>
+                            <p>Traditional sailboat cruise on the Nile at sunset - pure magic.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Islamic Cairo</h5>
+                            <p>Al-Azhar Mosque, Khan el-Khalili bazaar, and medieval architecture.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="travel-info">
+                    <h4>✈️ Next Destination:</h4>
+                    <p>A short flight from Cairo takes you to Rome - welcome to Europe!</p>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Cairo: Hotel with Pyramid views in Giza. Luxor: East Bank or Nile cruise.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">31-32</div>
+                    <div class="week-title">
+                        <h3>Italy: Rome, Florence & Amalfi</h3>
+                        <div class="location">📍 Rome, Florence & Amalfi Coast, Italy</div>
+                        <div class="dates">Weeks 31-32</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Rome (5 days) → Florence (4 days) → Amalfi (5 days)</h4>
+                    <p>La Dolce Vita! Ancient ruins, Renaissance masterpieces, and Mediterranean coastal beauty.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Colosseum & Roman Forum</h5>
+                            <p>Walk where gladiators fought. Combined ticket covers the Forum and Palatine Hill.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Vatican City</h5>
+                            <p>St. Peter's Basilica, Sistine Chapel, and Vatican Museums - book skip-the-line tickets!</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Pompeii</h5>
+                            <p>Day trip from Amalfi to the Roman city frozen in time by Vesuvius.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Uffizi Gallery</h5>
+                            <p>Botticelli's Birth of Venus, works by Leonardo, and Renaissance masters.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Positano & Ravello</h5>
+                            <p>Pastel villages clinging to cliffs. Scenic coastal drives and lemon groves.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Capri Island</h5>
+                            <p>Ferry from Amalfi. Blue Grotto, designer shopping, and Mediterranean glamour.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Rome: Trastevere or near Spanish Steps. Florence: Centro Storico. Amalfi: Positano cliffside hotel.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MONTH 9: Western Europe & Return Home -->
+    <div class="month-section" id="month-9">
+        <div class="month-header" onclick="toggleMonth(9)">
+            <h2>📅 Month 9: France, UK & Home <span class="continent-badge">🏰 Europe → 🇺🇸 Home</span></h2>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="month-content" id="month-9-content">
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">33-34</div>
+                    <div class="week-title">
+                        <h3>France: Paris & Beyond</h3>
+                        <div class="location">📍 Paris & Provence, France</div>
+                        <div class="dates">Weeks 33-34</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Locations: Paris (Week 33) → Provence (Week 34)</h4>
+                    <p>The City of Light followed by lavender fields, Roman ruins, and Mediterranean charm in the south.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Eiffel Tower</h5>
+                            <p>Paris's iconic iron lady. Climb to the top or picnic in Champ de Mars with views.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Louvre Museum</h5>
+                            <p>Mona Lisa, Venus de Milo, and 35,000 works of art in the world's largest museum.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Versailles</h5>
+                            <p>Louis XIV's palace and gardens. Hall of Mirrors and Marie Antoinette's hamlet.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Montmartre & Sacre-Coeur</h5>
+                            <p>Artistic hilltop neighborhood with stunning views over Paris.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Avignon & Pont du Gard</h5>
+                            <p>Medieval papal palace and Roman aqueduct - stunning Provencal history.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Lavender Fields</h5>
+                            <p>Valensole plateau (June-August) or year-round markets and hilltop villages.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Paris: Le Marais or Saint-Germain. Provence: Aix-en-Provence or village guesthouse.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">35</div>
+                    <div class="week-title">
+                        <h3>United Kingdom: London</h3>
+                        <div class="location">📍 London, England</div>
+                        <div class="dates">Week 35</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Base Location: Central London</h4>
+                    <p>History, royalty, world-class museums, and iconic landmarks. The Eurostar from Paris takes just 2.5 hours.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Day Trips & Activities:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Tower of London</h5>
+                            <p>Crown Jewels, Beefeater tours, and 1,000 years of royal history.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ British Museum</h5>
+                            <p>Rosetta Stone, Elgin Marbles, Egyptian mummies - free entry!</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Stonehenge</h5>
+                            <p>Day trip to the mysterious prehistoric monument on Salisbury Plain.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Westminster & Big Ben</h5>
+                            <p>Houses of Parliament, Westminster Abbey, and Buckingham Palace.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Harry Potter Studios</h5>
+                            <p>Warner Bros. Studio Tour - a must for Potter fans!</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Oxford or Cambridge</h5>
+                            <p>Historic university towns with stunning architecture and punting.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accommodation">
+                    <h4>🏨 Suggested Accommodation:</h4>
+                    <p>Central London: Covent Garden, South Bank, or Kensington for easy access.</p>
+                </div>
+            </div>
+            
+            <div class="week-section">
+                <div class="week-header">
+                    <div class="week-number">36</div>
+                    <div class="week-title">
+                        <h3>Return to Boston</h3>
+                        <div class="location">📍 London → Boston</div>
+                        <div class="dates">Week 36</div>
+                    </div>
+                </div>
+                <div class="base-info">
+                    <h4>🏠 Journey's End</h4>
+                    <p>Your 9-month circumnavigation of the globe comes full circle. Direct flights from London Heathrow to Boston take approximately 7.5 hours.</p>
+                </div>
+                <div class="day-trips">
+                    <h4>Final Days in London:</h4>
+                    <div class="day-trip-grid">
+                        <div class="day-trip-card">
+                            <h5>Last-Minute London</h5>
+                            <p>Revisit favorites, shop for souvenirs, enjoy a West End show, or afternoon tea.</p>
+                        </div>
+                        <div class="day-trip-card">
+                            <h5>Pack & Reflect</h5>
+                            <p>Organize your 9 months of memories, souvenirs, and photos.</p>
+                        </div>
+                        <div class="day-trip-card landmark">
+                            <h5>⭐ Fly Home to Boston</h5>
+                            <p>Direct flight to Logan Airport. You've traveled around the entire world!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="highlights">
+                    <h4>🎉 Congratulations!</h4>
+                    <ul>
+                        <li>You've visited all 7 continents!</li>
+                        <li>Experienced 25+ countries and cultures</li>
+                        <li>Seen some of humanity's greatest achievements</li>
+                        <li>Created memories that will last a lifetime</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <h3>🌍 Trip Summary</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <strong>Duration</strong>
+                9 Months / 36 Weeks
+            </div>
+            <div class="summary-item">
+                <strong>Continents</strong>
+                All 7 (including Antarctica!)
+            </div>
+            <div class="summary-item">
+                <strong>Countries</strong>
+                25+ Nations
+            </div>
+            <div class="summary-item">
+                <strong>Direction</strong>
+                Westward Circumnavigation
+            </div>
+            <div class="summary-item">
+                <strong>Start/End</strong>
+                Boston, Massachusetts
+            </div>
+            <div class="summary-item">
+                <strong>Style</strong>
+                Week-long Hub Stays
+            </div>
+        </div>
+        
+        <div class="tips-section">
+            <h4>Essential Travel Tips</h4>
+            <ul>
+                <li>Book flights with alliance partners (Star Alliance, OneWorld, SkyTeam) for round-the-world tickets</li>
+                <li>Get travel insurance that covers the entire duration and all activities</li>
+                <li>Check visa requirements for each country well in advance</li>
+                <li>Register with your country's embassy in each destination</li>
+                <li>Keep digital and physical copies of all important documents</li>
+                <li>Use a travel credit card with no foreign transaction fees</li>
+                <li>Get recommended vaccinations before departure</li>
+                <li>Pack light - you'll thank yourself later!</li>
+            </ul>
+        </div>
+        
+        <p style="margin-top: 30px; opacity: 0.8;">
+            🌍 <em>"The world is a book and those who do not travel read only one page."</em> - Saint Augustine
+        </p>
+        <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.7;">
+            Created for Realms of Silver Travel Collection
+        </p>
+    </footer>
+</div>
+
+<script>
+    // Toggle month sections
+    function toggleMonth(monthNum) {
+        const content = document.getElementById('month-' + monthNum + '-content');
+        const header = content.previousElementSibling;
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            header.classList.remove('collapsed');
+        } else {
+            content.classList.add('hidden');
+            header.classList.add('collapsed');
+        }
+    }
+    
+    // Scroll to specific month
+    function scrollToMonth(monthNum) {
+        const element = document.getElementById('month-' + monthNum);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Ensure the month is expanded
+            const content = document.getElementById('month-' + monthNum + '-content');
+            const header = content.previousElementSibling;
+            content.classList.remove('hidden');
+            header.classList.remove('collapsed');
+        }
+    }
+    
+    // Initialize - expand first month by default
+    document.addEventListener('DOMContentLoaded', function() {
+        // All months start expanded, but we could collapse them like this:
+        // for (let i = 2; i <= 9; i++) {
+        //     const content = document.getElementById('month-' + i + '-content');
+        //     const header = content.previousElementSibling;
+        //     content.classList.add('hidden');
+        //     header.classList.add('collapsed');
+        // }
+        console.log('9-Month World Trip Itinerary Loaded');
+    });
+</script>
+</body>
+</html>
