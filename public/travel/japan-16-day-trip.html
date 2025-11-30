@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-Day Japan Historic & Cultural Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #dc143c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .trip-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .trip-overview {
+            background: #f8f9fa;
+            padding: 30px;
+            border-bottom: 3px solid #dc143c;
+        }
+        
+        .trip-overview h2 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+        }
+        
+        .route-map {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .route-stop {
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+        
+        .route-stop::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #dc143c;
+        }
+        
+        .route-stop:last-child::after {
+            content: '';
+        }
+        
+        .route-stop span {
+            display: block;
+            font-weight: bold;
+            color: #dc143c;
+            margin-top: 5px;
+        }
+        
+        .total-distance {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #dc143c;
+            color: white;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .day-section {
+            padding: 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .day-section:last-child {
+            border-bottom: none;
+        }
+        
+        .day-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .day-number {
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+        }
+        
+        .day-title {
+            flex: 1;
+        }
+        
+        .day-title h3 {
+            color: #1a1a2e;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        
+        .day-title .date {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .day-title .location {
+            color: #dc143c;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .day-content {
+            margin-left: 80px;
+        }
+        
+        .travel-info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .travel-info strong {
+            color: #1a1a2e;
+        }
+        
+        .transport-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .transport-link:hover {
+            background: #2980b9;
+        }
+        
+        .activities {
+            margin-top: 15px;
+        }
+        
+        .activities h4 {
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .activities ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .activities li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #dc143c;
+            padding-left: 15px;
+        }
+        
+        .activities li:before {
+            content: '✓';
+            color: #dc143c;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .highlights {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .highlights h4 {
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        
+        .accommodation {
+            background: #e8f8f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .accommodation h4 {
+            color: #27ae60;
+            margin-bottom: 5px;
+        }
+        
+        .hike-section {
+            background: #f0e6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #9b59b6;
+        }
+        
+        .hike-section h4 {
+            color: #8e44ad;
+            margin-bottom: 10px;
+        }
+        
+        .hike-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .hike-section li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .hike-section li::before {
+            content: '🥾';
+            position: absolute;
+            left: 0;
+        }
+        
+        footer {
+            background: #1a1a2e;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .tips {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .tips h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .tips ul {
+            list-style-position: inside;
+            color: #856404;
+        }
+        
+        .region-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .region-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: white;
+            background: #dc143c;
+        }
+        
+        .region-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #8b0000;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .day-content {
+                margin-left: 0;
+            }
+            
+            .route-map {
+                flex-direction: column;
+            }
+            
+            .route-stop::after {
+                content: '↓';
+                right: auto;
+                top: auto;
+                bottom: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .route-stop:last-child::after {
+                content: '';
+            }
+            
+            .trip-stats {
+                gap: 15px;
+            }
+            
+            .stat-box {
+                padding: 10px 15px;
+            }
+            
+            .stat-box .number {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇯🇵 16-Day Japan Historic & Cultural Adventure</h1>
+            <p>Boston → Tokyo → Kyoto → Hiroshima → Alps → Boston</p>
+            <div class="trip-stats">
+                <div class="stat-box"><span class="number">16</span><span class="label">Days</span></div>
+                <div class="stat-box"><span class="number">3</span><span class="label">Travelers</span></div>
+                <div class="stat-box"><span class="number">7</span><span class="label">Cities</span></div>
+                <div class="stat-box"><span class="number">1</span><span class="label">Mountain Hike</span></div>
+            </div>
+        </header>
+        
+        <div class="trip-overview">
+            <h2>Trip Overview</h2>
+            <p>Experience the best of Japan on this comprehensive 16-day journey for three travelers. From the ultra-modern streets of Tokyo to ancient temples in Kyoto, the moving history of Hiroshima, and a stunning mountain hike in the Japanese Alps, this itinerary covers Japan's most iconic and historic sites. Staying in carefully selected mid-level boutique hotels, you'll enjoy authentic Japanese hospitality while exploring this fascinating country.</p>
+            
+            <div class="route-map">
+                <div class="route-stop">
+                    ✈️
+                    <span>Boston</span>
+                </div>
+                <div class="route-stop">
+                    🗼
+                    <span>Tokyo</span>
+                </div>
+                <div class="route-stop">
+                    ⛩️
+                    <span>Kyoto</span>
+                </div>
+                <div class="route-stop">
+                    🦌
+                    <span>Nara</span>
+                </div>
+                <div class="route-stop">
+                    ☮️
+                    <span>Hiroshima</span>
+                </div>
+                <div class="route-stop">
+                    🏯
+                    <span>Himeji</span>
+                </div>
+                <div class="route-stop">
+                    ⛰️
+                    <span>Takayama</span>
+                </div>
+                <div class="route-stop">
+                    🗻
+                    <span>Kamikochi</span>
+                </div>
+                <div class="route-stop">
+                    🗼
+                    <span>Tokyo</span>
+                </div>
+                <div class="route-stop">
+                    ✈️
+                    <span>Boston</span>
+                </div>
+            </div>
+            
+            <div class="total-distance">
+                JR Pass Recommended: 14-Day Pass covers most transportation between cities
+            </div>
+            
+            <div class="region-nav">
+                <button class="region-btn" onclick="scrollToDay(1)">Day 1: Departure</button>
+                <button class="region-btn" onclick="scrollToDay(2)">Days 2-4: Tokyo</button>
+                <button class="region-btn" onclick="scrollToDay(5)">Days 5-8: Kyoto</button>
+                <button class="region-btn" onclick="scrollToDay(9)">Days 9-10: Hiroshima</button>
+                <button class="region-btn" onclick="scrollToDay(11)">Days 11-13: Alps</button>
+                <button class="region-btn" onclick="scrollToDay(14)">Days 14-15: Tokyo</button>
+                <button class="region-btn" onclick="scrollToDay(16)">Day 16: Return</button>
+            </div>
+            
+            <div class="tips">
+                <h4>💡 Essential Tips for Japan Travel</h4>
+                <ul>
+                    <li>Purchase a 14-day JR Pass before arriving in Japan - significant savings on bullet trains</li>
+                    <li>Get a Suica or Pasmo IC card for local transportation</li>
+                    <li>Download offline maps and translation apps (Google Translate with camera feature)</li>
+                    <li>Carry cash - many smaller establishments don't accept cards</li>
+                    <li>7-Eleven ATMs are the most reliable for international cards</li>
+                    <li>Remove shoes when entering temples, traditional restaurants, and hotels</li>
+                    <li>Bow slightly when greeting people and receiving items</li>
+                    <li>Don't tip - it's not customary and can cause confusion</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Day 1: Travel from Boston -->
+        <div class="day-section" id="day-1">
+            <div class="day-header">
+                <div class="day-number">1</div>
+                <div class="day-title">
+                    <h3>Departure from Boston</h3>
+                    <div class="date">📅 Travel Day</div>
+                    <div class="location">📍 Boston → Tokyo (In Transit)</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>✈️ Flight:</strong> Boston Logan (BOS) → Tokyo Narita (NRT) or Haneda (HND)
+                    <br>Duration: Approximately 14 hours (direct) or 16-18 hours (1 stop)
+                    <br><strong>Airlines:</strong> Japan Airlines, ANA, United, or Delta offer direct flights
+                </div>
+                
+                <div class="activities">
+                    <h4>Travel Day Notes:</h4>
+                    <ul>
+                        <li>Depart Boston in the morning or early afternoon</li>
+                        <li>Cross the International Date Line - arrive in Tokyo the next day</li>
+                        <li>Use flight time to rest and adjust to the time difference</li>
+                        <li>Review Japanese phrases and customs during the flight</li>
+                        <li>Complete Japan arrival forms provided on the aircraft</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Pre-Departure Checklist:</h4>
+                    <p>Ensure you have: Valid passport (6+ months validity), JR Pass exchange voucher, hotel confirmations, travel insurance documents, yen for initial expenses, and any necessary medications.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 2: Arrive Tokyo -->
+        <div class="day-section" id="day-2">
+            <div class="day-header">
+                <div class="day-number">2</div>
+                <div class="day-title">
+                    <h3>Arrival in Tokyo</h3>
+                    <div class="date">📅 Arrival Day</div>
+                    <div class="location">📍 Tokyo</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚃 Airport to City:</strong> Narita Express (N'EX) to Tokyo Station (~60 min) or Limousine Bus to Shinjuku
+                    <br><strong>Important:</strong> Exchange your JR Pass voucher at the JR counter at the airport
+                </div>
+                
+                <div class="activities">
+                    <h4>Afternoon Activities (Light Day for Jet Lag Recovery):</h4>
+                    <ul>
+                        <li>Arrive at Narita/Haneda and clear immigration</li>
+                        <li>Exchange JR Pass voucher and pick up Suica card</li>
+                        <li>Take train to hotel and check in</li>
+                        <li>Gentle exploration of local neighborhood</li>
+                        <li>Light dinner at a nearby izakaya or ramen shop</li>
+                        <li>Early night to recover from jet lag</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Tokyo Tip:</h4>
+                    <p>Stay hydrated and try to stay awake until at least 9pm local time to help adjust to the 13-14 hour time difference from Boston.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Boutique Hotel Recommendation:</h4>
+                    <p><strong>Hotel Gracery Shinjuku</strong> or <strong>The Gate Hotel Kaminarimon</strong> - Mid-range boutique hotels with excellent locations, modern Japanese design, and rooms that accommodate three travelers. Expect ¥20,000-35,000/night for triple occupancy.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 3: Full Day Tokyo -->
+        <div class="day-section" id="day-3">
+            <div class="day-header">
+                <div class="day-number">3</div>
+                <div class="day-title">
+                    <h3>Explore Tokyo - Traditional & Modern</h3>
+                    <div class="date">📅 Full Day</div>
+                    <div class="location">📍 Tokyo</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Attractions:</h4>
+                    <ul>
+                        <li>Morning: Visit Senso-ji Temple in Asakusa - Tokyo's oldest and most famous temple</li>
+                        <li>Walk through Nakamise Shopping Street for traditional souvenirs</li>
+                        <li>Take the subway to Shibuya - cross the famous Shibuya Crossing</li>
+                        <li>Explore Harajuku's Takeshita Street for pop culture and street fashion</li>
+                        <li>Visit Meiji Shrine - peaceful Shinto shrine in a forested park</li>
+                        <li>Evening in Shinjuku - neon lights, Golden Gai bars, and dinner</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <p>The contrast between ancient Senso-ji Temple and the ultra-modern Shibuya Crossing perfectly captures Tokyo's unique blend of tradition and innovation. Visit Senso-ji early morning to avoid crowds!</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Continue stay at boutique hotel in Shinjuku or Asakusa area</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 4: Tokyo Day 2 -->
+        <div class="day-section" id="day-4">
+            <div class="day-header">
+                <div class="day-number">4</div>
+                <div class="day-title">
+                    <h3>Tokyo - Imperial History & Modern Culture</h3>
+                    <div class="date">📅 Full Day</div>
+                    <div class="location">📍 Tokyo</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Attractions:</h4>
+                    <ul>
+                        <li>Morning: Imperial Palace East Gardens - beautiful traditional Japanese gardens</li>
+                        <li>Walk around the Imperial Palace moat and plaza</li>
+                        <li>Visit the Tokyo National Museum in Ueno Park - Japan's oldest museum</li>
+                        <li>Explore Ueno Park - temples, shrines, and cherry blossom trees</li>
+                        <li>Afternoon: Akihabara Electric Town - anime, manga, and electronics heaven</li>
+                        <li>Evening: TeamLab digital art museum or Tokyo Skytree for city views</li>
+                        <li>Farewell Tokyo dinner in Ginza district</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Historic Highlight:</h4>
+                    <p>The Tokyo National Museum houses over 110,000 objects including 89 National Treasures. Don't miss the Japanese Gallery for samurai armor, swords, and ancient art.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Final night at Tokyo boutique hotel</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 5: Tokyo to Kyoto -->
+        <div class="day-section" id="day-5">
+            <div class="day-header">
+                <div class="day-number">5</div>
+                <div class="day-title">
+                    <h3>Tokyo to Kyoto - Ancient Capital</h3>
+                    <div class="date">📅 Travel & Explore</div>
+                    <div class="location">📍 Kyoto</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚄 Shinkansen:</strong> Tokyo Station → Kyoto Station (Nozomi or Hikari)
+                    <br>Duration: 2 hours 15 minutes
+                    <br><strong>Note:</strong> JR Pass valid on Hikari and Kodama (not the faster Nozomi or Mizuho)
+                    <a href="https://www.hyperdia.com/" target="_blank" class="transport-link">🗺️ Check Train Times</a>
+                </div>
+                
+                <div class="activities">
+                    <h4>Afternoon in Kyoto:</h4>
+                    <ul>
+                        <li>Depart Tokyo early morning by Shinkansen</li>
+                        <li>Arrive Kyoto and check into hotel</li>
+                        <li>Afternoon: Fushimi Inari Shrine - iconic 10,000 vermillion torii gates</li>
+                        <li>Hike partway up the mountain trail (2-3 hours round trip)</li>
+                        <li>Evening stroll through Gion district - traditional geisha quarter</li>
+                        <li>Dinner at a traditional kaiseki restaurant</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <p>Fushimi Inari is best visited early morning or late afternoon to avoid crowds and capture magical photos of the endless torii gates winding up the mountainside.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Boutique Hotel Recommendation:</h4>
+                    <p><strong>Hotel Kanra Kyoto</strong> or <strong>Mitsui Garden Hotel Kyoto Shinmachi Bettei</strong> - Boutique ryokan-style hotels blending traditional and modern aesthetics. Private onsen options available. Triple rooms ¥25,000-40,000/night.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 6: Kyoto Temples -->
+        <div class="day-section" id="day-6">
+            <div class="day-header">
+                <div class="day-number">6</div>
+                <div class="day-title">
+                    <h3>Kyoto - Golden Pavilion & Zen Gardens</h3>
+                    <div class="date">📅 Full Day</div>
+                    <div class="location">📍 Kyoto</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Attractions:</h4>
+                    <ul>
+                        <li>Morning: Kinkaku-ji (Golden Pavilion) - iconic gold-leaf covered temple</li>
+                        <li>Ryoan-ji Temple - famous Zen rock garden, perfect for meditation</li>
+                        <li>Lunch in the Arashiyama area</li>
+                        <li>Arashiyama Bamboo Grove - walk through towering bamboo forest</li>
+                        <li>Tenryu-ji Temple - UNESCO World Heritage zen temple</li>
+                        <li>Cross the Togetsukyo Bridge at sunset</li>
+                        <li>Evening: Return to central Kyoto for dinner</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Historic Significance:</h4>
+                    <p>Kinkaku-ji was originally built in 1397 as a retirement villa for shogun Ashikaga Yoshimitsu. The top two floors are covered entirely in gold leaf, reflecting beautifully in the surrounding pond.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Continue stay at Kyoto boutique hotel</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 7: Kyoto & Nara Day Trip -->
+        <div class="day-section" id="day-7">
+            <div class="day-header">
+                <div class="day-number">7</div>
+                <div class="day-title">
+                    <h3>Day Trip to Nara - Ancient Temples & Sacred Deer</h3>
+                    <div class="date">📅 Day Trip</div>
+                    <div class="location">📍 Nara (from Kyoto)</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚃 Train:</strong> Kyoto → Nara (JR Nara Line or Kintetsu Railway)
+                    <br>Duration: 45 minutes
+                    <br><strong>Note:</strong> JR Pass covers JR Nara Line
+                </div>
+                
+                <div class="activities">
+                    <h4>Day Trip Highlights:</h4>
+                    <ul>
+                        <li>Walk through Nara Park with over 1,200 friendly sacred deer</li>
+                        <li>Visit Todai-ji Temple - housing one of Japan's largest bronze Buddha statues</li>
+                        <li>Explore Kasuga Taisha Shrine - famous for thousands of stone and bronze lanterns</li>
+                        <li>Stroll through the beautiful Isuien Garden</li>
+                        <li>Visit Kofuku-ji Temple and its five-story pagoda</li>
+                        <li>Sample local specialties like kakinoha-zushi (persimmon leaf sushi)</li>
+                        <li>Return to Kyoto for evening</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <p>Todai-ji's Daibutsu (Great Buddha) is 15 meters tall and weighs approximately 500 tons. The Daibutsuden hall that houses it is one of the world's largest wooden buildings!</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Return to Kyoto boutique hotel</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 8: More Kyoto -->
+        <div class="day-section" id="day-8">
+            <div class="day-header">
+                <div class="day-number">8</div>
+                <div class="day-title">
+                    <h3>Kyoto - Eastern Hills & Tea Ceremony</h3>
+                    <div class="date">📅 Full Day</div>
+                    <div class="location">📍 Kyoto</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Attractions:</h4>
+                    <ul>
+                        <li>Morning: Kiyomizu-dera Temple - famous wooden terrace with city views</li>
+                        <li>Walk down Ninenzaka and Sannenzaka - historic preserved streets</li>
+                        <li>Visit Ginkaku-ji (Silver Pavilion) and its exquisite moss garden</li>
+                        <li>Walk along the Philosopher's Path - scenic canal-side walk</li>
+                        <li>Afternoon: Traditional tea ceremony experience</li>
+                        <li>Explore Nishiki Market - "Kyoto's Kitchen" for food tastings</li>
+                        <li>Evening: Final night in Kyoto - optional maiko performance</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Cultural Experience:</h4>
+                    <p>A traditional tea ceremony (chado) is a quintessential Japanese cultural experience. Book in advance at Camellia or En tea house for an authentic ceremony with English explanation.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Final night at Kyoto boutique hotel</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 9: Kyoto to Hiroshima -->
+        <div class="day-section" id="day-9">
+            <div class="day-header">
+                <div class="day-number">9</div>
+                <div class="day-title">
+                    <h3>Kyoto to Hiroshima - Peace & Reflection</h3>
+                    <div class="date">📅 Travel & Explore</div>
+                    <div class="location">📍 Hiroshima</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚄 Shinkansen:</strong> Kyoto → Hiroshima (Sakura or Hikari)
+                    <br>Duration: 1 hour 40 minutes
+                </div>
+                
+                <div class="activities">
+                    <h4>Afternoon in Hiroshima:</h4>
+                    <ul>
+                        <li>Depart Kyoto morning and arrive Hiroshima by noon</li>
+                        <li>Check into hotel and drop off luggage</li>
+                        <li>Visit the Hiroshima Peace Memorial Park</li>
+                        <li>See the A-Bomb Dome (Genbaku Dome) - UNESCO World Heritage Site</li>
+                        <li>Hiroshima Peace Memorial Museum - moving exhibits on August 6, 1945</li>
+                        <li>Cenotaph for the A-bomb Victims and Peace Flame</li>
+                        <li>Evening: Try Hiroshima-style okonomiyaki in the Okonomi-mura food hall</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Historic Importance:</h4>
+                    <p>The Peace Memorial Park stands at the epicenter of the atomic bomb blast. The experience is profound and moving, offering a powerful message about peace and the consequences of nuclear weapons.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Boutique Hotel Recommendation:</h4>
+                    <p><strong>Sheraton Grand Hiroshima Hotel</strong> or <strong>Hotel Granvia Hiroshima</strong> - Comfortable hotels connected to or near Hiroshima Station. Triple rooms ¥18,000-30,000/night.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 10: Miyajima Island -->
+        <div class="day-section" id="day-10">
+            <div class="day-header">
+                <div class="day-number">10</div>
+                <div class="day-title">
+                    <h3>Miyajima Island - Floating Torii Gate</h3>
+                    <div class="date">📅 Day Trip</div>
+                    <div class="location">📍 Miyajima Island (from Hiroshima)</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚃 + ⛴️:</strong> JR train to Miyajimaguchi (30 min) + Ferry (10 min)
+                    <br><strong>Note:</strong> JR Pass covers both train and JR Ferry
+                </div>
+                
+                <div class="activities">
+                    <h4>Island Exploration:</h4>
+                    <ul>
+                        <li>Take morning train and ferry to Miyajima Island</li>
+                        <li>See the iconic Itsukushima Shrine and floating torii gate</li>
+                        <li>Walk at low tide to the base of the torii gate (check tide times!)</li>
+                        <li>Hike to the top of Mount Misen for panoramic views (ropeway available)</li>
+                        <li>Explore the charming shopping street - try momiji manju cakes</li>
+                        <li>Meet the friendly wild deer roaming the island</li>
+                        <li>Return to Hiroshima, then evening Shinkansen to Himeji</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <p>The floating torii gate of Itsukushima Shrine is one of Japan's most iconic images. At high tide it appears to float on water; at low tide you can walk right up to it. Plan your visit around tide times!</p>
+                </div>
+                
+                <div class="travel-info">
+                    <strong>🚄 Evening Transfer:</strong> Hiroshima → Himeji (40 minutes by Shinkansen)
+                    <br>Stay overnight near Himeji for early castle visit tomorrow
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p><strong>Hotel Nikko Himeji</strong> or <strong>Daiwa Roynet Hotel Himeji</strong> - Modern hotels near Himeji Station. ¥15,000-25,000/night for triple.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 11: Himeji to Takayama -->
+        <div class="day-section" id="day-11">
+            <div class="day-header">
+                <div class="day-number">11</div>
+                <div class="day-title">
+                    <h3>Himeji Castle & Journey to the Alps</h3>
+                    <div class="date">📅 Travel Day</div>
+                    <div class="location">📍 Himeji → Takayama</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Morning at Himeji Castle:</h4>
+                    <ul>
+                        <li>Early morning visit to Himeji Castle (opens 9am) - Japan's most spectacular original castle</li>
+                        <li>Explore the castle's impressive architecture and defensive features</li>
+                        <li>Walk through the adjacent Koko-en Garden</li>
+                        <li>Allow 2-3 hours for the full castle experience</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Historic Treasure:</h4>
+                    <p>Himeji Castle is Japan's finest surviving original castle, never destroyed by war, earthquake, or fire. The elegant white exterior has earned it the nickname "White Heron Castle." It's a UNESCO World Heritage Site and National Treasure.</p>
+                </div>
+                
+                <div class="travel-info">
+                    <strong>🚄 Afternoon Journey:</strong> Himeji → Takayama
+                    <br>Route: Himeji → Shin-Osaka → Nagoya → Takayama
+                    <br>Total: Approximately 4 hours with transfers
+                    <br><strong>Note:</strong> Scenic final leg on JR Hida Limited Express through mountains
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Boutique Ryokan Recommendation:</h4>
+                    <p><strong>Honjin Hiranoya Kachoan</strong> or <strong>Tanabe Ryokan</strong> - Traditional Japanese inns with tatami rooms, futons, and onsen baths. Experience authentic Japanese hospitality. ¥30,000-50,000/night including dinner and breakfast for three.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 12: Takayama -->
+        <div class="day-section" id="day-12">
+            <div class="day-header">
+                <div class="day-number">12</div>
+                <div class="day-title">
+                    <h3>Takayama - Little Kyoto of the Alps</h3>
+                    <div class="date">📅 Full Day</div>
+                    <div class="location">📍 Takayama</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Attractions:</h4>
+                    <ul>
+                        <li>Early morning: Miyagawa Morning Market - local produce, crafts, and flowers</li>
+                        <li>Explore Sanmachi Suji - preserved Edo-period merchant district</li>
+                        <li>Visit sake breweries - taste locally brewed sake</li>
+                        <li>Takayama Jinya - former government building from Edo period</li>
+                        <li>Hida Folk Village - open-air museum of traditional thatched-roof farmhouses</li>
+                        <li>Try Hida beef - considered among Japan's finest wagyu</li>
+                        <li>Evening onsen at ryokan and traditional kaiseki dinner</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <p>Takayama's morning markets have been running for over 300 years. The Sanmachi Suji district has sake breweries marked by sugidama (cedar ball) decorations - a fresh green ball means new sake is ready!</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Continue stay at traditional ryokan in Takayama</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 13: Mountain Hike - Kamikochi -->
+        <div class="day-section" id="day-13">
+            <div class="day-header">
+                <div class="day-number">13</div>
+                <div class="day-title">
+                    <h3>Mountain Hike - Kamikochi Valley</h3>
+                    <div class="date">📅 Hiking Day ⛰️</div>
+                    <div class="location">📍 Kamikochi, Japanese Alps</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚌 Transport:</strong> Bus from Takayama to Kamikochi (2 hours)
+                    <br><strong>Note:</strong> Private vehicles not allowed - bus access only
+                    <br>First bus departs around 6:30am; last return bus around 5pm
+                </div>
+                
+                <div class="hike-section">
+                    <h4>🥾 Mountain Hiking Day</h4>
+                    <ul>
+                        <li><strong>Difficulty:</strong> Easy to Moderate (depending on trail chosen)</li>
+                        <li><strong>Elevation:</strong> Valley floor at 1,500m; optional climbs to 2,000m+</li>
+                        <li><strong>Duration:</strong> 4-6 hours of hiking</li>
+                        <li><strong>Terrain:</strong> Well-maintained trails, wooden boardwalks, some rocky sections</li>
+                        <li><strong>What to bring:</strong> Hiking boots, layers, rain jacket, water, snacks, camera</li>
+                    </ul>
+                </div>
+                
+                <div class="activities">
+                    <h4>Hiking Route Options:</h4>
+                    <ul>
+                        <li>Start at Kappa Bridge - iconic suspension bridge over crystal-clear Azusa River</li>
+                        <li>Easy route: Taisho Pond to Kappa Bridge loop (2-3 hours)</li>
+                        <li>Moderate route: Continue to Myojin Pond and Tokusawa (4-5 hours)</li>
+                        <li>Challenging option: Climb to Dakesawa Hut for alpine views (6+ hours)</li>
+                        <li>Enjoy stunning views of the Northern Alps peaks including Hotaka-dake</li>
+                        <li>Spot wildlife: Japanese macaques, serow, and various birds</li>
+                        <li>Pack a bento lunch to enjoy by the river</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Mountain Highlight:</h4>
+                    <p>Kamikochi is often called the "Japanese Yosemite" - a pristine alpine valley surrounded by 3,000m peaks of the Northern Alps. The turquoise waters of the Azusa River and dramatic mountain backdrop create unforgettable scenery. This is one of Japan's most beautiful natural landscapes.</p>
+                </div>
+                
+                <div class="travel-info">
+                    <strong>🚌 Evening Return:</strong> Bus back to Takayama (2 hours)
+                    <br>Relax in onsen after the hike!
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Final night at Takayama ryokan - enjoy the onsen after your mountain adventure!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 14: Takayama to Tokyo -->
+        <div class="day-section" id="day-14">
+            <div class="day-header">
+                <div class="day-number">14</div>
+                <div class="day-title">
+                    <h3>Return to Tokyo</h3>
+                    <div class="date">📅 Travel & Explore</div>
+                    <div class="location">📍 Takayama → Tokyo</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>🚃 Train:</strong> Takayama → Nagoya → Tokyo
+                    <br>Route: JR Hida Limited Express + Shinkansen
+                    <br>Total: Approximately 4.5 hours
+                </div>
+                
+                <div class="activities">
+                    <h4>Afternoon in Tokyo:</h4>
+                    <ul>
+                        <li>Morning departure from Takayama with scenic mountain train ride</li>
+                        <li>Arrive Tokyo early afternoon</li>
+                        <li>Check into hotel in different Tokyo area for fresh experience</li>
+                        <li>Optional: Visit Tsukiji Outer Market for sushi and street food</li>
+                        <li>Explore Ginza - upscale shopping and dining district</li>
+                        <li>Evening: Robot Restaurant show or explore Kabukicho</li>
+                        <li>Shopping for souvenirs and last-minute gifts</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Tokyo Tip:</h4>
+                    <p>Stay in a different neighborhood this time - try Shibuya or Roppongi for a different Tokyo experience than your first visit.</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Boutique Hotel Recommendation:</h4>
+                    <p><strong>Shibuya Stream Excel Hotel Tokyu</strong> or <strong>Hotel Risveglio Akasaka</strong> - Modern boutique hotels in vibrant neighborhoods. ¥22,000-35,000/night for triple.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 15: Final Tokyo Day -->
+        <div class="day-section" id="day-15">
+            <div class="day-header">
+                <div class="day-number">15</div>
+                <div class="day-title">
+                    <h3>Final Tokyo Exploration</h3>
+                    <div class="date">📅 Full Day</div>
+                    <div class="location">📍 Tokyo</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Last Experiences:</h4>
+                    <ul>
+                        <li>Morning: Revisit favorite spots or explore new neighborhoods</li>
+                        <li>Optional day trip: Nikko (UNESCO shrines) or Kamakura (Great Buddha)</li>
+                        <li>Visit teamLab Borderless or Planets for digital art immersion</li>
+                        <li>Last-minute shopping at Tokyu Hands or Don Quijote</li>
+                        <li>Experience a Japanese cooking class or sake tasting</li>
+                        <li>Evening: Farewell dinner - splurge on high-end sushi or tempura</li>
+                        <li>Pack for departure tomorrow</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Optional Day Trips:</h4>
+                    <p><strong>Nikko (2 hours):</strong> Elaborate Toshogu Shrine, beautiful nature, and hot springs.<br>
+                    <strong>Kamakura (1 hour):</strong> Giant Buddha, Zen temples, and seaside atmosphere.<br>
+                    Both are covered by JR Pass!</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Final night at Tokyo boutique hotel - choose one convenient to the airport for early departure</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Day 16: Departure -->
+        <div class="day-section" id="day-16">
+            <div class="day-header">
+                <div class="day-number">16</div>
+                <div class="day-title">
+                    <h3>Departure - Sayonara Japan</h3>
+                    <div class="date">📅 Travel Day</div>
+                    <div class="location">📍 Tokyo → Boston</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="travel-info">
+                    <strong>✈️ Flight:</strong> Tokyo Narita (NRT) or Haneda (HND) → Boston Logan (BOS)
+                    <br>Duration: Approximately 13-14 hours (direct)
+                    <br><strong>Note:</strong> Arrive same calendar day due to crossing Date Line eastward
+                </div>
+                
+                <div class="activities">
+                    <h4>Departure Day:</h4>
+                    <ul>
+                        <li>Allow 3+ hours for airport check-in and security</li>
+                        <li>Last-minute shopping at airport duty-free shops</li>
+                        <li>Enjoy final Japanese meal at airport restaurants</li>
+                        <li>Board flight to Boston</li>
+                        <li>Arrive in Boston same day (time travel magic!)</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Travel Tip:</h4>
+                    <p>Haneda Airport is closer to central Tokyo (20-30 min by train) vs. Narita (60-90 min). Check which airport your flight departs from and plan accordingly!</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <h3>Trip Summary</h3>
+            <p><strong>Duration:</strong> 16 Days / 14 Nights in Japan</p>
+            <p><strong>Travelers:</strong> 3 people</p>
+            <p><strong>Transportation:</strong> JR Pass (14-day) covers most travel</p>
+            <p><strong>Accommodation Style:</strong> Mid-level boutique hotels and ryokans</p>
+            <p><strong>Estimated Budget:</strong> ¥50,000-80,000 per person per day (accommodation, food, activities)</p>
+            <br>
+            <p><strong>Highlights:</strong></p>
+            <p>🗼 Tokyo's blend of ancient temples and modern pop culture</p>
+            <p>⛩️ Kyoto's 2,000+ temples and traditional culture</p>
+            <p>☮️ Hiroshima's powerful peace message</p>
+            <p>🏯 Himeji's magnificent original castle</p>
+            <p>⛰️ Japanese Alps mountain hiking adventure</p>
+            <p>🍶 Traditional ryokan stays with onsen and kaiseki cuisine</p>
+            <br>
+            <p>🇯🇵 <em>ありがとうございました (Arigatou gozaimashita) - Thank you for exploring Japan!</em> 🗻</p>
+            <br>
+            <p style="font-size: 0.9em; opacity: 0.8;">Created for Realms of Silver Travel Collection</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Scroll to specific day
+        function scrollToDay(dayNum) {
+            const element = document.getElementById('day-' + dayNum);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // Log page load
+        console.log('Japan 16-Day Trip Itinerary Loaded');
+        
+        // Add subtle animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const daySections = document.querySelectorAll('.day-section');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            daySections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                observer.observe(section);
+            });
+            
+            // Trigger initial sections
+            setTimeout(() => {
+                daySections.forEach((section, index) => {
+                    if (index < 3) {
+                        section.style.opacity = '1';
+                        section.style.transform = 'translateY(0)';
+                    }
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>
