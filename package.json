@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm run generate-travel-index && vite build",
+    "preview": "vite preview",
+    "generate-travel-index": "python scripts/generate_travel_index.py",
+    "generate-travel-index:dry": "python scripts/generate_travel_index.py --dry-run"
   },
   "dependencies": {
     "vue": "^3.5.22"
