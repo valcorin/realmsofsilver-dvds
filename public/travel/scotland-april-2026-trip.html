@@ -11,6 +11,10 @@
             box-sizing: border-box;
         }
         
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
@@ -74,6 +78,19 @@
             text-align: center;
             padding: 10px;
             position: relative;
+        }
+        
+        .route-stop a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        
+        .route-stop a:hover {
+            transform: scale(1.1);
+            opacity: 0.8;
+            cursor: pointer;
         }
         
         .route-stop::after {
@@ -315,24 +332,34 @@
             
             <div class="route-map">
                 <div class="route-stop">
-                    🏰
-                    <span>Edinburgh</span>
+                    <a href="#edinburgh">
+                        🏰
+                        <span>Edinburgh</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    🌊
-                    <span>Loch Ness</span>
+                    <a href="#loch-ness">
+                        🌊
+                        <span>Loch Ness</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    🏝️
-                    <span>Isle of Lewis</span>
+                    <a href="#isle-of-lewis">
+                        🏝️
+                        <span>Isle of Lewis</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    ⛰️
-                    <span>Isle of Skye</span>
+                    <a href="#isle-of-skye">
+                        ⛰️
+                        <span>Isle of Skye</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    🏰
-                    <span>Edinburgh</span>
+                    <a href="#return-edinburgh">
+                        🏰
+                        <span>Edinburgh</span>
+                    </a>
                 </div>
             </div>
             
@@ -355,7 +382,7 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="edinburgh">
             <div class="day-header">
                 <div class="day-number">1</div>
                 <div class="day-title">
@@ -426,7 +453,7 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="loch-ness">
             <div class="day-header">
                 <div class="day-number">3</div>
                 <div class="day-title">
@@ -502,7 +529,7 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="isle-of-lewis">
             <div class="day-header">
                 <div class="day-number">5</div>
                 <div class="day-title">
@@ -583,7 +610,7 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="isle-of-skye">
             <div class="day-header">
                 <div class="day-number">7</div>
                 <div class="day-title">
@@ -757,7 +784,7 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="return-edinburgh">
             <div class="day-header">
                 <div class="day-number">10</div>
                 <div class="day-title">
