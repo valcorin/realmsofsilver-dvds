@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10-Day Scotland Road Trip: April 18-28, 2026</title>
+    <title>11-Day Scotland Road Trip: April 17-28, 2026</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
         }
         
         body {
@@ -74,6 +78,18 @@
             text-align: center;
             padding: 10px;
             position: relative;
+        }
+        
+        .route-stop a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        
+        .route-stop a:hover {
+            transform: scale(1.1);
+            opacity: 0.8;
         }
         
         .route-stop::after {
@@ -305,39 +321,49 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏴󠁧󠁢󠁳󠁣󠁴󠁿 10-Day Scotland Road Trip</h1>
-            <p>April 18-28, 2026 • Edinburgh to the Highlands & Islands</p>
+            <h1>🏴󠁧󠁢󠁳󠁣󠁴󠁿 11-Day Scotland Road Trip</h1>
+            <p>April 17-28, 2026 • Edinburgh to the Highlands & Islands</p>
         </header>
         
         <div class="trip-overview">
             <h2>Trip Overview</h2>
-            <p>Experience the magic of Scotland on this 10-day self-drive journey from April 18th (morning arrival via overnight flight) through April 28th, 2026. From Edinburgh's medieval charm to the mystical Loch Ness, the ancient Isle of Lewis, and the dramatic landscapes of Skye, this springtime adventure covers the best of the Scottish Highlands.</p>
+            <p>Experience the magic of Scotland on this 11-day self-drive journey from April 17th (morning arrival via overnight flight) through April 28th, 2026. From Edinburgh's medieval charm to the mystical Loch Ness, the ancient Isle of Lewis, and the dramatic landscapes of Skye, this springtime adventure covers the best of the Scottish Highlands.</p>
             
             <div class="route-map">
                 <div class="route-stop">
-                    🏰
-                    <span>Edinburgh</span>
+                    <a href="#edinburgh">
+                        🏰
+                        <span>Edinburgh</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    🌊
-                    <span>Loch Ness</span>
+                    <a href="#loch-ness">
+                        🌊
+                        <span>Loch Ness</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    🏝️
-                    <span>Isle of Lewis</span>
+                    <a href="#isle-of-lewis">
+                        🏝️
+                        <span>Isle of Lewis</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    ⛰️
-                    <span>Isle of Skye</span>
+                    <a href="#isle-of-skye">
+                        ⛰️
+                        <span>Isle of Skye</span>
+                    </a>
                 </div>
                 <div class="route-stop">
-                    🏰
-                    <span>Edinburgh</span>
+                    <a href="#return-edinburgh">
+                        🏰
+                        <span>Edinburgh</span>
+                    </a>
                 </div>
             </div>
             
             <div class="total-distance">
-                Total Distance: Approximately 850 miles (1,370 km)
+                Total Distance: Approximately 860 miles (1,385 km)
             </div>
             
             <div class="tips">
@@ -355,12 +381,12 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="edinburgh">
             <div class="day-header">
                 <div class="day-number">1</div>
                 <div class="day-title">
                     <h3>Arrival in Edinburgh</h3>
-                    <div class="date">📅 Saturday, April 18, 2026 (Morning - Overnight Flight)</div>
+                    <div class="date">📅 Friday, April 17, 2026 (Morning - Overnight Flight)</div>
                     <div class="location">📍 Edinburgh</div>
                 </div>
             </div>
@@ -393,7 +419,7 @@
                 <div class="day-number">2</div>
                 <div class="day-title">
                     <h3>Explore Edinburgh</h3>
-                    <div class="date">📅 Sunday, April 19, 2026</div>
+                    <div class="date">📅 Saturday, April 18, 2026</div>
                     <div class="location">📍 Edinburgh</div>
                 </div>
             </div>
@@ -430,6 +456,42 @@
             <div class="day-header">
                 <div class="day-number">3</div>
                 <div class="day-title">
+                    <h3>More Edinburgh Exploration</h3>
+                    <div class="date">📅 Sunday, April 19, 2026</div>
+                    <div class="location">📍 Edinburgh</div>
+                </div>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <h4>Activities & Attractions:</h4>
+                    <ul>
+                        <li>Morning: Visit Holyrood Palace (official residence of the British monarch in Scotland)</li>
+                        <li>Explore the Scottish Parliament building (modern architecture)</li>
+                        <li>Walk along the Water of Leith Walkway</li>
+                        <li>Visit Dean Village (picturesque historic village)</li>
+                        <li>Explore the Royal Botanic Garden Edinburgh</li>
+                        <li>Browse shops on Victoria Street and Grassmarket</li>
+                        <li>Optional: Visit Camera Obscura and World of Illusions</li>
+                        <li>Evening: Enjoy traditional Scottish music in a local pub</li>
+                    </ul>
+                </div>
+                
+                <div class="highlights">
+                    <h4>⭐ Don't Miss:</h4>
+                    <p>Holyrood Palace offers a fascinating glimpse into royal history, and the surrounding Holyrood Park provides stunning views of the city. Dean Village feels like stepping back in time!</p>
+                </div>
+                
+                <div class="accommodation">
+                    <h4>🏨 Accommodation:</h4>
+                    <p>Stay in Edinburgh city center</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="day-section" id="loch-ness">
+            <div class="day-header">
+                <div class="day-number">4</div>
+                <div class="day-title">
                     <h3>Edinburgh to Loch Ness</h3>
                     <div class="date">📅 Monday, April 20, 2026</div>
                     <div class="location">📍 Inverness / Loch Ness</div>
@@ -438,13 +500,14 @@
             <div class="day-content">
                 <div class="driving-info">
                     <strong>🚗 Driving:</strong> 170 miles (275 km) • Approximately 3.5-4 hours
-                    <br>Route: Edinburgh → Stirling → Pitlochry → Inverness
-                    <a href="https://www.google.com/maps/dir/Edinburgh,+UK/Stirling,+UK/Pitlochry,+UK/Inverness,+UK/" target="_blank" class="map-link">🗺️ View Route on Google Maps</a>
+                    <br>Route: Edinburgh → The Helix (Grangemouth) → Stirling → Pitlochry → Inverness
+                    <a href="https://www.google.com/maps/dir/Edinburgh,+UK/The+Helix,+Grangemouth,+Falkirk/Stirling,+UK/Pitlochry,+UK/Inverness,+UK/" target="_blank" class="map-link">🗺️ View Route on Google Maps</a>
                 </div>
                 
                 <div class="activities">
                     <h4>En Route & Activities:</h4>
                     <ul>
+                        <li>Stop at The Helix in Grangemouth - see the iconic Kelpies sculptures</li>
                         <li>Stop at Stirling Castle (magnificent hilltop fortress)</li>
                         <li>Visit the Wallace Monument near Stirling</li>
                         <li>Lunch break in Pitlochry (charming Highland town)</li>
@@ -453,6 +516,34 @@
                         <li>Visit Urquhart Castle ruins on the loch shore</li>
                         <li>Evening walk along the loch (Nessie hunting!)</li>
                     </ul>
+                </div>
+                
+                <div class="tips">
+                    <h4>🐴 The Helix & The Kelpies</h4>
+                    <p><strong>Location:</strong> 269W+F7 The Helix, Grangemouth, Falkirk FK2 7ZT, United Kingdom - approximately 30 minutes from Edinburgh city center, directly on the route to Stirling.</p>
+                    
+                    <p><strong>About The Kelpies:</strong> The Kelpies are 30-metre-high (100 feet) horse-head sculptures, the largest equine sculptures in the world. Created by sculptor Andy Scott, they pay tribute to Scotland's horse-powered heritage - the working horses that pulled barges along Scotland's canals and plowed its fields.</p>
+                    
+                    <p><strong>What to Expect:</strong></p>
+                    <ul>
+                        <li><strong>The Sculptures:</strong> Two massive steel horse heads rising dramatically from the landscape, weighing 300 tonnes each</li>
+                        <li><strong>The Park:</strong> The Helix is a 350-hectare parkland with walking and cycling paths, lagoons, and wildflower meadows</li>
+                        <li><strong>Duration:</strong> Allow 45-60 minutes to view the sculptures, walk around the site, and take photos</li>
+                        <li><strong>Visitor Centre:</strong> On-site café and gift shop available</li>
+                        <li><strong>Parking:</strong> Free parking available at The Helix</li>
+                    </ul>
+                    
+                    <p><strong>Photography Tips:</strong></p>
+                    <ul>
+                        <li>Morning light is excellent for photographs, with the sun illuminating the steel structures</li>
+                        <li>Walk around both sculptures for different perspectives and angles</li>
+                        <li>The reflection pool offers beautiful mirrored shots on calm days</li>
+                        <li>The scale is best captured by including people in your shots</li>
+                    </ul>
+                    
+                    <p><strong>Timing in Your Day:</strong> The Helix makes a perfect first stop as you leave Edinburgh, breaking up the drive to Stirling. It's directly on the route and adds minimal time (about 15 minutes) to your journey. Visit mid-morning around 10-11 AM for good light and fewer crowds.</p>
+                    
+                    <p><strong>Scottish Mythology Note:</strong> In Scottish folklore, kelpies are shape-shifting water spirits that inhabit Scotland's lochs and rivers. They often appear as beautiful horses, luring travelers to mount them before plunging into the water. These magnificent sculptures capture both the beauty and the power of these mythological creatures.</p>
                 </div>
                 
                 <div class="highlights">
@@ -469,7 +560,7 @@
         
         <div class="day-section">
             <div class="day-header">
-                <div class="day-number">4</div>
+                <div class="day-number">5</div>
                 <div class="day-title">
                     <h3>Explore Loch Ness & Area</h3>
                     <div class="date">📅 Tuesday, April 21, 2026</div>
@@ -502,9 +593,9 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="isle-of-lewis">
             <div class="day-header">
-                <div class="day-number">5</div>
+                <div class="day-number">6</div>
                 <div class="day-title">
                     <h3>Loch Ness to Isle of Lewis</h3>
                     <div class="date">📅 Wednesday, April 22, 2026</div>
@@ -546,7 +637,7 @@
         
         <div class="day-section">
             <div class="day-header">
-                <div class="day-number">6</div>
+                <div class="day-number">7</div>
                 <div class="day-title">
                     <h3>Explore Isle of Lewis</h3>
                     <div class="date">📅 Thursday, April 23, 2026</div>
@@ -583,9 +674,9 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="isle-of-skye">
             <div class="day-header">
-                <div class="day-number">7</div>
+                <div class="day-number">8</div>
                 <div class="day-title">
                     <h3>Isle of Lewis to Isle of Skye</h3>
                     <div class="date">📅 Friday, April 24, 2026</div>
@@ -627,7 +718,7 @@
         
         <div class="day-section">
             <div class="day-header">
-                <div class="day-number">8</div>
+                <div class="day-number">9</div>
                 <div class="day-title">
                     <h3>Explore Northern Skye</h3>
                     <div class="date">📅 Saturday, April 25, 2026</div>
@@ -657,8 +748,8 @@
                     <h4>🥾 Optional Long Hike (2–4 Hours)</h4>
                     <p>For those seeking a more immersive hiking experience, consider one of these classic routes:</p>
                     <ul>
-                        <li><strong>Old Man of Storr Circuit (2–3 hours):</strong> Start from the main car park, ascend to the iconic pinnacle, then loop around the back of the rock formations before descending. Moderate difficulty with steep sections and uneven terrain.</li>
-                        <li><strong>Quiraing Full Loop (3–4 hours):</strong> Begin at the Quiraing car park, follow the main path past the Prison and Needle, continue to the Table plateau, and return via the ridge. Offers sweeping views of Staffin Bay and the mainland.</li>
+                        <li><strong>Old Man of Storr Circuit (2–3 hours):</strong> Start from the main car park, ascend to the iconic pinnacle, then loop around the back of the rock formations before descending. Moderate difficulty with steep sections and uneven terrain. <a href="https://www.walkhighlands.co.uk/skye/oldmanofstorr.shtml" target="_blank" class="map-link" style="font-size: 0.9em; padding: 5px 10px; margin-left: 5px;">🗺️ Trail Map & Details</a></li>
+                        <li><strong>Quiraing Full Loop (3–4 hours):</strong> Begin at the Quiraing car park, follow the main path past the Prison and Needle, continue to the Table plateau, and return via the ridge. Offers sweeping views of Staffin Bay and the mainland. <a href="https://www.walkhighlands.co.uk/skye/quiraing.shtml" target="_blank" class="map-link" style="font-size: 0.9em; padding: 5px 10px; margin-left: 5px;">🗺️ Trail Map & Details</a></li>
                     </ul>
                     <p><strong>Gear & Conditions:</strong> Wear waterproof hiking boots and dress in layers—spring weather on Skye can be changeable, with wet and muddy terrain common. April daylight extends from around 6am to 8:30pm, giving ample time for a longer outing. You'll likely encounter few other tourists this time of year.</p>
                     <p><strong>Flexibility:</strong> The long hike fits easily into the day's schedule. If you prefer a shorter walk, the standard 1–2 hour Old Man of Storr route or a brief Quiraing viewpoint stroll are excellent alternatives.</p>
@@ -678,7 +769,7 @@
         
         <div class="day-section">
             <div class="day-header">
-                <div class="day-number">9</div>
+                <div class="day-number">10</div>
                 <div class="day-title">
                     <h3>Explore Southern Skye</h3>
                     <div class="date">📅 Sunday, April 26, 2026</div>
@@ -709,7 +800,8 @@
                     <p><strong>Distance:</strong> 2.4 km (1.5 miles) one way, 4.8 km (3 miles) round trip<br>
                     <strong>Duration:</strong> 1.5–2.5 hours round trip (allow extra time for photos and exploration)<br>
                     <strong>Difficulty:</strong> Easy to moderate—relatively flat path with rocky and uneven sections<br>
-                    <strong>Elevation Gain:</strong> Minimal (approximately 50 meters / 165 feet)</p>
+                    <strong>Elevation Gain:</strong> Minimal (approximately 50 meters / 165 feet)<br>
+                    <a href="https://www.walkhighlands.co.uk/skye/fairypools.shtml" target="_blank" class="map-link" style="margin-top: 10px;">🗺️ Trail Map & Detailed Guide</a></p>
                     
                     <p><strong>Trail Description:</strong> The Fairy Pools are a series of crystal-clear, turquoise pools and waterfalls formed by the River Brittle as it flows down from the Black Cuillin mountains. The well-trodden path follows the river upstream through a dramatic glacial valley. Each pool offers stunning photo opportunities, especially with the rugged Cuillin peaks as a backdrop.</p>
                     
@@ -757,9 +849,9 @@
             </div>
         </div>
         
-        <div class="day-section">
+        <div class="day-section" id="return-edinburgh">
             <div class="day-header">
-                <div class="day-number">10</div>
+                <div class="day-number">11</div>
                 <div class="day-title">
                     <h3>Isle of Skye to Edinburgh</h3>
                     <div class="date">📅 Monday, April 27, 2026</div>
@@ -768,9 +860,9 @@
             </div>
             <div class="day-content">
                 <div class="driving-info">
-                    <strong>🚗 Driving:</strong> 210 miles (340 km) • Approximately 5-5.5 hours
-                    <br>Route: Portree → Kyle of Lochalsh → Eilean Donan Castle → Fort William → Glencoe → Edinburgh
-                    <a href="https://www.google.com/maps/dir/Portree,+Isle+of+Skye,+UK/Eilean+Donan+Castle,+Dornie,+Kyle+of+Lochalsh,+UK/Fort+William,+UK/Glencoe,+UK/Edinburgh,+UK/" target="_blank" class="map-link">🗺️ View Route on Google Maps</a>
+                    <strong>🚗 Driving:</strong> 220 miles (355 km) • Approximately 5.5-6 hours
+                    <br>Route: Portree → Kyle of Lochalsh → Eilean Donan Castle → Fort William → Glencoe → Loch Lomond Bird of Prey Centre → Edinburgh
+                    <a href="https://www.google.com/maps/dir/Portree,+Isle+of+Skye,+UK/Eilean+Donan+Castle,+Dornie,+Kyle+of+Lochalsh,+UK/Fort+William,+UK/Glencoe,+UK/Loch+Lomond+Bird+of+Prey+Centre,+Balloch,+UK/Edinburgh,+UK/" target="_blank" class="map-link">🗺️ View Route on Google Maps</a>
                 </div>
                 
                 <div class="activities">
@@ -783,8 +875,32 @@
                         <li>Drive through Glencoe - hauntingly beautiful valley</li>
                         <li>Optional: Short walk in Glencoe (weather dependent)</li>
                         <li>Drive past Loch Lomond</li>
+                        <li>Visit Loch Lomond Bird of Prey Centre (near Balloch) - flying displays and interactive bird experiences</li>
                         <li>Arrive in Edinburgh late afternoon/early evening</li>
                     </ul>
+                </div>
+                
+                <div class="tips">
+                    <h4>🦅 Loch Lomond Bird of Prey Centre</h4>
+                    <p><strong>Location:</strong> Near Balloch, at the southern end of Loch Lomond (approximately 25 miles from Glasgow, on the route to Edinburgh)</p>
+                    
+                    <p><strong>What to Expect:</strong></p>
+                    <ul>
+                        <li><strong>Flying Displays:</strong> Watch stunning flight demonstrations featuring eagles, hawks, owls, and falcons. Displays typically run 2-3 times daily.</li>
+                        <li><strong>Interactive Experiences:</strong> Opportunity to handle and photograph birds of prey with experienced handlers</li>
+                        <li><strong>Duration:</strong> Allow 1.5-2 hours for a full visit including a flying display</li>
+                        <li><strong>Best for:</strong> Wildlife enthusiasts, photographers, families</li>
+                    </ul>
+                    
+                    <p><strong>April Visit Tips:</strong></p>
+                    <ul>
+                        <li><strong>Opening Hours:</strong> Typically open daily from 10:00 AM. Check website for specific April hours and display times.</li>
+                        <li><strong>Booking:</strong> Pre-booking is recommended, especially for weekends and school holidays</li>
+                        <li><strong>Weather:</strong> Outdoor displays may be affected by high winds or heavy rain. Indoor viewing areas available.</li>
+                        <li><strong>What to Bring:</strong> Camera with good zoom lens for photography. Dress warmly in layers as displays are outdoors.</li>
+                    </ul>
+                    
+                    <p><strong>Timing in Your Day:</strong> This stop fits well in the late afternoon on your journey from Glencoe to Edinburgh. The centre is conveniently located just off the A82/A811 route, adding only 15-20 minutes to your overall journey. Consider arriving around 2-3 PM to catch an afternoon flying display before continuing to Edinburgh.</p>
                 </div>
                 
                 <div class="highlights">
@@ -821,8 +937,8 @@
         
         <footer>
             <h3>Trip Summary</h3>
-            <p><strong>Dates:</strong> April 18 (Morning arrival via overnight flight) - April 28, 2026</p>
-            <p><strong>Total Distance:</strong> Approximately 850 miles (1,370 km)</p>
+            <p><strong>Dates:</strong> April 17 (Morning arrival via overnight flight) - April 28, 2026</p>
+            <p><strong>Total Distance:</strong> Approximately 860 miles (1,385 km)</p>
             <p><strong>Driving Time:</strong> About 25-30 hours total</p>
             <p><strong>Ferry Bookings:</strong> Ullapool-Stornoway and Stornoway-Uig (Skye)</p>
             <p><strong>Best for:</strong> Spring landscapes, fewer crowds, dramatic weather</p>
