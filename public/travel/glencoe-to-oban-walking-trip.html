@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9-Day Glencoe to Oban Walking Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .trip-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .trip-overview {
+            background: #f8f9fa;
+            padding: 30px;
+            border-bottom: 3px solid #2e7d32;
+        }
+        
+        .trip-overview h2 {
+            color: #1b5e20;
+            margin-bottom: 15px;
+        }
+        
+        .route-map {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .route-stop {
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+        
+        .route-stop a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        
+        .route-stop a:hover {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+        
+        .route-stop::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #2e7d32;
+        }
+        
+        .route-stop:last-child::after {
+            content: '';
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .day-section {
+            margin-bottom: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+        
+        .day-section:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .day-header {
+            background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .day-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .day-title h3 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .date, .location {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .day-content {
+            padding: 30px;
+            background: white;
+        }
+        
+        .hiking-info {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .hiking-info strong {
+            color: #1b5e20;
+        }
+        
+        .activities {
+            margin-top: 15px;
+        }
+        
+        .activities h4 {
+            color: #1b5e20;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .activities ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .activities li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #2e7d32;
+            padding-left: 15px;
+        }
+        
+        .activities li:before {
+            content: '✓';
+            color: #2e7d32;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .highlights {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .highlights h4 {
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        
+        .accommodation {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #1976d2;
+        }
+        
+        .accommodation h4 {
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+        
+        footer {
+            background: #1b5e20;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .tips {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .tips h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .tips ul {
+            list-style-position: inside;
+            color: #856404;
+        }
+        
+        .service-info {
+            background: #e1f5fe;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #0288d1;
+        }
+        
+        .service-info h3 {
+            color: #01579b;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .day-content {
+                padding: 20px;
+            }
+            
+            .route-map {
+                flex-direction: column;
+            }
+            
+            .route-stop::after {
+                content: '↓';
+                right: auto;
+                top: auto;
+                bottom: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .route-stop:last-child::after {
+                content: '';
+            }
+            
+            .trip-stats {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🥾 9-Day Glencoe to Oban Walking Adventure</h1>
+            <p>A Scenic Scottish Highlands Walking Holiday with Luggage Transfer</p>
+            
+            <div class="trip-stats">
+                <div class="stat-box">
+                    <span class="number">9</span>
+                    <span class="label">Days</span>
+                </div>
+                <div class="stat-box">
+                    <span class="number">~90</span>
+                    <span class="label">Miles</span>
+                </div>
+                <div class="stat-box">
+                    <span class="number">8</span>
+                    <span class="label">B&Bs</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="trip-overview">
+            <h2>Trip Overview</h2>
+            <p>Experience the dramatic beauty of the Scottish Highlands on this 9-day walking holiday from Glencoe to Oban. Each day features approximately 10 miles of scenic hiking through some of Scotland's most stunning landscapes, including ancient glens, mountain passes, coastal paths, and historic sites. Your luggage is transported between accommodations, so you only need to carry a daypack while enjoying carefully selected B&Bs along the route.</p>
+            
+            <div class="route-map">
+                <div class="route-stop">
+                    <a href="#glencoe">
+                        🏔️
+                        <span>Glencoe</span>
+                    </a>
+                </div>
+                <div class="route-stop">
+                    <a href="#kinlochleven">
+                        🌄
+                        <span>Kinlochleven</span>
+                    </a>
+                </div>
+                <div class="route-stop">
+                    <a href="#ballachulish">
+                        🏞️
+                        <span>Ballachulish</span>
+                    </a>
+                </div>
+                <div class="route-stop">
+                    <a href="#appin">
+                        🌊
+                        <span>Appin</span>
+                    </a>
+                </div>
+                <div class="route-stop">
+                    <a href="#oban">
+                        ⛵
+                        <span>Oban</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="service-info">
+                <h3>🚐 Luggage Transfer Service</h3>
+                <p>Like Walk About Scotland and other premier walking holiday operators, we arrange for your luggage to be transported daily from one B&B to the next. You simply pack your bags in the morning, and they'll be waiting for you at your next accommodation. You only need to carry a daypack with essentials for the day's walk.</p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="day-section" id="glencoe">
+                <div class="day-header">
+                    <div class="day-number">1</div>
+                    <div class="day-title">
+                        <h3>Arrival in Glencoe</h3>
+                        <div class="date">📅 Day 1</div>
+                        <div class="location">📍 Glencoe Village</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> Short orientation walk (3-4 miles) - Easy
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Activities:</h4>
+                        <ul>
+                            <li>Arrive in Glencoe Village and check into your B&B</li>
+                            <li>Orientation walk around Glencoe Village</li>
+                            <li>Visit the Glencoe Visitor Centre to learn about the area's geology and history</li>
+                            <li>Short walk to Signal Rock and An Torr viewpoint</li>
+                            <li>Evening meal at local pub</li>
+                            <li>Early night to prepare for tomorrow's full walking day</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>The dramatic mountains of Glencoe provide an awe-inspiring introduction to the Highlands. The valley is steeped in history, including the infamous 1692 Massacre of Glencoe.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Glencoe Village - Traditional Highland hospitality with mountain views</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <div class="day-header">
+                    <div class="day-number">2</div>
+                    <div class="day-title">
+                        <h3>Glencoe Valley Exploration</h3>
+                        <div class="date">📅 Day 2</div>
+                        <div class="location">📍 Glencoe Village</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 10 miles - Moderate with some elevation gain<br>
+                        <strong>⏱️ Duration:</strong> 5-6 hours<br>
+                        <strong>↗️ Elevation:</strong> +1,600 ft
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Follow the lower slopes of Aonach Eagach ridge</li>
+                            <li>Walk through the Lost Valley (Coire Gabhail) - a hidden glacial valley</li>
+                            <li>Pass the Meeting of Three Waters (confluence of rivers)</li>
+                            <li>Return via the River Coe path with stunning valley views</li>
+                            <li>Wildlife spotting opportunities - red deer, golden eagles</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>The Lost Valley is a geological wonder where Clan MacDonald once hid their stolen cattle. The walk offers some of the most dramatic mountain scenery in Scotland.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Glencoe Village - Same accommodation as Day 1</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section" id="kinlochleven">
+                <div class="day-header">
+                    <div class="day-number">3</div>
+                    <div class="day-title">
+                        <h3>Glencoe to Kinlochleven</h3>
+                        <div class="date">📅 Day 3</div>
+                        <div class="location">📍 Kinlochleven</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 11 miles - Moderate to Challenging<br>
+                        <strong>⏱️ Duration:</strong> 6-7 hours<br>
+                        <strong>↗️ Elevation:</strong> +1,800 ft<br>
+                        <strong>🚐 Luggage:</strong> Transferred to Kinlochleven B&B
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Follow part of the West Highland Way from Altnafeadh</li>
+                            <li>Climb to the Devil's Staircase (highest point of West Highland Way at 1,800 ft)</li>
+                            <li>Spectacular panoramic views from the summit</li>
+                            <li>Descend through moorland into Kinlochleven</li>
+                            <li>Pass by the dramatic Blackwater Reservoir</li>
+                            <li>Arrive in the former aluminum smelting village</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>The Devil's Staircase offers breathtaking 360-degree views across the Highlands. On clear days, you can see Ben Nevis, Britain's highest mountain.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Kinlochleven - Cozy village accommodation with excellent local restaurants</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section" id="ballachulish">
+                <div class="day-header">
+                    <div class="day-number">4</div>
+                    <div class="day-title">
+                        <h3>Kinlochleven to Ballachulish</h3>
+                        <div class="date">📅 Day 4</div>
+                        <div class="location">📍 Ballachulish</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 9 miles - Easy to Moderate<br>
+                        <strong>⏱️ Duration:</strong> 4-5 hours<br>
+                        <strong>↗️ Elevation:</strong> +800 ft<br>
+                        <strong>🚐 Luggage:</strong> Transferred to Ballachulish B&B
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Follow forest paths along Loch Leven's southern shore</li>
+                            <li>Walk through native oak and birch woodland</li>
+                            <li>Visit the site of the historic Ballachulish slate quarries</li>
+                            <li>Cross the Ballachulish Bridge with views to Loch Linnhe</li>
+                            <li>Explore the village and learn about the slate industry heritage</li>
+                            <li>Optional visit to nearby Glencoe village</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>Ballachulish slate roofed buildings across Britain for 300 years. The quarry site is now a peaceful nature area with interpretive displays.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Ballachulish - Comfortable accommodation with loch views</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <div class="day-header">
+                    <div class="day-number">5</div>
+                    <div class="day-title">
+                        <h3>Ballachulish Circular Walk</h3>
+                        <div class="date">📅 Day 5</div>
+                        <div class="location">📍 Ballachulish</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 10 miles - Moderate<br>
+                        <strong>⏱️ Duration:</strong> 5-6 hours<br>
+                        <strong>↗️ Elevation:</strong> +1,200 ft
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Circular walk to Sgorr Dhearg and Sgorr Dhonuill viewpoints</li>
+                            <li>Climb through ancient Caledonian pine forest remnants</li>
+                            <li>Panoramic views over Loch Leven and Glencoe mountains</li>
+                            <li>Descend past waterfalls and through heather moorland</li>
+                            <li>Return to Ballachulish along the shore path</li>
+                            <li>Relaxing evening in the village</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>This circular walk offers some of the best viewpoints in the area without the need to move accommodations - a perfect mid-trip rest day.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Ballachulish - Same accommodation as Day 4</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section" id="appin">
+                <div class="day-header">
+                    <div class="day-number">6</div>
+                    <div class="day-title">
+                        <h3>Ballachulish to Appin</h3>
+                        <div class="date">📅 Day 6</div>
+                        <div class="location">📍 Appin</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 11 miles - Easy to Moderate<br>
+                        <strong>⏱️ Duration:</strong> 5-6 hours<br>
+                        <strong>↗️ Elevation:</strong> +600 ft<br>
+                        <strong>🚐 Luggage:</strong> Transferred to Appin B&B
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Walk south along Loch Linnhe's scenic coastal path</li>
+                            <li>Pass through oak and birch woodlands rich with wildlife</li>
+                            <li>Visit the ruins of Castle Stalker viewpoint (iconic island castle)</li>
+                            <li>Walk through the historic Appin region</li>
+                            <li>Explore Port Appin harbor village</li>
+                            <li>Optional ferry to Lismore Island for views</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>Castle Stalker, sitting on its tidal island, is one of Scotland's most photographed castles. The Appin area features prominently in Robert Louis Stevenson's "Kidnapped."</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Port Appin - Charming coastal village with seafood restaurants</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <div class="day-header">
+                    <div class="day-number">7</div>
+                    <div class="day-title">
+                        <h3>Appin Coastal Exploration</h3>
+                        <div class="date">📅 Day 7</div>
+                        <div class="location">📍 Appin</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 10 miles - Easy<br>
+                        <strong>⏱️ Duration:</strong> 5 hours<br>
+                        <strong>↗️ Elevation:</strong> +400 ft
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Circular coastal walk around Appin peninsula</li>
+                            <li>Visit the Appin Murder Monument (historic 1752 incident)</li>
+                            <li>Walk to Airds Bay with views across to Lismore and Mull</li>
+                            <li>Spot seals, otters, and seabirds along the shore</li>
+                            <li>Explore tidal pools and rocky beaches</li>
+                            <li>Return via inland farm tracks and woodland paths</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>The Appin Murder is one of Scotland's most famous unsolved crimes, inspiring Robert Louis Stevenson's novel. The coastal views are spectacular.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Port Appin - Same accommodation as Day 6</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section">
+                <div class="day-header">
+                    <div class="day-number">8</div>
+                    <div class="day-title">
+                        <h3>Appin to Connel</h3>
+                        <div class="date">📅 Day 8</div>
+                        <div class="location">📍 Connel (near Oban)</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 12 miles - Moderate<br>
+                        <strong>⏱️ Duration:</strong> 6 hours<br>
+                        <strong>↗️ Elevation:</strong> +800 ft<br>
+                        <strong>🚐 Luggage:</strong> Transferred to Connel B&B
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Walk south through Glen Creran forests</li>
+                            <li>Pass by ancient oak woodlands and cascading streams</li>
+                            <li>Cross moorland with views to Ben Cruachan</li>
+                            <li>Descend to Loch Etive at its tidal narrows</li>
+                            <li>View the Falls of Lora (tidal rapids under Connel Bridge)</li>
+                            <li>Arrive in Connel village</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>The Falls of Lora are unusual tidal rapids that occur when Loch Etive's waters rush through the narrow strait. They're best viewed at specific tide times.</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>B&B in Connel - Peaceful village just north of Oban with excellent local amenities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section" id="oban">
+                <div class="day-header">
+                    <div class="day-number">9</div>
+                    <div class="day-title">
+                        <h3>Connel to Oban - Final Day</h3>
+                        <div class="date">📅 Day 9</div>
+                        <div class="location">📍 Oban</div>
+                    </div>
+                </div>
+                <div class="day-content">
+                    <div class="hiking-info">
+                        <strong>🥾 Walking:</strong> 9 miles - Easy<br>
+                        <strong>⏱️ Duration:</strong> 4-5 hours<br>
+                        <strong>↗️ Elevation:</strong> +400 ft<br>
+                        <strong>🚐 Luggage:</strong> Transferred to Oban accommodation
+                    </div>
+                    
+                    <div class="activities">
+                        <h4>Today's Walk:</h4>
+                        <ul>
+                            <li>Follow the coastal path from Connel to Oban</li>
+                            <li>Walk along Loch Etive and Loch Linnhe shores</li>
+                            <li>Pass through Dunstaffnage with its ancient castle</li>
+                            <li>Arrive in Oban, the "Gateway to the Isles"</li>
+                            <li>Celebrate at one of Oban's excellent seafood restaurants</li>
+                            <li>Visit McCaig's Tower for sunset views over the harbor</li>
+                            <li>Optional: Visit Oban Distillery for a whisky tasting</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlights">
+                        <h4>⭐ Highlights:</h4>
+                        <p>Oban is a beautiful Victorian harbor town and major ferry port. McCaig's Tower, resembling Rome's Colosseum, offers stunning views. Celebrate your achievement with fresh seafood and local whisky!</p>
+                    </div>
+                    
+                    <div class="accommodation">
+                        <h4>🏨 Accommodation:</h4>
+                        <p>Hotel or B&B in Oban - Town center location with harbor views and dining options</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tips">
+                <h4>💡 Essential Trip Tips:</h4>
+                <ul>
+                    <li><strong>Best Season:</strong> May to September for best weather and longest daylight hours</li>
+                    <li><strong>What to Pack:</strong> Waterproof jacket and trousers, sturdy hiking boots, daypack, water bottle, sunscreen, midges repellent (summer), hat and gloves (spring/autumn)</li>
+                    <li><strong>Fitness Level:</strong> Moderate - daily walks of 9-12 miles with some elevation gain</li>
+                    <li><strong>Luggage:</strong> Pack light - one main bag (transferred daily) and a daypack</li>
+                    <li><strong>Weather:</strong> Scottish weather is changeable - be prepared for rain, wind, and sun in the same day</li>
+                    <li><strong>Midges:</strong> Tiny biting insects are prevalent June-August, especially in still, damp conditions. Bring repellent!</li>
+                    <li><strong>Food:</strong> Most B&Bs offer excellent Scottish breakfasts. Pack lunch provisions or arrange with your B&B</li>
+                    <li><strong>Phone Signal:</strong> Can be limited in remote areas - download offline maps</li>
+                </ul>
+            </div>
+            
+            <div class="service-info">
+                <h3>📋 What's Included:</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="padding: 8px 0;">✓ 8 nights' accommodation in carefully selected B&Bs</li>
+                    <li style="padding: 8px 0;">✓ Daily breakfast at each B&B</li>
+                    <li style="padding: 8px 0;">✓ Daily luggage transfer between accommodations</li>
+                    <li style="padding: 8px 0;">✓ Detailed route notes and maps</li>
+                    <li style="padding: 8px 0;">✓ 24/7 emergency support during your trip</li>
+                    <li style="padding: 8px 0;">✓ Pre-trip information pack with local recommendations</li>
+                </ul>
+                
+                <h3 style="margin-top: 20px;">❌ Not Included:</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="padding: 8px 0;">✗ Transportation to Glencoe and from Oban</li>
+                    <li style="padding: 8px 0;">✗ Lunches and evening meals</li>
+                    <li style="padding: 8px 0;">✗ Travel insurance</li>
+                    <li style="padding: 8px 0;">✗ Personal expenses</li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <h3>Ready for Your Scottish Walking Adventure?</h3>
+            <p>This itinerary provides a perfect blend of challenging walks, stunning scenery, comfortable accommodations, and Scottish hospitality. Each day brings new landscapes and experiences while luggage transfer ensures you travel light and focus on enjoying the journey.</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">Note: This is a sample itinerary. Actual walking holidays can be customized based on fitness levels, time availability, and preferences.</p>
+        </footer>
+    </div>
+</body>
+</html>
