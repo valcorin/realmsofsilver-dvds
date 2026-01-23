@@ -14,15 +14,21 @@ Example:
 This script uses weasyprint for HTML to PDF conversion.
 """
 from pathlib import Path
+from typing import Optional
 import argparse
 import sys
 
+# Try to import weasyprint at module level
+try:
+    from weasyprint import HTML
+    WEASYPRINT_AVAILABLE = True
+except ImportError:
+    WEASYPRINT_AVAILABLE = False
 
-def generate_pdf(html_path: Path, output_path: Path = None):
+
+def generate_pdf(html_path: Path, output_path: Optional[Path] = None):
     """Convert an HTML file to PDF using weasyprint."""
-    try:
-        from weasyprint import HTML
-    except ImportError:
+    if not WEASYPRINT_AVAILABLE:
         print("Error: weasyprint is not installed.", file=sys.stderr)
         print("Install it with: pip install weasyprint", file=sys.stderr)
         sys.exit(1)
