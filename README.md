@@ -147,6 +147,29 @@ Works in all modern browsers that support ES6+:
 **Layout**: Modify component styles in respective `.vue` files
 **Data Fields**: Update the DVD structure in `src/data/dvds.js` and corresponding component templates
 
+## Travel Pages PDF Generation
+
+The repository includes travel HTML pages in the `public/travel` directory. You can generate PDF versions of these pages:
+
+### Generate PDF for Glencoe Trip
+
+```bash
+npm run generate-pdf:glencoe
+```
+
+Or use the Python script directly:
+
+```bash
+python scripts/generate_pdf.py public/travel/glencoe-to-oban-walking-trip.html
+```
+
+### Requirements
+
+- Python 3.6+
+- weasyprint library: `pip install weasyprint`
+
+See `scripts/README_PDF.md` for more details.
+
 ## Future Enhancements
 
 Potential features to add:
